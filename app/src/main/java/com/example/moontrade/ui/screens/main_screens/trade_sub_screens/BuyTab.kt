@@ -1,4 +1,4 @@
-package com.example.moontrade.ui.screens.main_screens.trade_utils
+package com.example.moontrade.ui.screens.main_screens.trade_sub_screens
 
 
 import androidx.compose.foundation.layout.*

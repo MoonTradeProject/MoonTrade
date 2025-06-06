@@ -1,0 +1,22 @@
+package com.example.moontrade.navigation
+
+
+object NavRoutes {
+    const val ONBOARDING_1 = "onboarding1"
+    const val ONBOARDING_2 = "onboarding2"
+    const val ONBOARDING_3 = "onboarding3"
+    const val WELCOME = "welcome"
+    const val ACCOUNT_CREATION = "account_creation"
+    const val ADD_MAIL = "add_mail"
+    const val CONFIRM_MAIL = "confirm_mail"
+    const val ENTER_CODE = "enter_code"
+    const val CREATE_PASSWORD = "create_password"
+    const val SUCCESSFUL_REGISTRATION = "successful_registration"
+    const val LOGIN = "login"
+    const val HOME = "home"
+    const val MARKETS = "markets"
+    const val TRADE = "trade"
+    const val RATINGS = "ratings"
+    const val TOURNAMENTS = "tournaments"
+    const val PLAYER_PROFILE = "player_profile/{playerId}"
+}

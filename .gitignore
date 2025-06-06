@@ -18,3 +18,17 @@ local.properties
 .idea/
 "gradlew"
 "gradlew.bat"
+# Firebase config (секретный файл, не должен быть в гите)
+google-services.json
+
+
+/build/
+**/build/
+
+
+
+gradlew
+gradlew.bat
+
+
+*.webp

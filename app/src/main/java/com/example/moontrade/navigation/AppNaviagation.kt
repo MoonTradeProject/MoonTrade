@@ -8,17 +8,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.moontrade.ui.screens.authentication.*
-import com.example.moontrade.ui.screens.main_screens.HomeScreen
-import com.example.moontrade.ui.screens.main_screens.MarketsScreen
-import com.example.moontrade.ui.screens.main_screens.RatingsScreen
-import com.example.moontrade.ui.screens.main_screens.TournamentsScreen
-import com.example.moontrade.ui.screens.main_screens.TradeScreen
-import com.example.moontrade.ui.screens.onboarding.OnboardingOne
-import com.example.moontrade.ui.screens.onboarding.OnboardingTwo
-import com.example.moontrade.ui.screens.onboarding.OnboardingThree
-import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
 import com.example.moontrade.auth.AuthViewModel
+import com.example.moontrade.ui.screens.authentication.*
+import com.example.moontrade.ui.screens.main_screens.*
+import com.example.moontrade.ui.screens.onboarding.*
+import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
 
 @Composable
 fun AppNavigation() {
@@ -28,48 +22,58 @@ fun AppNavigation() {
     Scaffold { padding ->
         NavHost(
             navController = navController,
-            startDestination = "onboarding1",
+            startDestination = NavRoutes.ONBOARDING_1,
             modifier = Modifier.padding(padding)
         ) {
-            composable("onboarding1") {
-                OnboardingOne(onNext = { navController.navigate("onboarding2") })
+            composable(NavRoutes.ONBOARDING_1) {
+                OnboardingOne(onNext = { navController.navigate(NavRoutes.ONBOARDING_2) })
             }
-            composable("onboarding2") {
-                OnboardingTwo(onNext = { navController.navigate("onboarding3") })
+            composable(NavRoutes.ONBOARDING_2) {
+                OnboardingTwo(onNext = { navController.navigate(NavRoutes.ONBOARDING_3) })
             }
-            composable("onboarding3") {
-                OnboardingThree(onNext = { navController.navigate("welcome") })
+            composable(NavRoutes.ONBOARDING_3) {
+                OnboardingThree(onNext = { navController.navigate(NavRoutes.WELCOME) })
             }
-            composable("welcome") {
+            composable(NavRoutes.WELCOME) {
                 WelcomeScreen(navController, authViewModel)
             }
-            composable("account_creation") {
+            composable(NavRoutes.ACCOUNT_CREATION) {
                 AccountCreationScreen(navController)
             }
-            composable("add_mail") {
+            composable(NavRoutes.ADD_MAIL) {
                 AddMail(navController, authViewModel)
             }
-            composable("confirm_mail") {
+            composable(NavRoutes.CONFIRM_MAIL) {
                 ConfirmEmail(navController, authViewModel)
             }
-            composable("enter_code") {
+            composable(NavRoutes.ENTER_CODE) {
                 EnterCode(navController, authViewModel)
             }
-            composable("create_password") {
+            composable(NavRoutes.CREATE_PASSWORD) {
                 CreatePassword(navController, authViewModel)
             }
-            composable("successful_registration") {
+            composable(NavRoutes.SUCCESSFUL_REGISTRATION) {
                 SuccessfulRegistration(navController)
             }
-            composable("login") {
+            composable(NavRoutes.LOGIN) {
                 LoginScreen(navController, authViewModel)
             }
-            composable("home") { HomeScreen(navController) }
-            composable("markets") { MarketsScreen(navController) }
-            composable("trade") { TradeScreen(navController) }
-            composable("ratings") { RatingsScreen(navController) }
-            composable("tournaments") { TournamentsScreen(navController) }
-            composable("player_profile/{playerId}") { backStackEntry ->
+            composable(NavRoutes.HOME) {
+                HomeScreen(navController)
+            }
+            composable(NavRoutes.MARKETS) {
+                MarketsScreen(navController)
+            }
+            composable(NavRoutes.TRADE) {
+                TradeScreen(navController)
+            }
+            composable(NavRoutes.RATINGS) {
+                RatingsScreen(navController)
+            }
+            composable(NavRoutes.TOURNAMENTS) {
+                TournamentsScreen(navController)
+            }
+            composable(NavRoutes.PLAYER_PROFILE) { backStackEntry ->
                 val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
                 PlayerProfeleScreen(navController, playerId)
             }

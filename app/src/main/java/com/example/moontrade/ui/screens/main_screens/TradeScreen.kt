@@ -6,14 +6,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.moontrade.ui.screens.components.*
 import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.ui.screens.components.bars.TopBar
-import com.example.moontrade.ui.screens.main_screens.trade_utils.BuyTab
-import com.example.moontrade.ui.screens.main_screens.trade_utils.SellTab
-import com.example.moontrade.ui.screens.main_screens.trade_utils.ExchangeTab
-import com.example.moontrade.ui.screens.main_screens.trade_utils.BalanceHeader
-import com.example.moontrade.ui.screens.main_screens.trade_utils.TradeTabSelector
+import com.example.moontrade.ui.screens.main_screens.trade_sub_screens.BuyTab
+import com.example.moontrade.ui.screens.main_screens.trade_sub_screens.SellTab
+import com.example.moontrade.ui.screens.main_screens.trade_sub_screens.ExchangeTab
+import com.example.moontrade.ui.screens.main_screens.trade_sub_screens.BalanceHeader
+import com.example.moontrade.ui.screens.main_screens.trade_sub_screens.TradeTabSelector
 
 enum class TradeTab { BUY, SELL, EXCHANGE }
 
