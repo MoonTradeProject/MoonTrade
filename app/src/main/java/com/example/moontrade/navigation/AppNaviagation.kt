@@ -16,13 +16,14 @@ import com.example.moontrade.ui.screens.authentication.*
 import com.example.moontrade.ui.screens.main_screens.*
 import com.example.moontrade.ui.screens.onboarding.*
 import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
+import com.example.moontrade.viewmodels.MarketViewModel
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
-
+    val marketViewModel: MarketViewModel = hiltViewModel()
     LaunchedEffect(Unit) {
         if (isLoggedIn) {
             navController.navigate(NavRoutes.HOME) {
@@ -76,7 +77,7 @@ fun AppNavigation() {
                 HomeScreen(navController)
             }
             composable(NavRoutes.MARKETS) {
-                MarketsScreen(navController)
+                MarketsScreen(navController, marketViewModel)
             }
             composable(NavRoutes.TRADE) {
                 TradeScreen(navController)

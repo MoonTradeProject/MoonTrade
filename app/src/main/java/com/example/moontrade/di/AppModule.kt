@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.moontrade.auth.AuthPreferences
 import com.example.moontrade.auth.AuthRepository
 import com.example.moontrade.data.api.AuthApi
+import com.example.moontrade.data.api.MarketApi
 import com.example.moontrade.data.repository.AuthRepositoryImpl
 import dagger.Module
 import dagger.Provides
@@ -38,5 +39,15 @@ object AppModule {
     @Singleton
     fun provideAuthPreferences(@ApplicationContext context: Context): AuthPreferences {
         return AuthPreferences(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMarketApi(): MarketApi {
+        return Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:3000")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MarketApi::class.java)
     }
 }
