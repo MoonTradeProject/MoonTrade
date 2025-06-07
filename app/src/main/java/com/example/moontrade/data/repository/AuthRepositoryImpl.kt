@@ -1,5 +1,6 @@
 package com.example.moontrade.data.repository
 
+import com.example.moontrade.auth.AuthPreferences
 import com.example.moontrade.auth.AuthRepository
 import com.example.moontrade.data.api.AuthApi
 import com.example.moontrade.model.RegisterRequest
@@ -14,75 +15,75 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 
 class AuthRepositoryImpl(
-    private val authApi: AuthApi
+    private val authApi: AuthApi,
+    private val prefs: AuthPreferences
 ) : AuthRepository {
 
     private val auth: FirebaseAuth = Firebase.auth
-    private val _isAuthenticated = MutableStateFlow(auth.currentUser != null)
-    override fun getIsAuthenticatedFlow(): StateFlow<Boolean> = _isAuthenticated.asStateFlow()
+    private val _isAuth = MutableStateFlow(auth.currentUser != null)
+    override fun getIsAuthenticatedFlow(): StateFlow<Boolean> = _isAuth.asStateFlow()
 
-    override suspend fun register(email: String, password: String): Boolean {
-        return try {
-            println("[auth] registering in Firebase...")
-            val result = auth.createUserWithEmailAndPassword(email, password).await()
-            val user = result.user ?: return false
+    /* ───────────────────────── register ───────────────────────── */
 
-            val token = user.getIdToken(false).await().token ?: return false
-            println("[auth] Firebase ID token obtained")
+    override suspend fun register(email: String, password: String): Boolean = runCatching {
+        println("[auth] register in Firebase…")
+        auth.createUserWithEmailAndPassword(email, password).await()
 
-            val req = RegisterRequest(
-                id_token = token,
-                email = email,
-                username = email.substringBefore("@")
-            )
+        val token = auth.currentUser?.getIdToken(true)?.await()?.token ?: return false
+        prefs.saveIdToken(token)
+        println("[auth] Firebase token saved")
 
-            println("[auth] sending /register to backend")
-            authApi.register(req)
-            println("[auth] backend responded OK")
+        val req = RegisterRequest(token, email, email.substringBefore("@"))
+        authApi.register(req)
+        println("[auth] backend /register OK")
 
-            _isAuthenticated.value = true
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            println("[auth] registration failed: ${e.message}")
-            false
-        }
+        _isAuth.value = true
+        true
+    }.getOrElse { e ->
+        e.printStackTrace(); false
     }
 
-    override suspend fun login(email: String, password: String): Boolean {
-        return try {
-            auth.signInWithEmailAndPassword(email, password).await()
-            _isAuthenticated.value = true
-            println("[auth] login OK")
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            println("[auth] login failed: ${e.message}")
-            false
-        }
+    /* ───────────────────────── login ───────────────────────── */
+
+    override suspend fun login(email: String, password: String): Boolean = runCatching {
+        auth.signInWithEmailAndPassword(email, password).await()
+
+        val token = auth.currentUser?.getIdToken(true)?.await()?.token ?: return false
+        prefs.saveIdToken(token)
+        println("[auth] login token saved")
+
+        _isAuth.value = true
+        true
+    }.getOrElse { e ->
+        e.printStackTrace(); false
     }
+
+    /* ───────────────────────── Google Sign-In ───────────────────────── */
+
+    override suspend fun signInWithGoogle(account: GoogleSignInAccount): Boolean = runCatching {
+        val cred = GoogleAuthProvider.getCredential(account.idToken, null)
+        auth.signInWithCredential(cred).await()
+
+        val token = auth.currentUser?.getIdToken(true)?.await()?.token ?: return false
+        prefs.saveIdToken(token)
+        println("[auth] Google token saved")
+
+        _isAuth.value = true
+        true
+    }.getOrElse { e ->
+        e.printStackTrace(); false
+    }
+
+    /* ───────────────────────── logout ───────────────────────── */
 
     override fun logout() {
         auth.signOut()
-        _isAuthenticated.value = false
+        prefs.clear()
+        _isAuth.value = false
         println("[auth] user logged out")
     }
 
-    override suspend fun signInWithGoogle(account: GoogleSignInAccount): Boolean {
-        return try {
-            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-            auth.signInWithCredential(credential).await()
-            _isAuthenticated.value = true
-            println("[auth] google sign-in success")
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            println("[auth] google sign-in failed: ${e.message}")
-            false
-        }
-    }
+    /* ───────────────────────── util ───────────────────────── */
 
-    override fun isUserLoggedIn(): Boolean {
-        return Firebase.auth.currentUser != null
-    }
+    override fun isUserLoggedIn(): Boolean = auth.currentUser != null
 }

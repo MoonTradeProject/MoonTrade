@@ -4,8 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
@@ -13,13 +12,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.moontrade.ui.screens.components.bars.BottomBar
+import com.example.moontrade.viewmodels.BalanceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
-    val activeTournaments = listOf("None", "3-Month League", "2-Week Blitz")
+fun HomeScreen(navController: NavController,  balanceViewModel: BalanceViewModel) {
+    val activeTournaments = listOf("Main", "3-Month League", "2-Week Blitz")
     var selectedTournament by remember { mutableStateOf(activeTournaments[0]) }
 
     val topPlayers = listOf(
@@ -29,6 +30,14 @@ fun HomeScreen(navController: NavController) {
         "TraderD" to "+12.1%",
         "TraderE" to "+10.5%"
     )
+
+
+    val balance by balanceViewModel.balance.collectAsState()
+
+    // Connect to WebSocket initially as Main
+    LaunchedEffect(Unit) {
+        balanceViewModel.connect(BalanceViewModel.Mode.Main)
+    }
 
     Scaffold(
         topBar = {
@@ -53,6 +62,13 @@ fun HomeScreen(navController: NavController) {
                                         onClick = {
                                             selectedTournament = tournament
                                             expanded = false
+                                            if (tournament == "None") {
+                                                balanceViewModel.changeMode(BalanceViewModel.Mode.Main)
+                                            } else {
+                                                balanceViewModel.changeMode(
+                                                    BalanceViewModel.Mode.Tournament("ccba2478-e949-4848-b2bc-991f839b6292")
+                                                )
+                                            }
                                         }
                                     )
                                 }
@@ -62,8 +78,7 @@ fun HomeScreen(navController: NavController) {
                         Spacer(Modifier.weight(1f))
 
                         Text(
-                            text = if (selectedTournament == "None") "Balance: 5200 USDT"
-                            else "Stack: 480 USDT",
+                            text = balance,
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -88,8 +103,7 @@ fun HomeScreen(navController: NavController) {
                         Text("Portfolio Balance", style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = if (selectedTournament == "None") "$5,200"
-                            else "$480 Tournament Stack",
+                            text = balance,
                             style = MaterialTheme.typography.headlineSmall
                         )
                         Text("ROI: +3.4%", style = MaterialTheme.typography.bodyMedium)
@@ -101,8 +115,7 @@ fun HomeScreen(navController: NavController) {
                 Text("Top 5 Players", style = MaterialTheme.typography.titleLarge)
             }
 
-            items(topPlayers.size) { index ->
-                val (name, roi) = topPlayers[index]
+            items(topPlayers) { (name, roi) ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()

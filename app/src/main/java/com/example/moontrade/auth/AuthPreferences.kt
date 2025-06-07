@@ -20,4 +20,12 @@ class AuthPreferences(context: Context) {
     fun clear() {
         prefs.edit().clear().apply()
     }
+
+    fun saveIdToken(token: String) {
+        prefs.edit().putString("id_token", token).apply()
+    }
+
+    fun getIdToken(): String? {
+        return prefs.getString("id_token", null)
+    }
 }
