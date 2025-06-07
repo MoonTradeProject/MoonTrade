@@ -3,6 +3,9 @@ package com.example.moontrade.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -18,6 +21,17 @@ import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
 fun AppNavigation() {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+
+    LaunchedEffect(Unit) {
+        if (isLoggedIn) {
+            navController.navigate(NavRoutes.HOME) {
+                popUpTo(0)
+            }
+        }
+    }
+
+
 
     Scaffold { padding ->
         NavHost(

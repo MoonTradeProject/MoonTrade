@@ -9,6 +9,7 @@ interface AuthRepository {
     fun logout()
     fun getIsAuthenticatedFlow(): StateFlow<Boolean>
     suspend fun signInWithGoogle(account: GoogleSignInAccount): Boolean
+    fun isUserLoggedIn(): Boolean
 }
 
 
