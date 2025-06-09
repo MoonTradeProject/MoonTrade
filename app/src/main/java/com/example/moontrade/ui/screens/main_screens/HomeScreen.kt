@@ -12,31 +12,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.moontrade.data.ws.WebSocketManager
 import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.viewmodels.BalanceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController,  balanceViewModel: BalanceViewModel) {
-    val activeTournaments = listOf("Main", "3-Month League", "2-Week Blitz")
-    var selectedTournament by remember { mutableStateOf(activeTournaments[0]) }
-
-    val topPlayers = listOf(
-        "TraderA" to "+25.3%",
-        "TraderB" to "+18.4%",
-        "TraderC" to "+16.7%",
-        "TraderD" to "+12.1%",
-        "TraderE" to "+10.5%"
-    )
-
+fun HomeScreen(
+    navController: NavController,
+    balanceViewModel: BalanceViewModel
+) {
+    val tournamentList = listOf("Main", "3-Month League", "2-Week Blitz")
+    var selectedTournament by remember { mutableStateOf(tournamentList.first()) }
 
     val balance by balanceViewModel.balance.collectAsState()
 
-    // Connect to WebSocket initially as Main
     LaunchedEffect(Unit) {
-        balanceViewModel.connect(BalanceViewModel.Mode.Main)
+        balanceViewModel.connect(WebSocketManager.Mode.Main)
     }
 
     Scaffold(
@@ -48,6 +41,7 @@ fun HomeScreen(navController: NavController,  balanceViewModel: BalanceViewModel
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         var expanded by remember { mutableStateOf(false) }
+
                         Box {
                             TextButton(onClick = { expanded = true }) {
                                 Text(selectedTournament)
@@ -56,17 +50,18 @@ fun HomeScreen(navController: NavController,  balanceViewModel: BalanceViewModel
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false }
                             ) {
-                                activeTournaments.forEach { tournament ->
+                                tournamentList.forEach { name ->
                                     DropdownMenuItem(
-                                        text = { Text(tournament) },
+                                        text = { Text(name) },
                                         onClick = {
-                                            selectedTournament = tournament
+                                            selectedTournament = name
                                             expanded = false
-                                            if (tournament == "None") {
-                                                balanceViewModel.changeMode(BalanceViewModel.Mode.Main)
+
+                                            if (name == "Main") {
+                                                balanceViewModel.changeMode(WebSocketManager.Mode.Main)
                                             } else {
                                                 balanceViewModel.changeMode(
-                                                    BalanceViewModel.Mode.Tournament("ccba2478-e949-4848-b2bc-991f839b6292")
+                                                    WebSocketManager.Mode.Tournament("ccba2478-e949-4848-b2bc-991f839b6292")
                                                 )
                                             }
                                         }
@@ -77,10 +72,7 @@ fun HomeScreen(navController: NavController,  balanceViewModel: BalanceViewModel
 
                         Spacer(Modifier.weight(1f))
 
-                        Text(
-                            text = balance,
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        Text(text = balance, style = MaterialTheme.typography.titleMedium)
                     }
                 }
             )
@@ -102,10 +94,7 @@ fun HomeScreen(navController: NavController,  balanceViewModel: BalanceViewModel
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Portfolio Balance", style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = balance,
-                            style = MaterialTheme.typography.headlineSmall
-                        )
+                        Text(balance, style = MaterialTheme.typography.headlineSmall)
                         Text("ROI: +3.4%", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
@@ -114,6 +103,14 @@ fun HomeScreen(navController: NavController,  balanceViewModel: BalanceViewModel
             item {
                 Text("Top 5 Players", style = MaterialTheme.typography.titleLarge)
             }
+
+            val topPlayers = listOf(
+                "TraderA" to "+25.3%",
+                "TraderB" to "+18.4%",
+                "TraderC" to "+16.7%",
+                "TraderD" to "+12.1%",
+                "TraderE" to "+10.5%"
+            )
 
             items(topPlayers) { (name, roi) ->
                 Card(
@@ -124,9 +121,7 @@ fun HomeScreen(navController: NavController,  balanceViewModel: BalanceViewModel
                         }
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -134,10 +129,7 @@ fun HomeScreen(navController: NavController,  balanceViewModel: BalanceViewModel
                             Text(name, style = MaterialTheme.typography.bodyLarge)
                             Text("ROI: $roi", style = MaterialTheme.typography.bodyMedium)
                         }
-                        Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = "View Profile"
-                        )
+                        Icon(Icons.Default.ArrowForward, contentDescription = "View")
                     }
                 }
             }
@@ -166,7 +158,7 @@ fun AssetCardStub(label: String, value: String) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(label, style = MaterialTheme.typography.bodyLarge)
-            Spacer(Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(value, style = MaterialTheme.typography.bodyMedium)
         }
     }

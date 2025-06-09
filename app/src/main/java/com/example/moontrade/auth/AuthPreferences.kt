@@ -3,6 +3,7 @@ package com.example.moontrade.auth
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 
 class AuthPreferences(context: Context) {
 
@@ -10,7 +11,7 @@ class AuthPreferences(context: Context) {
         context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
     fun saveIsAuthenticated(value: Boolean) {
-        prefs.edit().putBoolean("is_authenticated", value).apply()
+        prefs.edit() { putBoolean("is_authenticated", value) }
     }
 
     fun getIsAuthenticated(): Boolean {
@@ -18,11 +19,11 @@ class AuthPreferences(context: Context) {
     }
 
     fun clear() {
-        prefs.edit().clear().apply()
+        prefs.edit() { clear() }
     }
 
     fun saveIdToken(token: String) {
-        prefs.edit().putString("id_token", token).apply()
+        prefs.edit() { putString("id_token", token) }
     }
 
     fun getIdToken(): String? {
