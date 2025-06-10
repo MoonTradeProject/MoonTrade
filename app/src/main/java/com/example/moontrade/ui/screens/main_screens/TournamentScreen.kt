@@ -1,5 +1,7 @@
 package com.example.moontrade.ui.screens.main_screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -7,31 +9,27 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.moontrade.ui.screens.components.bars.BottomBar
-import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.components.tournament.JoinTournamentDialog
 import com.example.moontrade.ui.screens.components.tournament.TournamentCard
+import com.example.moontrade.viewmodels.TournamentsViewModel
+import com.example.moontrade.ui.screens.components.bars.BottomBar
+import com.example.moontrade.ui.screens.components.bars.TopBar
+import java.util.UUID
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TournamentsScreen(navController: NavController) {
-    var showJoinDialog by remember { mutableStateOf<String?>(null) }
-
-    val myTournaments = listOf("3-Month Pro League", "2-Week Blitz")
-    val availableTournaments = listOf("6-Month Challenge", "1-Month Sprint")
+fun TournamentsScreen(navController: NavController, viewModel: TournamentsViewModel) {
+    val tournaments by viewModel.tournaments.collectAsState()
+    var selectedTournamentId by remember { mutableStateOf<String?>(null) }
+    var selectedTournamentName by remember { mutableStateOf<String?>(null) }
 
     val scrollState = rememberScrollState()
 
     Scaffold(
-        topBar = {
-            TopBar(
-                title = "Tournaments",
-                showBack = false
-            )
-        },
-        bottomBar = {
-            BottomBar(navController)
-        }
+        topBar = { TopBar(title = "Tournaments", showBack = false) },
+        bottomBar = { BottomBar(navController) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -40,45 +38,42 @@ fun TournamentsScreen(navController: NavController) {
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            Text("My Tournaments", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(8.dp))
-
-            myTournaments.forEach {
-                TournamentCard(
-                    title = it,
-                    subtitle = "ROI: +12.4%",
-                    actionText = "View Leaderboard",
-                    onAction = { /* TODO */ }
-                )
-                Spacer(Modifier.height(12.dp))
-            }
-
-            Spacer(Modifier.height(24.dp))
-
             Text("Available Tournaments", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
 
-            availableTournaments.forEach {
+            tournaments.forEach { tournament ->
                 TournamentCard(
-                    title = it,
-                    subtitle = "Entry: 1000 Stack",
+                    title = tournament.name,
+                    subtitle = "${tournament.kind} | Starts: ${tournament.startTime.toLocalDate()}",
+                    isJoined = tournament.isJoined,
                     actionText = "Join",
-                    onAction = { showJoinDialog = it }
+                    onAction = {
+                        selectedTournamentId = tournament.id.toString()
+                        selectedTournamentName = tournament.name
+                    }
                 )
                 Spacer(Modifier.height(12.dp))
             }
         }
     }
 
-    showJoinDialog?.let { tournamentName ->
+    // Show join dialog
+    if (selectedTournamentId != null && selectedTournamentName != null) {
         JoinTournamentDialog(
-            tournamentName = tournamentName,
-            onDismiss = { showJoinDialog = null },
+            tournamentName = selectedTournamentName!!,
+            onDismiss = {
+                selectedTournamentId = null
+                selectedTournamentName = null
+            },
             onConfirm = { method ->
-                // TODO: handle method
-                println("Chosen method: $method")
-                showJoinDialog = null
+                viewModel.joinTournament(
+                    tournamentId = UUID.fromString(selectedTournamentId!!).toString(),
+                    method = method
+                )
+                selectedTournamentId = null
+                selectedTournamentName = null
             }
+
         )
     }
 }

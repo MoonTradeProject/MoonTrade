@@ -1,5 +1,7 @@
 package com.example.moontrade.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -18,7 +20,9 @@ import com.example.moontrade.ui.screens.onboarding.*
 import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
 import com.example.moontrade.viewmodels.BalanceViewModel
 import com.example.moontrade.viewmodels.MarketViewModel
+import com.example.moontrade.viewmodels.TournamentsViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -26,6 +30,8 @@ fun AppNavigation() {
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val marketViewModel: MarketViewModel = hiltViewModel()
     val balanceViewModel: BalanceViewModel = hiltViewModel()
+    val tournamentsViewModel: TournamentsViewModel = hiltViewModel()
+
     LaunchedEffect(Unit) {
         if (isLoggedIn) {
             navController.navigate(NavRoutes.HOME) {
@@ -88,7 +94,7 @@ fun AppNavigation() {
                 RatingsScreen(navController)
             }
             composable(NavRoutes.TOURNAMENTS) {
-                TournamentsScreen(navController)
+                TournamentsScreen(navController, tournamentsViewModel)
             }
             composable(NavRoutes.PLAYER_PROFILE) { backStackEntry ->
                 val playerId = backStackEntry.arguments?.getString("playerId") ?: ""

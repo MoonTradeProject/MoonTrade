@@ -52,12 +52,16 @@ class WebSocketManager @Inject constructor() {
         )
     }
 
-    fun disconnect() = socket?.close(1000, "scope finished")
+    fun disconnect() {
+        socket?.close(1000, "scope finished")
+        socket = null
+    }
 
     /* ——— helpers ——— */
 
     private fun send(j: JSONObject) {
         Log.d(TAG, "→ $j")
+        if (socket == null) Log.w(TAG, "⚠️ Tried to send but socket is null")
         socket?.send(j.toString())
     }
 
@@ -72,13 +76,17 @@ class WebSocketManager @Inject constructor() {
     private inner class Listener : WebSocketListener() {
 
         override fun onOpen(ws: WebSocket, resp: Response) {
-            send(
-                JSONObject()
-                    .put("type", "subscribe")
-                    .put("id_token", idToken)
-                    .put("mode", currentMode.toJson())
-            )
+            scope.launch {
+                delay(50)
+                send(
+                    JSONObject()
+                        .put("type", "subscribe")
+                        .put("idToken", idToken)          // ← camelCase!
+                        .put("mode", currentMode.toJson())
+                )
+            }
         }
+
 
         override fun onMessage(ws: WebSocket, text: String) {
             Log.d(TAG, "← $text")
@@ -99,7 +107,14 @@ class WebSocketManager @Inject constructor() {
         }
         override fun onFailure(ws: WebSocket, t: Throwable, r: Response?) {
             Log.e(TAG, "WS error", t)
-            scope.launch { _balance.value = "WS error: ${t.message}" }
+            scope.launch {
+                _balance.value = "WS error: ${t.message}"
+
+                // Wait and reconnect
+                delay(5000)
+                Log.d(TAG, "🔄 Trying to reconnect...")
+                connect(idToken, currentMode)
+            }
         }
     }
 }
