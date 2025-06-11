@@ -1,8 +1,14 @@
 package com.example.moontrade.data.enums
 
-// Status of the tournament (only 'Active' allows joining)
+import com.google.gson.annotations.SerializedName
+
 enum class TournamentStatus {
+    @SerializedName("active")
     Active,
+
+    @SerializedName("finalizing")
     Finalizing,
+
+    @SerializedName("finished")
     Finished
 }

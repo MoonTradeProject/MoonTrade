@@ -33,6 +33,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -60,6 +61,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.firebase.functions.ktx)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.media3.common.ktx)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
@@ -80,4 +82,5 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
 
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

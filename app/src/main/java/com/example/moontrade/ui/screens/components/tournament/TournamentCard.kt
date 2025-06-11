@@ -20,17 +20,16 @@ fun TournamentCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isJoined) Color(0xFFD8F8D8) else MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .background(if (isJoined) Color(0xFFDFFFE0) else Color.White)
-            .padding(16.dp)
-        ) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(title, style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(4.dp))
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium)
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray))
             Spacer(Modifier.height(12.dp))
 
             Button(
@@ -43,3 +42,4 @@ fun TournamentCard(
         }
     }
 }
+

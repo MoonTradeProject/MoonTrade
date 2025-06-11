@@ -5,14 +5,16 @@ import com.example.moontrade.data.enums.TournamentStatus
 import java.time.LocalDateTime
 import java.util.UUID
 
-// This class represents a single tournament received from the backend
+import com.google.gson.annotations.SerializedName
+
+
 data class TournamentDto(
-    val id: UUID,
-    val name: String,
-    val kind: TournamentKind,
-    val startTime: LocalDateTime,
-    val endTime: LocalDateTime,
-    val status: TournamentStatus,
-    val isJoined: Boolean
+    @SerializedName("id") val id: UUID,
+    @SerializedName("name") val name: String,
+    @SerializedName("kind") val kind: TournamentKind,
+    @SerializedName("start_time") val startTime: LocalDateTime,
+    @SerializedName("end_time") val endTime: LocalDateTime,
+    @SerializedName("status") val status: TournamentStatus,
+    @SerializedName("is_joined") val isJoined: Boolean
 )
 

@@ -1,7 +1,5 @@
 package com.example.moontrade.ui.screens.main_screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,11 +14,14 @@ import com.example.moontrade.ui.screens.components.tournament.TournamentCard
 import com.example.moontrade.viewmodels.TournamentsViewModel
 import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.ui.screens.components.bars.TopBar
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TournamentsScreen(navController: NavController, viewModel: TournamentsViewModel) {
+fun TournamentsScreen(
+    navController: NavController,
+    viewModel: TournamentsViewModel = hiltViewModel()
+) {
     val tournaments by viewModel.tournaments.collectAsState()
     var selectedTournamentId by remember { mutableStateOf<String?>(null) }
     var selectedTournamentName by remember { mutableStateOf<String?>(null) }
@@ -42,9 +43,14 @@ fun TournamentsScreen(navController: NavController, viewModel: TournamentsViewMo
             Spacer(Modifier.height(8.dp))
 
             tournaments.forEach { tournament ->
+                val formattedDate = remember(tournament.startTime) {
+                    tournament.startTime?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) ?: "unknown"
+                }
+                val subtitle = "${tournament.kind} | Starts: $formattedDate"
+
                 TournamentCard(
                     title = tournament.name,
-                    subtitle = "${tournament.kind} | Starts: ${tournament.startTime.toLocalDate()}",
+                    subtitle = subtitle,
                     isJoined = tournament.isJoined,
                     actionText = "Join",
                     onAction = {
@@ -73,7 +79,6 @@ fun TournamentsScreen(navController: NavController, viewModel: TournamentsViewMo
                 selectedTournamentId = null
                 selectedTournamentName = null
             }
-
         )
     }
 }
