@@ -1,119 +1,122 @@
 package com.example.moontrade.data.ws
 
 import android.util.Log
+import com.example.moontrade.model.BalanceResponse
+import com.example.moontrade.model.Mode
+import com.example.moontrade.model.WebSocketStatus
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.google.gson.JsonElement
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.*
-import org.json.JSONObject
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val TAG    = "BalanceWS"
+private const val TAG = "BalanceWS"
 private const val WS_URL = "ws://10.0.2.2:3000/ws/balance"
 
 @Singleton
 class WebSocketManager @Inject constructor() {
 
-    sealed class Mode {
-        data object Main : Mode()
-        data class Tournament(val id: String) : Mode()
-    }
+    private val gson = Gson()
+    private val client = OkHttpClient()
+    private var socket: WebSocket? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    /* ——— state ——— */
     private val _balance = MutableStateFlow("Loading…")
     val balance: StateFlow<String> = _balance
 
-    /* ——— internals ——— */
-    private val client = OkHttpClient()
-    private var socket: WebSocket? = null
-    private var currentMode: Mode = Mode.Main
-    private var idToken: String = ""
+    private val _status = MutableStateFlow<WebSocketStatus>(WebSocketStatus.Idle)
+    val status: StateFlow<WebSocketStatus> = _status
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-
-    /* ——— public API ——— */
+    private val currentMode = AtomicReference<Mode>(Mode.Main)
+    private val idTokenRef = AtomicReference<String>()
+    private val isConnecting = AtomicBoolean(false)
 
     fun connect(token: String, mode: Mode) {
-        idToken     = token
-        currentMode = mode
-        socket = client.newWebSocket(
-            Request.Builder().url(WS_URL).build(),
-            Listener()
-        )
-    }
+        if (isConnecting.get()) return
+        isConnecting.set(true)
+        _status.value = WebSocketStatus.Connecting
 
-    fun changeMode(mode: Mode) {
-        currentMode = mode
-        send(
-            JSONObject()
-                .put("type", "changeMode")
-                .put("mode", mode.toJson())
-        )
+        disconnect()
+
+        idTokenRef.set(token)
+        currentMode.set(mode)
+
+        socket = client.newWebSocket(Request.Builder().url(WS_URL).build(), Listener())
     }
 
     fun disconnect() {
-        socket?.close(1000, "scope finished")
+        socket?.cancel()
         socket = null
+        isConnecting.set(false)
+        _status.value = WebSocketStatus.Idle
     }
 
-    /* ——— helpers ——— */
+    fun changeMode(mode: Mode) {
+        currentMode.set(mode)
 
-    private fun send(j: JSONObject) {
-        Log.d(TAG, "→ $j")
-        if (socket == null) Log.w(TAG, "⚠️ Tried to send but socket is null")
-        socket?.send(j.toString())
-    }
-
-    private fun Mode.toJson(): Any = when (this) {
-        is Mode.Main       -> "main"
-        is Mode.Tournament -> JSONObject()
-            .put("tournament", JSONObject().put("tournament_id", id))
-    }
-
-    /* ——— listener ——— */
-
-    private inner class Listener : WebSocketListener() {
-
-        override fun onOpen(ws: WebSocket, resp: Response) {
-            scope.launch {
-                delay(50)
-                send(
-                    JSONObject()
-                        .put("type", "subscribe")
-                        .put("idToken", idToken)          // ← camelCase!
-                        .put("mode", currentMode.toJson())
-                )
-            }
+        val json = JsonObject().apply {
+            addProperty("type", "changeMode")
+            add("mode", mode.toJson())
         }
 
+        send(json.toString())
+    }
+
+    private fun send(json: String) {
+        Log.d(TAG, "→ $json")
+        socket?.send(json) ?: Log.w(TAG, "⚠️ Tried to send but socket is null")
+    }
+
+    private inner class Listener : WebSocketListener() {
+        override fun onOpen(ws: WebSocket, response: Response) {
+            Log.d(TAG, "✅ WebSocket opened")
+            isConnecting.set(false)
+            _status.value = WebSocketStatus.Connected
+
+            scope.launch {
+                delay(50)
+                val subscribe = JsonObject().apply {
+                    addProperty("type", "subscribe")
+                    addProperty("id_token", idTokenRef.get())
+                    add("mode", currentMode.get().toJson())
+                }
+                send(subscribe.toString())
+            }
+        }
 
         override fun onMessage(ws: WebSocket, text: String) {
             Log.d(TAG, "← $text")
             runCatching {
-                val j   = JSONObject(text)
-                val bal = when {
-                    j.has("balance") -> j.get("balance")
-                    j.optJSONObject("payload")?.has("balance") == true ->
-                        j.getJSONObject("payload").get("balance")
-                    else -> return
+                val res = gson.fromJson(text, BalanceResponse::class.java)
+                scope.launch {
+                    _balance.value = "${res.balance} USDT"
                 }
-                scope.launch { _balance.value = "$bal USDT" }
-            }.onFailure { Log.e(TAG, "parse error", it) }
+            }.onFailure {
+                Log.e(TAG, "❌ Failed to parse balance", it)
+                _status.value = WebSocketStatus.Error("Invalid response")
+            }
         }
 
         override fun onClosed(ws: WebSocket, code: Int, reason: String) {
-            Log.d(TAG, "WS closed → code=$code reason=$reason")
+            Log.d(TAG, "🛑 Closed: $code — $reason")
+            _status.value = WebSocketStatus.Idle
         }
-        override fun onFailure(ws: WebSocket, t: Throwable, r: Response?) {
-            Log.e(TAG, "WS error", t)
-            scope.launch {
-                _balance.value = "WS error: ${t.message}"
 
-                // Wait and reconnect
-                delay(5000)
-                Log.d(TAG, "🔄 Trying to reconnect...")
-                connect(idToken, currentMode)
+        override fun onFailure(ws: WebSocket, t: Throwable, r: Response?) {
+            Log.e(TAG, "💥 WS failure", t)
+            isConnecting.set(false)
+            _status.value = WebSocketStatus.Error(t.message ?: "Unknown error")
+
+            scope.launch {
+                delay(3000)
+                Log.d(TAG, "🔄 Reconnect scheduled")
+                connect(idTokenRef.get(), currentMode.get())
             }
         }
     }

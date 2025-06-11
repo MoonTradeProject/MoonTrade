@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.moontrade.data.ws.WebSocketManager
+import com.example.moontrade.model.Mode
 import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.viewmodels.BalanceViewModel
 
@@ -29,7 +30,7 @@ fun HomeScreen(
     val balance by balanceViewModel.balance.collectAsState()
 
     LaunchedEffect(Unit) {
-        balanceViewModel.connect(WebSocketManager.Mode.Main)
+        balanceViewModel.connect(Mode.Main)
     }
 
     Scaffold(
@@ -58,10 +59,10 @@ fun HomeScreen(
                                             expanded = false
 
                                             if (name == "Main") {
-                                                balanceViewModel.changeMode(WebSocketManager.Mode.Main)
+                                                balanceViewModel.changeMode(Mode.Main)
                                             } else {
                                                 balanceViewModel.changeMode(
-                                                    WebSocketManager.Mode.Tournament("ccba2478-e949-4848-b2bc-991f839b6292")
+                                                    Mode.Tournament("ccba2478-e949-4848-b2bc-991f839b6292")
                                                 )
                                             }
                                         }

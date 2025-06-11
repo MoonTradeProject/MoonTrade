@@ -5,8 +5,6 @@ import com.example.moontrade.data.request.JoinTournamentRequest
 import com.example.moontrade.data.response.JoinTournamentResponse
 import retrofit2.http.*
 
-import java.util.UUID
-
 interface TournamentApi {
 
     // Fetch all tournaments with isJoined flag
@@ -18,7 +16,7 @@ interface TournamentApi {
     // Join a specific tournament
     @POST("tournaments/{id}/join")
     suspend fun joinTournament(
-        @Path("id") tournamentId: UUID,
+        @Path("id") tournamentId: String,
         @Body request: JoinTournamentRequest
     ): JoinTournamentResponse
 }

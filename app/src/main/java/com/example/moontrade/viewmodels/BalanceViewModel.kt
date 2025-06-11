@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.moontrade.auth.AuthPreferences
 import com.example.moontrade.data.ws.WebSocketManager
+import com.example.moontrade.model.Mode
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,38 +20,33 @@ class BalanceViewModel @Inject constructor(
 ) : ViewModel() {
 
     val balance: StateFlow<String> = ws.balance
-    // !!! forcing getting token/ maybe should not every time
-    fun connect(mode: WebSocketManager.Mode) = viewModelScope.launch(Dispatchers.IO) {
+
+    fun connect(mode: Mode) = viewModelScope.launch(Dispatchers.IO) {
         try {
             val user = FirebaseAuth.getInstance().currentUser
-
             if (user == null) {
-                println("[BalanceVM] ❌ No user logged in")
+                println("[BalanceVM] ❌ No user")
                 ws.disconnect()
                 return@launch
             }
 
-            val tokenResult = user.getIdToken(true).await()
-            val token = tokenResult.token
-
+            val token = user.getIdToken(false).await().token
             if (token.isNullOrBlank()) {
-                println("[BalanceVM] ❌ Token is null or blank")
+                println("[BalanceVM] ❌ Token is blank")
                 ws.disconnect()
                 return@launch
             }
 
-            println("[BalanceVM] ✅ Got fresh token")
             prefs.saveIdToken(token)
             ws.connect(token, mode)
 
         } catch (e: Exception) {
-            println("[BalanceVM] ❌ Exception while getting token: ${e.message}")
+            println("[BalanceVM] ❌ Exception: ${e.message}")
             ws.disconnect()
         }
     }
 
-
-    fun changeMode(mode: WebSocketManager.Mode) = ws.changeMode(mode)
+    fun changeMode(mode: Mode) = ws.changeMode(mode)
 
     override fun onCleared() {
         ws.disconnect()

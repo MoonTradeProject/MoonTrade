@@ -5,7 +5,9 @@ import com.example.moontrade.auth.AuthPreferences
 import com.example.moontrade.auth.AuthRepository
 import com.example.moontrade.data.api.AuthApi
 import com.example.moontrade.data.api.MarketApi
+import com.example.moontrade.data.api.TournamentApi
 import com.example.moontrade.data.repository.AuthRepositoryImpl
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,42 +17,51 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
     @Provides
     @Singleton
-    fun provideAuthApi(): AuthApi {
-        return Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3000") // for emulator to reach localhost
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(AuthApi::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideAuthRepository(
-        api: AuthApi,
-        authPreferences: AuthPreferences
-    ): AuthRepository {
-        return AuthRepositoryImpl(api, authPreferences)
-    }
-
-    @Provides
-    @Singleton
-    fun provideAuthPreferences(@ApplicationContext context: Context): AuthPreferences {
-        return AuthPreferences(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideMarketApi(): MarketApi {
+    fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl("http://10.0.2.2:3000")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(MarketApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideAuthApi(retrofit: Retrofit): AuthApi =
+        retrofit.create(AuthApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMarketApi(retrofit: Retrofit): MarketApi =
+        retrofit.create(MarketApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideTournamentApi(retrofit: Retrofit): TournamentApi =
+        retrofit.create(TournamentApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAuthPreferences(
+        @ApplicationContext context: Context
+    ): AuthPreferences {
+        return AuthPreferences(context)
+    }
+
+}
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class AuthModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        impl: AuthRepositoryImpl
+    ): AuthRepository
 }

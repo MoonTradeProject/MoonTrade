@@ -6,7 +6,6 @@ import com.example.moontrade.data.dto.TournamentDto
 import com.example.moontrade.data.enums.TournamentPaymentMethod
 import com.example.moontrade.data.request.JoinTournamentRequest
 import com.example.moontrade.data.response.JoinTournamentResponse
-import java.util.UUID
 import javax.inject.Inject
 
 // Repository that wraps Tournament API and manages token injection
@@ -20,7 +19,7 @@ class TournamentRepository @Inject constructor(
         return api.getTournaments("Bearer $token")
     }
 
-    suspend fun joinTournament(tournamentId: UUID, method: TournamentPaymentMethod): JoinTournamentResponse {
+    suspend fun joinTournament(tournamentId: String, method: TournamentPaymentMethod): JoinTournamentResponse {
         val token = authPreferences.getIdToken()
             ?: throw IllegalStateException("User not logged in")
         val request = JoinTournamentRequest(

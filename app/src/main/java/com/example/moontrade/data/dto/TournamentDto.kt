@@ -1,6 +1,6 @@
 package com.example.moontrade.data.dto
 
-import com.example.moontrade.data.dto.enums.TournamentKind
+import com.example.moontrade.data.enums.TournamentKind
 import com.example.moontrade.data.enums.TournamentStatus
 import java.time.LocalDateTime
 import java.util.UUID
