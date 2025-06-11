@@ -23,7 +23,7 @@ class TournamentsViewModel @Inject constructor(
     private val _joinResult = MutableStateFlow<JoinTournamentResponse?>(null)
     val joinResult: StateFlow<JoinTournamentResponse?> = _joinResult.asStateFlow()
 
-    fun loadTournaments() {
+    private fun loadTournaments() {
         viewModelScope.launch {
             try {
                 _tournaments.value = tournamentRepository.getTournaments()

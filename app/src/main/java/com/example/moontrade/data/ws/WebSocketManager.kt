@@ -11,6 +11,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.*
+import java.net.SocketException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
@@ -36,13 +37,17 @@ class WebSocketManager @Inject constructor() {
     private val currentMode = AtomicReference<Mode>(Mode.Main)
     private val idTokenRef = AtomicReference<String>()
     private val isConnecting = AtomicBoolean(false)
+    private var userClosed = false
 
     fun connect(token: String, mode: Mode) {
         if (isConnecting.get()) return
         isConnecting.set(true)
         _status.value = WebSocketStatus.Connecting
 
-        disconnect()
+        // ⚠️ cancel() instead of close() to prevent triggering onFailure
+        socket?.cancel()
+        socket = null
+        userClosed = false
 
         idTokenRef.set(token)
         currentMode.set(mode)
@@ -51,6 +56,7 @@ class WebSocketManager @Inject constructor() {
     }
 
     fun disconnect() {
+        userClosed = true
         socket?.cancel()
         socket = null
         isConnecting.set(false)
@@ -109,6 +115,11 @@ class WebSocketManager @Inject constructor() {
         }
 
         override fun onFailure(ws: WebSocket, t: Throwable, r: Response?) {
+            if (userClosed || t is SocketException && t.message?.contains("Socket closed") == true) {
+                Log.w(TAG, "⛔ Ignoring socket closed by user")
+                return
+            }
+
             Log.e(TAG, "💥 WS failure", t)
             isConnecting.set(false)
             _status.value = WebSocketStatus.Error(t.message ?: "Unknown error")

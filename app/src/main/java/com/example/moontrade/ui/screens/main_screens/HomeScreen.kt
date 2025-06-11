@@ -11,10 +11,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.moontrade.data.ws.WebSocketManager
 import com.example.moontrade.model.Mode
+import com.example.moontrade.model.WebSocketStatus
 import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.viewmodels.BalanceViewModel
 
@@ -28,9 +29,10 @@ fun HomeScreen(
     var selectedTournament by remember { mutableStateOf(tournamentList.first()) }
 
     val balance by balanceViewModel.balance.collectAsState()
+    val status by balanceViewModel.status.collectAsState()
 
     LaunchedEffect(Unit) {
-        balanceViewModel.connect(Mode.Main)
+        balanceViewModel.connect()
     }
 
     Scaffold(
@@ -72,6 +74,23 @@ fun HomeScreen(
                         }
 
                         Spacer(Modifier.weight(1f))
+
+                        // WebSocket status indicator
+                        Box(
+                            modifier = Modifier
+                                .size(12.dp)
+                                .background(
+                                    color = when (status) {
+                                        is WebSocketStatus.Connected -> Color.Green
+                                        is WebSocketStatus.Connecting -> Color.Yellow
+                                        is WebSocketStatus.Error -> Color.Red
+                                        WebSocketStatus.Idle -> Color.Gray
+                                    },
+                                    shape = MaterialTheme.shapes.extraSmall
+                                )
+                        )
+
+                        Spacer(Modifier.width(8.dp))
 
                         Text(text = balance, style = MaterialTheme.typography.titleMedium)
                     }
