@@ -10,8 +10,10 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,7 +26,8 @@ class SessionManager @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val _mode = MutableStateFlow(Mode.Main)
+    private val _mode = MutableStateFlow<Mode>(Mode.Main)
+
     val mode: StateFlow<Mode> = _mode
 
     private val _idToken = MutableStateFlow<String?>(null)
@@ -39,6 +42,12 @@ class SessionManager @Inject constructor(
     init {
         // Preload saved token if available
         prefs.getIdToken()?.let { _idToken.value = it }
+    }
+    private val _joinedTournamentIds = MutableStateFlow<Set<UUID>>(emptySet())
+    val joinedTournamentIds: StateFlow<Set<UUID>> = _joinedTournamentIds.asStateFlow()
+
+    fun setJoinedTournaments(ids: Set<UUID>) {
+        _joinedTournamentIds.value = ids
     }
 
     suspend fun refreshToken(): String? {
@@ -88,7 +97,8 @@ class SessionManager @Inject constructor(
     }
 
     fun changeMode(mode: Mode) {
-        _mode.value = mode as Mode.Main
+        println("🌐 [SessionManager] Received changeMode: $mode")
+        _mode.value = mode
         ws.changeMode(mode)
     }
 

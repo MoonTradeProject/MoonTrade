@@ -39,7 +39,11 @@ class TournamentsViewModel @Inject constructor(
                 Log.d("TournamentsVM", "📡 Loading tournaments...")
                 val result = tournamentRepository.getTournaments()
                 Log.d("TournamentsVM", "✅ Got ${result.size} tournaments")
+                session.setJoinedTournaments(
+                    result.filter { it.isJoined }.map { it.id }.toSet()
+                )
                 _tournaments.value = result
+
             } catch (e: Exception) {
                 Log.e("TournamentsVM", "❌ Failed to load tournaments: ${e.message}", e)
                 _tournaments.value = emptyList()

@@ -6,30 +6,46 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.moontrade.model.Mode
 import com.example.moontrade.model.WebSocketStatus
-import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.viewmodels.BalanceViewModel
+import com.example.moontrade.viewmodels.TournamentsViewModel
+
+data class SelectableMode(
+    val mode: Mode,
+    val label: String
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
-    balanceViewModel: BalanceViewModel
+    balanceViewModel: BalanceViewModel,
+    tournamentsViewModel: TournamentsViewModel = hiltViewModel()
 ) {
-    val tournamentList = listOf("Main", "3-Month League", "2-Week Blitz")
-    var selectedTournament by remember { mutableStateOf(tournamentList.first()) }
-
+    val mode by balanceViewModel.mode.collectAsState()
     val balance by balanceViewModel.balance.collectAsState()
     val status by balanceViewModel.status.collectAsState()
+    val tournaments by tournamentsViewModel.tournaments.collectAsState()
+
+    val selectableModes = listOf(
+        SelectableMode(Mode.Main, "Main")
+    ) + tournaments.filter { it.isJoined }.map {
+        SelectableMode(Mode.Tournament(it.id.toString()), it.name)
+    }
+
+    var selected by remember(mode, selectableModes) {
+        mutableStateOf(selectableModes.find { it.mode == mode } ?: selectableModes.first())
+    }
 
     LaunchedEffect(Unit) {
         balanceViewModel.connect()
@@ -47,26 +63,20 @@ fun HomeScreen(
 
                         Box {
                             TextButton(onClick = { expanded = true }) {
-                                Text(selectedTournament)
+                                Text(selected.label)
                             }
+
                             DropdownMenu(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false }
                             ) {
-                                tournamentList.forEach { name ->
+                                selectableModes.forEach { item ->
                                     DropdownMenuItem(
-                                        text = { Text(name) },
+                                        text = { Text(item.label) },
                                         onClick = {
-                                            selectedTournament = name
+                                            selected = item
                                             expanded = false
-
-                                            if (name == "Main") {
-                                                balanceViewModel.changeMode(Mode.Main)
-                                            } else {
-                                                balanceViewModel.changeMode(
-                                                    Mode.Tournament("ccba2478-e949-4848-b2bc-991f839b6292")
-                                                )
-                                            }
+                                            balanceViewModel.changeMode(item.mode)
                                         }
                                     )
                                 }
@@ -75,7 +85,6 @@ fun HomeScreen(
 
                         Spacer(Modifier.weight(1f))
 
-                        // WebSocket status indicator
                         Box(
                             modifier = Modifier
                                 .size(12.dp)
@@ -91,14 +100,13 @@ fun HomeScreen(
                         )
 
                         Spacer(Modifier.width(8.dp))
-
                         Text(text = balance, style = MaterialTheme.typography.titleMedium)
                     }
                 }
             )
         },
         bottomBar = {
-            BottomBar(navController)
+            com.example.moontrade.ui.screens.components.bars.BottomBar(navController)
         }
     ) { padding ->
         LazyColumn(
@@ -149,7 +157,7 @@ fun HomeScreen(
                             Text(name, style = MaterialTheme.typography.bodyLarge)
                             Text("ROI: $roi", style = MaterialTheme.typography.bodyMedium)
                         }
-                        Icon(Icons.Default.ArrowForward, contentDescription = "View")
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "View")
                     }
                 }
             }
@@ -158,17 +166,9 @@ fun HomeScreen(
                 Text("Your Portfolio", style = MaterialTheme.typography.titleLarge)
             }
 
-            item {
-                AssetCardStub("BTC", "0.42 BTC")
-            }
-
-            item {
-                AssetCardStub("ETH", "3.1 ETH")
-            }
-
-            item {
-                Spacer(Modifier.height(80.dp))
-            }
+            item { AssetCardStub("BTC", "0.42 BTC") }
+            item { AssetCardStub("ETH", "3.1 ETH") }
+            item { Spacer(Modifier.height(80.dp)) }
         }
     }
 }
