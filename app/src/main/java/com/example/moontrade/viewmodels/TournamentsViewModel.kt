@@ -10,6 +10,7 @@ import com.example.moontrade.data.dto.TournamentDto
 import com.example.moontrade.data.enums.TournamentPaymentMethod
 import com.example.moontrade.data.repository.TournamentRepository
 import com.example.moontrade.data.response.JoinTournamentResponse
+import com.example.moontrade.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TournamentsViewModel @Inject constructor(
-    private val tournamentRepository: TournamentRepository
+    private val tournamentRepository: TournamentRepository,
+    private val session: SessionManager
 ) : ViewModel() {
 
     private val _tournaments = MutableStateFlow<List<TournamentDto>>(emptyList())
@@ -47,20 +49,31 @@ class TournamentsViewModel @Inject constructor(
 
 
     @OptIn(UnstableApi::class)
+
     fun joinTournament(tournamentId: String, method: TournamentPaymentMethod) {
         viewModelScope.launch {
             try {
-                Log.d("TournamentsVM", "🧾 Joining tournament $tournamentId with method $method")
+                val token = session.getValidToken()
+                Log.d("TournamentsVM", "🧾 Requesting join: tournamentId=$tournamentId, method=$method, token=${token?.take(10)}...")
+
                 val response = tournamentRepository.joinTournament(tournamentId, method)
-                Log.d("TournamentsVM", "✅ Join result: ${response.success} — ${response.message}")
+
+                Log.d("TournamentsVM", "✅ Server response: success=${response.success}, message='${response.message}'")
                 _joinResult.value = response
-                if (response.success) loadTournaments()
+
+                if (response.success) {
+                    Log.d("TournamentsVM", "🔄 Refreshing tournament list after join...")
+                    loadTournaments()
+                } else {
+                    Log.w("TournamentsVM", "⚠️ Join rejected: ${response.message}")
+                }
             } catch (e: Exception) {
-                Log.e("TournamentsVM", "❌ Join failed: ${e.message}", e)
+                Log.e("TournamentsVM", "❌ Join error: ${e.message}", e)
                 _joinResult.value = JoinTournamentResponse(false, e.message ?: "Join failed")
             }
         }
     }
+
 
 
     fun clearJoinResult() {
