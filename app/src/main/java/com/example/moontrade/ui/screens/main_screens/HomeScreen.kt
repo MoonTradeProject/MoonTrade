@@ -1,10 +1,12 @@
 package com.example.moontrade.ui.screens.main_screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Settings
@@ -12,10 +14,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.moontrade.R
 import com.example.moontrade.model.Mode
 import com.example.moontrade.model.WebSocketStatus
 import com.example.moontrade.navigation.NavRoutes
@@ -39,11 +44,10 @@ fun HomeScreen(
     val status by balanceViewModel.status.collectAsState()
     val tournaments by tournamentsViewModel.tournaments.collectAsState()
 
-    val selectableModes = listOf(
-        SelectableMode(Mode.Main, "Main")
-    ) + tournaments.filter { it.isJoined }.map {
-        SelectableMode(Mode.Tournament(it.id.toString()), it.name)
-    }
+    val selectableModes = listOf(SelectableMode(Mode.Main, "Main")) +
+            tournaments.filter { it.isJoined }.map {
+                SelectableMode(Mode.Tournament(it.id.toString()), it.name)
+            }
 
     var selected by remember(mode, selectableModes) {
         mutableStateOf(selectableModes.find { it.mode == mode } ?: selectableModes.first())
@@ -65,9 +69,8 @@ fun HomeScreen(
 
                         Box {
                             TextButton(onClick = { expanded = true }) {
-                                Text(selected.label)
+                                Text(selected.label, style = MaterialTheme.typography.titleMedium)
                             }
-
                             DropdownMenu(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false }
@@ -89,20 +92,20 @@ fun HomeScreen(
 
                         Box(
                             modifier = Modifier
-                                .size(12.dp)
+                                .size(10.dp)
                                 .background(
                                     color = when (status) {
-                                        is WebSocketStatus.Connected -> Color.Green
+                                        is WebSocketStatus.Connected -> Color(0xFF00E676)
                                         is WebSocketStatus.Connecting -> Color.Yellow
                                         is WebSocketStatus.Error -> Color.Red
                                         WebSocketStatus.Idle -> Color.Gray
                                     },
-                                    shape = MaterialTheme.shapes.extraSmall
+                                    shape = CircleShape
                                 )
                         )
 
                         Spacer(Modifier.width(8.dp))
-                        Text(text = balance, style = MaterialTheme.typography.titleMedium)
+                        Text(balance, style = MaterialTheme.typography.titleMedium)
                     }
                 },
                 actions = {
@@ -113,30 +116,55 @@ fun HomeScreen(
                     }
                 }
             )
-        },
-
-        ) { padding ->
+        }
+    ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.background),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Portfolio Balance", style = MaterialTheme.typography.titleLarge)
-                        Spacer(Modifier.height(8.dp))
-                        Text(balance, style = MaterialTheme.typography.headlineSmall)
-                        Text("ROI: +3.4%", style = MaterialTheme.typography.bodyMedium)
+                // Profile header
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        painter = painterResource(id = R.drawable.img),
+                        contentDescription = "Avatar",
+                        modifier = Modifier
+                            .size(90.dp)
+                            .clip(CircleShape)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf("Sniper", "Top 10", "Bullish").forEach {
+                            AssistChip(onClick = {}, label = { Text(it) })
+                        }
                     }
                 }
             }
 
             item {
-                Text("Top 5 Players", style = MaterialTheme.typography.titleLarge)
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text("Portfolio", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Spacer(Modifier.height(8.dp))
+                        Text(balance, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Spacer(Modifier.height(4.dp))
+                        Text("ROI: +3.4%", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
+                }
+            }
+
+            item {
+                Text("Top Traders", style = MaterialTheme.typography.titleLarge)
             }
 
             val topPlayers = listOf(
@@ -148,37 +176,61 @@ fun HomeScreen(
             )
 
             items(topPlayers) { (name, roi) ->
-                Card(
+                ElevatedCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            navController.navigate("player_profile/${name}")
-                        }
+                        .clickable { navController.navigate("player_profile/$name") },
+                    colors = CardDefaults.elevatedCardColors()
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(name, style = MaterialTheme.typography.bodyLarge)
                             Text("ROI: $roi", style = MaterialTheme.typography.bodyMedium)
                         }
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "View")
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Go")
                     }
                 }
             }
 
             item {
-                Text("Your Portfolio", style = MaterialTheme.typography.titleLarge)
+                Text("Your Assets", style = MaterialTheme.typography.titleLarge)
             }
 
-            item { AssetCardStub("BTC", "0.42 BTC") }
-            item { AssetCardStub("ETH", "3.1 ETH") }
-            item { Spacer(Modifier.height(80.dp)) }
+            item { AssetCard("BTC", "₿ 0.42") }
+            item { AssetCard("ETH", "Ξ 3.1") }
+
+            item {
+                Spacer(modifier = Modifier.height(80.dp))
+            }
         }
     }
 }
+
+@Composable
+fun AssetCard(label: String, value: String) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors()
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(label, style = MaterialTheme.typography.bodyLarge)
+                Text(value, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
+}
+
 
 @Composable
 fun AssetCardStub(label: String, value: String) {
