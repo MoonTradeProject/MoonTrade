@@ -4,17 +4,15 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.example.moontrade.auth.AuthViewModel
 import com.example.moontrade.ui.screens.authentication.*
+import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.ui.screens.main_screens.*
 import com.example.moontrade.ui.screens.onboarding.*
 import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
@@ -32,7 +30,8 @@ fun AppNavigation() {
     val balanceViewModel: BalanceViewModel = hiltViewModel()
     val tournamentsViewModel: TournamentsViewModel = hiltViewModel()
 
-    LaunchedEffect(Unit) {
+    // ✅ Навигация после логина
+    LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             navController.navigate(NavRoutes.HOME) {
                 popUpTo(0)
@@ -40,9 +39,12 @@ fun AppNavigation() {
         }
     }
 
-
-
-    Scaffold { padding ->
+    // ✅ BottomBar отображается везде
+    Scaffold(
+        bottomBar = {
+            BottomBar(navController)
+        }
+    ) { padding ->
         NavHost(
             navController = navController,
             startDestination = NavRoutes.ONBOARDING_1,
@@ -87,9 +89,7 @@ fun AppNavigation() {
             composable(NavRoutes.MARKETS) {
                 MarketsScreen(navController, marketViewModel)
             }
-            composable(NavRoutes.TRADE) {
-                TradeScreen(navController)
-            }
+
             composable(NavRoutes.RATINGS) {
                 RatingsScreen(navController)
             }
@@ -99,6 +99,14 @@ fun AppNavigation() {
             composable(NavRoutes.PLAYER_PROFILE) { backStackEntry ->
                 val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
                 PlayerProfeleScreen(navController, playerId)
+            }
+            composable(
+                route = "${NavRoutes.MARKET_DETAIL}/{symbol}",
+                arguments = listOf(navArgument("symbol") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val symbol = backStackEntry.arguments?.getString("symbol")
+                println("🟡 ROUTE ACTIVE — symbol = $symbol")
+                MarketDetailScreen(navController = navController, symbol = symbol ?: "null")
             }
         }
     }

@@ -30,7 +30,7 @@ fun TournamentsScreen(
 
     Scaffold(
         topBar = { TopBar(title = "Tournaments", showBack = false) },
-        bottomBar = { BottomBar(navController) }
+
     ) { padding ->
         Column(
             modifier = Modifier

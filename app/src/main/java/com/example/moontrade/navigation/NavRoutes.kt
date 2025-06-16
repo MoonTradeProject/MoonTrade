@@ -19,4 +19,7 @@ object NavRoutes {
     const val RATINGS = "ratings"
     const val TOURNAMENTS = "tournaments"
     const val PLAYER_PROFILE = "player_profile/{playerId}"
+    const val MARKET_DETAIL = "market_detail"
+    fun marketDetailRoute(symbol: String) = "$MARKET_DETAIL/$symbol"
+
 }

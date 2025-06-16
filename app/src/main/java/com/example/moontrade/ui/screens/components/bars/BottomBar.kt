@@ -22,31 +22,34 @@ data class BottomNavItem(
 private val bottomNavItems = listOf(
     BottomNavItem("home", "Home", Icons.Default.Home),
     BottomNavItem("markets", "Markets", Icons.Default.CheckCircle),
-    BottomNavItem("trade", "Trade", Icons.Default.Build),
     BottomNavItem("ratings", "Ratings", Icons.Default.AccountCircle),
     BottomNavItem("tournaments", "Tournaments", Icons.Default.Star)
 )
 
 @Composable
 fun BottomBar(navController: NavController) {
-    NavigationBar {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val currentRoot  = currentRoute?.substringBefore('/')   // ← базовая часть
 
+    NavigationBar {
         bottomNavItems.forEach { item ->
+
+            val selected = currentRoot == item.route      // ✔ сравниваем только “корень”
+
             NavigationBarItem(
-                selected = currentRoute == item.route,
+                selected = selected,
+                icon     = { Icon(item.icon, null) },
+                label    = { Text(item.label) },
+
+                // ✔ навигируем ТОЛЬКО если ещё не в этой вкладке
                 onClick = {
-                    if (currentRoute != item.route) {
+                    if (!selected) {
                         navController.navigate(item.route) {
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+                            launchSingleTop = true        // никакого popUpTo / restoreState
                         }
                     }
-                },
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) }
+                }
             )
         }
     }

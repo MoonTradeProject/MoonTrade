@@ -28,10 +28,6 @@ fun TradeScreen(navController: NavController) {
                 onBack = { navController.popBackStack() }
             )
         },
-        bottomBar = {
-            BottomBar(navController)
-        }
-
     )
     { padding ->
         Column(

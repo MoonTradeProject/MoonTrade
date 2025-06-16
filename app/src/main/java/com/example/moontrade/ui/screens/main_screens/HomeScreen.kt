@@ -105,9 +105,7 @@ fun HomeScreen(
                 }
             )
         },
-        bottomBar = {
-            com.example.moontrade.ui.screens.components.bars.BottomBar(navController)
-        }
+
     ) { padding ->
         LazyColumn(
             modifier = Modifier
