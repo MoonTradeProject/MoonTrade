@@ -25,6 +25,7 @@ import com.example.moontrade.model.Mode
 import com.example.moontrade.model.WebSocketStatus
 import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.viewmodels.BalanceViewModel
+import com.example.moontrade.viewmodels.ProfileViewModel
 import com.example.moontrade.viewmodels.TournamentsViewModel
 
 data class SelectableMode(
@@ -37,8 +38,12 @@ data class SelectableMode(
 fun HomeScreen(
     navController: NavController,
     balanceViewModel: BalanceViewModel,
-    tournamentsViewModel: TournamentsViewModel = hiltViewModel()
+    tournamentsViewModel: TournamentsViewModel,
+    profileViewModel: ProfileViewModel
 ) {
+    val nickname by profileViewModel.nickname.collectAsState()
+    val selectedTags by profileViewModel.selectedTags.collectAsState()
+
     val mode by balanceViewModel.mode.collectAsState()
     val balance by balanceViewModel.balance.collectAsState()
     val status by balanceViewModel.status.collectAsState()
@@ -127,22 +132,40 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item {
-                // Profile header
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Profile header with avatar + nickname + tags right-aligned
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
                     Image(
                         painter = painterResource(id = R.drawable.img),
                         contentDescription = "Avatar",
                         modifier = Modifier
-                            .size(90.dp)
+                            .size(100.dp)
                             .clip(CircleShape)
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.Start
                     ) {
-                        listOf("Sniper", "Top 10", "Bullish").forEach {
-                            AssistChip(onClick = {}, label = { Text(it) })
+                        Text(
+                            text = nickname,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            selectedTags.forEach {
+                                AssistChip(onClick = {}, label = { Text(it) })
+                            }
                         }
                     }
                 }
@@ -227,18 +250,6 @@ fun AssetCard(label: String, value: String) {
                 Text(label, style = MaterialTheme.typography.bodyLarge)
                 Text(value, style = MaterialTheme.typography.bodyMedium)
             }
-        }
-    }
-}
-
-
-@Composable
-fun AssetCardStub(label: String, value: String) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(label, style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(value, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

@@ -19,6 +19,7 @@ import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
 import com.example.moontrade.ui.theme.ThemeViewModel
 import com.example.moontrade.viewmodels.BalanceViewModel
 import com.example.moontrade.viewmodels.MarketViewModel
+import com.example.moontrade.viewmodels.ProfileViewModel
 import com.example.moontrade.viewmodels.TournamentsViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -31,7 +32,7 @@ fun AppNavigation() {
     val balanceViewModel: BalanceViewModel = hiltViewModel()
     val tournamentsViewModel: TournamentsViewModel = hiltViewModel()
     val themeViewModel: ThemeViewModel = hiltViewModel()
-
+    val profileViewModel: ProfileViewModel = hiltViewModel()
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             navController.navigate(NavRoutes.HOME) {
@@ -85,7 +86,7 @@ fun AppNavigation() {
                 LoginScreen(navController, authViewModel)
             }
             composable(NavRoutes.HOME) {
-                HomeScreen(navController, balanceViewModel)
+                HomeScreen(navController, balanceViewModel, tournamentsViewModel, profileViewModel)
             }
             composable(NavRoutes.MARKETS) {
                 MarketsScreen(navController, marketViewModel)
@@ -111,6 +112,9 @@ fun AppNavigation() {
             }
             composable(NavRoutes.SETTINGS) {
                 SettingsScreen(navController, authViewModel, themeViewModel)
+            }
+            composable(NavRoutes.PROFILE_EDIT) {
+                EditProfileScreen(navController, profileViewModel)
             }
 
         }
