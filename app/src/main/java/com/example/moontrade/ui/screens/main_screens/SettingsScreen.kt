@@ -1,25 +1,32 @@
 package com.example.moontrade.ui.screens.main_screens
 
-package com.example.moontrade.ui.screens.main_screens
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.moontrade.auth.AuthViewModel
 import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.bars.TopBar
+import com.example.moontrade.ui.theme.ThemeViewModel
 
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    themeViewModel: ThemeViewModel
+) {
+    val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
+
     Scaffold(
         topBar = {
             TopBar(
@@ -42,15 +49,18 @@ fun SettingsScreen(navController: NavController) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { /* TODO: Theme switch */ }
+                    .clickable { themeViewModel.toggleTheme() }
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.DarkMode, contentDescription = null)
+                Icon(Icons.Default.Settings, contentDescription = null)
                 Spacer(Modifier.width(12.dp))
                 Text("Dark Theme")
                 Spacer(Modifier.weight(1f))
-                Switch(checked = true, onCheckedChange = { /* TODO: switch */ })
+                Switch(
+                    checked = isDarkTheme,
+                    onCheckedChange = { themeViewModel.toggleTheme() }
+                )
             }
 
             Divider()
@@ -71,7 +81,11 @@ fun SettingsScreen(navController: NavController) {
                 Text("Edit Profile")
             }
 
-            Divider()
+            HorizontalDivider(
+                Modifier.padding(vertical = 6.dp),
+                thickness = 1.dp,
+                color = Color.Gray
+            )
 
             Text("Security", style = MaterialTheme.typography.titleLarge)
 
@@ -79,12 +93,15 @@ fun SettingsScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        // TODO: logout()
+                        authViewModel.logout()
+                        navController.navigate(NavRoutes.LOGIN) {
+                            popUpTo(0)
+                        }
                     }
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.ExitToApp, contentDescription = null)
+                Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
                 Spacer(Modifier.width(12.dp))
                 Text("Log out")
             }

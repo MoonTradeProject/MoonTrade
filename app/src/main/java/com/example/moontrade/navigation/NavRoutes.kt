@@ -21,5 +21,7 @@ object NavRoutes {
     const val PLAYER_PROFILE = "player_profile/{playerId}"
     const val MARKET_DETAIL = "market_detail"
     fun marketDetailRoute(symbol: String) = "$MARKET_DETAIL/$symbol"
+    const val SETTINGS = "settings"
+    const val PROFILE_EDIT = "profile_edit"
 
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.moontrade.model.Mode
 import com.example.moontrade.model.WebSocketStatus
+import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.viewmodels.BalanceViewModel
 import com.example.moontrade.viewmodels.TournamentsViewModel
 
@@ -102,11 +104,18 @@ fun HomeScreen(
                         Spacer(Modifier.width(8.dp))
                         Text(text = balance, style = MaterialTheme.typography.titleMedium)
                     }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        navController.navigate(NavRoutes.SETTINGS)
+                    }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
                 }
             )
         },
 
-    ) { padding ->
+        ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()

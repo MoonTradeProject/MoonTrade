@@ -16,6 +16,7 @@ import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.ui.screens.main_screens.*
 import com.example.moontrade.ui.screens.onboarding.*
 import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
+import com.example.moontrade.ui.theme.ThemeViewModel
 import com.example.moontrade.viewmodels.BalanceViewModel
 import com.example.moontrade.viewmodels.MarketViewModel
 import com.example.moontrade.viewmodels.TournamentsViewModel
@@ -29,8 +30,8 @@ fun AppNavigation() {
     val marketViewModel: MarketViewModel = hiltViewModel()
     val balanceViewModel: BalanceViewModel = hiltViewModel()
     val tournamentsViewModel: TournamentsViewModel = hiltViewModel()
+    val themeViewModel: ThemeViewModel = hiltViewModel()
 
-    // ✅ Навигация после логина
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             navController.navigate(NavRoutes.HOME) {
@@ -39,7 +40,7 @@ fun AppNavigation() {
         }
     }
 
-    // ✅ BottomBar отображается везде
+
     Scaffold(
         bottomBar = {
             BottomBar(navController)
@@ -108,6 +109,10 @@ fun AppNavigation() {
                 println("🟡 ROUTE ACTIVE — symbol = $symbol")
                 MarketDetailScreen(navController = navController, symbol = symbol ?: "null")
             }
+            composable(NavRoutes.SETTINGS) {
+                SettingsScreen(navController, authViewModel, themeViewModel)
+            }
+
         }
     }
 }
