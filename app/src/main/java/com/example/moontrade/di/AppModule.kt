@@ -59,6 +59,15 @@ object AppModule {
     ): AuthPreferences {
         return AuthPreferences(context)
     }
+
+
+    @Provides
+    @Singleton
+    fun provideProfileStorage(
+        @ApplicationContext context: Context
+    ): com.example.moontrade.data.storage.ProfileStorage {
+        return com.example.moontrade.data.storage.ProfileStorage(context)
+    }
 }
 
 @Module
