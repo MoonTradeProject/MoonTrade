@@ -2,10 +2,12 @@ package com.example.moontrade.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
@@ -17,22 +19,33 @@ import com.example.moontrade.ui.screens.main_screens.*
 import com.example.moontrade.ui.screens.onboarding.*
 import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
 import com.example.moontrade.ui.theme.ThemeViewModel
-import com.example.moontrade.viewmodels.BalanceViewModel
-import com.example.moontrade.viewmodels.MarketViewModel
-import com.example.moontrade.viewmodels.ProfileViewModel
-import com.example.moontrade.viewmodels.TournamentsViewModel
+import com.example.moontrade.viewmodels.*
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+
+    // ViewModels
     val authViewModel: AuthViewModel = hiltViewModel()
-    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val marketViewModel: MarketViewModel = hiltViewModel()
     val balanceViewModel: BalanceViewModel = hiltViewModel()
     val tournamentsViewModel: TournamentsViewModel = hiltViewModel()
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
+
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+
+    val bottomBarRoutes = listOf(
+        NavRoutes.HOME,
+        NavRoutes.MARKETS,
+        NavRoutes.RATINGS,
+        NavRoutes.TOURNAMENTS
+    )
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             navController.navigate(NavRoutes.HOME) {
@@ -42,11 +55,7 @@ fun AppNavigation() {
     }
 
 
-    Scaffold(
-        bottomBar = {
-            BottomBar(navController)
-        }
-    ) { padding ->
+    val content: @Composable (PaddingValues) -> Unit = { padding ->
         NavHost(
             navController = navController,
             startDestination = NavRoutes.ONBOARDING_1,
@@ -91,7 +100,6 @@ fun AppNavigation() {
             composable(NavRoutes.MARKETS) {
                 MarketsScreen(navController, marketViewModel)
             }
-
             composable(NavRoutes.RATINGS) {
                 RatingsScreen(navController)
             }
@@ -107,7 +115,6 @@ fun AppNavigation() {
                 arguments = listOf(navArgument("symbol") { type = NavType.StringType })
             ) { backStackEntry ->
                 val symbol = backStackEntry.arguments?.getString("symbol")
-                println("🟡 ROUTE ACTIVE — symbol = $symbol")
                 MarketDetailScreen(navController = navController, symbol = symbol ?: "null")
             }
             composable(NavRoutes.SETTINGS) {
@@ -116,7 +123,15 @@ fun AppNavigation() {
             composable(NavRoutes.PROFILE_EDIT) {
                 EditProfileScreen(navController, profileViewModel)
             }
-
         }
+    }
+
+
+    if (currentRoute in bottomBarRoutes) {
+        Scaffold(bottomBar = { BottomBar(navController) }) { padding ->
+            content(padding)
+        }
+    } else {
+        content(PaddingValues(0.dp))
     }
 }
