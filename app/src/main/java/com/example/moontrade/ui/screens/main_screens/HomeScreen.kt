@@ -138,13 +138,16 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
+                    val avatarId by profileViewModel.avatarId.collectAsState()
+
                     Image(
-                        painter = painterResource(id = R.drawable.img),
+                        painter = painterResource(id = avatarResIdFrom(avatarId)),
                         contentDescription = "Avatar",
                         modifier = Modifier
                             .size(100.dp)
                             .clip(CircleShape)
                     )
+
 
                     Spacer(modifier = Modifier.width(16.dp))
 

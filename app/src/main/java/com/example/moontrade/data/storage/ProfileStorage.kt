@@ -31,4 +31,11 @@ class ProfileStorage @Inject constructor(
         val raw = prefs.getString("tags", "Sniper,Top 10") ?: ""
         return raw.split(",").filter { it.isNotBlank() }
     }
+    fun saveAvatarId(id: Int) {
+        prefs.edit { putInt("avatarId", id) }
+    }
+
+    fun loadAvatarId(): Int {
+        return prefs.getInt("avatarId", 0)
+    }
 }
