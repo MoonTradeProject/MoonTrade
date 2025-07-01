@@ -33,7 +33,7 @@ fun AppNavigation() {
     val tournamentsViewModel: TournamentsViewModel = hiltViewModel()
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
-
+    val marketDetailViewModel: MarketDetailViewModel = hiltViewModel();
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
     val bottomBarRoutes = listOf(
@@ -115,7 +115,8 @@ fun AppNavigation() {
                 arguments = listOf(navArgument("symbol") { type = NavType.StringType })
             ) { backStackEntry ->
                 val symbol = backStackEntry.arguments?.getString("symbol")
-                MarketDetailScreen(navController = navController, symbol = symbol ?: "null")
+                MarketDetailScreen(
+                    navController = navController, symbol = symbol ?: "null", marketDetailViewModel)
             }
             composable(NavRoutes.SETTINGS) {
                 SettingsScreen(navController, authViewModel, themeViewModel)

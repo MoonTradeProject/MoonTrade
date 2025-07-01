@@ -1,7 +1,11 @@
 package com.example.moontrade.ui.screens.main_screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -9,19 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-
-import com.example.moontrade.ui.screens.components.orderbook.OrderBookMock
-
-
-import androidx.compose.foundation.rememberScrollState
-
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-
+import com.example.moontrade.model.OrderBookSnapshot
+import com.example.moontrade.ui.screens.components.orderbook.OrderBookLive
+import com.example.moontrade.viewmodels.MarketDetailViewModel
 
 @Composable
-fun MarketDetailScreen(navController: NavController, symbol: String) {
+fun MarketDetailScreen(
+    navController: NavController,
+    symbol: String,
+    viewModel: MarketDetailViewModel
+) {
+    // UI state
     var orderType by remember { mutableStateOf("Limit") }
     var isBuy by remember { mutableStateOf(true) }
     var price by remember { mutableStateOf("") }
@@ -31,16 +33,23 @@ fun MarketDetailScreen(navController: NavController, symbol: String) {
     var takeProfitEnabled by remember { mutableStateOf(false) }
     var takeProfit by remember { mutableStateOf("") }
 
+    // Subscribe to WS snapshot
+    val snapshot by viewModel.snapshot.collectAsState()
+
+    // Connect to WS on enter
+    LaunchedEffect(symbol) {
+        viewModel.connect(symbol)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // ✅ TopBar вручную
+
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
@@ -53,10 +62,18 @@ fun MarketDetailScreen(navController: NavController, symbol: String) {
         }
 
         Spacer(Modifier.height(16.dp))
-        Text("Best Bid: 0.07123    |    Best Ask: 0.07126")
+
+        Text(
+            "Best Bid: ${snapshot?.bids?.firstOrNull()?.price ?: "-"}    |    " +
+                    "Best Ask: ${snapshot?.asks?.firstOrNull()?.price ?: "-"}"
+        )
+
         Spacer(modifier = Modifier.height(12.dp))
-        OrderBookMock()
+
+        OrderBookLive(snapshot = snapshot)
+
         Spacer(modifier = Modifier.height(24.dp))
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Order Type:")
             Spacer(Modifier.width(8.dp))
@@ -137,9 +154,6 @@ fun MarketDetailScreen(navController: NavController, symbol: String) {
         }
     }
 }
-
-
-
 
 @Composable
 fun DropdownMenuBox(
