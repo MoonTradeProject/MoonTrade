@@ -43,24 +43,33 @@ class TradeViewModel @Inject constructor(
         val mode = session.mode.value
         val (modeStr, tid) = mode.toWire()
 
-        val rawPrice = if (side == "buy") lastAsk.value else lastBid.value
+        val rawPrice = if (side.lowercase() == "buy") lastAsk.value else lastBid.value
 
-        // Format price to 6 decimal places
-        val priceFormatted = rawPrice.toBigDecimalOrNull()
-            ?.setScale(6, RoundingMode.HALF_UP)
-            ?.stripTrailingZeros()
-            ?.toPlainString() ?: "0"
+        // Correctly set price:
+        // - For "market": always "0"
+        // - For "limit": formatted price
+        val priceFormatted = if (execType.lowercase() == "market") {
+            "0"
+        } else {
+            rawPrice.toBigDecimalOrNull()
+                ?.setScale(6, RoundingMode.HALF_UP)
+                ?.stripTrailingZeros()
+                ?.toPlainString() ?: "0"
+        }
 
-        // Format amount to 6 decimal places
+        // Format amount safely
         val amountFormatted = amount.value.toBigDecimalOrNull()
             ?.setScale(6, RoundingMode.HALF_UP)
             ?.stripTrailingZeros()
             ?.toPlainString() ?: "0"
 
-        Log.d("TradeViewModel", "📈 Preparing order: asset=${assetName.value}, price=$priceFormatted, amount=$amountFormatted, mode=$modeStr, tid=$tid")
+        Log.d(
+            "TradeViewModel",
+            "📈 Preparing order: asset=${assetName.value}, price=$priceFormatted, amount=$amountFormatted, mode=$modeStr, tid=$tid"
+        )
 
         val req = PlaceOrderRequest(
-            mode = modeStr.lowercase(),           // "main" or "tournament"
+            mode = mode.toJson(),           // "main" or "tournament"
             asset_name = assetName.value,
             price = priceFormatted,
             amount = amountFormatted,
@@ -74,11 +83,11 @@ class TradeViewModel @Inject constructor(
             .onSuccess { resp ->
                 Log.i("TradeViewModel", "✅ Order placed successfully: $resp")
                 amount.value = "" // clear input on success
-                // TODO: show Snackbar/Toast on success if needed
+                // TODO: Optionally show Snackbar/Toast
             }
             .onFailure { e ->
                 Log.e("TradeViewModel", "💥 Failed to place order: ${e.localizedMessage}", e)
-                // TODO: show Snackbar/Toast on error if needed
+                // TODO: Optionally show Snackbar/Toast
             }
     }
 }

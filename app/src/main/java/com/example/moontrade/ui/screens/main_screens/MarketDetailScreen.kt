@@ -24,10 +24,8 @@ fun MarketDetailScreen(
     symbol: String,
     viewModel: MarketDetailViewModel
 ) {
-    // Подключаем TradeViewModel для торговли
     val tradeViewModel: TradeViewModel = hiltViewModel()
 
-    // UI state
     var orderType by remember { mutableStateOf("Limit") }
     var isBuy by remember { mutableStateOf(true) }
     var price by remember { mutableStateOf("") }
@@ -37,10 +35,8 @@ fun MarketDetailScreen(
     var takeProfitEnabled by remember { mutableStateOf(false) }
     var takeProfit by remember { mutableStateOf("") }
 
-    // Subscribe to WS snapshot
     val snapshot by viewModel.snapshot.collectAsState()
 
-    // Connect to WS on enter
     LaunchedEffect(symbol) {
         viewModel.connect(symbol)
     }
@@ -150,23 +146,22 @@ fun MarketDetailScreen(
 
         Button(
             onClick = {
-                // Лог для дебага
                 println("[order] Sending $orderType ${if (isBuy) "Buy" else "Sell"} $amount @ $price for $symbol")
 
-                // Установка данных для TradeViewModel
                 tradeViewModel.assetName.value = symbol
                 tradeViewModel.amount.value = amount
+
+                val execType = if (orderType == "Market") "market" else "limit"
 
                 if (orderType == "Limit") {
                     if (isBuy) {
                         tradeViewModel.lastAsk.value = price.ifEmpty { "0" }
-                        tradeViewModel.place("Buy")
+                        tradeViewModel.place("buy", execType)
                     } else {
                         tradeViewModel.lastBid.value = price.ifEmpty { "0" }
-                        tradeViewModel.place("Sell")
+                        tradeViewModel.place("sell", execType)
                     }
                 } else {
-                    // Для Market Order можно подтягивать лучшие цены из snapshot
                     val marketPrice = if (isBuy) {
                         snapshot?.asks?.firstOrNull()?.price ?: "0"
                     } else {
@@ -175,10 +170,10 @@ fun MarketDetailScreen(
 
                     if (isBuy) {
                         tradeViewModel.lastAsk.value = marketPrice.toString()
-                        tradeViewModel.place("Buy")
+                        tradeViewModel.place("buy", execType)
                     } else {
                         tradeViewModel.lastBid.value = marketPrice.toString()
-                        tradeViewModel.place("Sell")
+                        tradeViewModel.place("sell", execType)
                     }
                 }
             },

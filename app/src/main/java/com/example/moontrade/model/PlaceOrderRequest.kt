@@ -1,10 +1,12 @@
 package com.example.moontrade.model
 
+import com.google.gson.JsonElement
+
 data class PlaceOrderRequest(
-    val mode: String,          // "main" / "tournament"
+    val mode: JsonElement, // <-- ключевой момент
     val asset_name: String,
-    val amount: String,        // строка для Decimal
-    val price: String,         // строка для Decimal
-    val exec_type: String,     // "market" / "limit"
-    val order_type: String     // "buy" / "sell"
+    val amount: String,
+    val price: String,
+    val exec_type: String,
+    val order_type: String
 )
