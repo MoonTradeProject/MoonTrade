@@ -34,6 +34,8 @@ fun AppNavigation() {
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
     val marketDetailViewModel: MarketDetailViewModel = hiltViewModel();
+    val tradeViewModel: TradeViewModel = hiltViewModel()
+
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
     val bottomBarRoutes = listOf(

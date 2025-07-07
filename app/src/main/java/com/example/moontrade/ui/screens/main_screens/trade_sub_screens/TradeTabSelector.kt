@@ -11,7 +11,7 @@ fun TradeTabSelector(
     selectedTab: TradeTab,
     onTabSelected: (TradeTab) -> Unit
 ) {
-    val tabs = listOf(TradeTab.BUY, TradeTab.SELL, TradeTab.EXCHANGE)
+    val tabs = listOf(TradeTab.BUY, TradeTab.SELL)
     TabRow(selectedTabIndex = tabs.indexOf(selectedTab)) {
         tabs.forEachIndexed { index, tab ->
             Tab(

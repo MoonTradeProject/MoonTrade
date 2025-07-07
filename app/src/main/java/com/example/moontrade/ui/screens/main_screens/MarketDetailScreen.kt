@@ -12,10 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.moontrade.model.OrderBookSnapshot
 import com.example.moontrade.ui.screens.components.orderbook.OrderBookLive
 import com.example.moontrade.viewmodels.MarketDetailViewModel
+import com.example.moontrade.viewmodels.TradeViewModel
 
 @Composable
 fun MarketDetailScreen(
@@ -23,6 +24,9 @@ fun MarketDetailScreen(
     symbol: String,
     viewModel: MarketDetailViewModel
 ) {
+    // Подключаем TradeViewModel для торговли
+    val tradeViewModel: TradeViewModel = hiltViewModel()
+
     // UI state
     var orderType by remember { mutableStateOf("Limit") }
     var isBuy by remember { mutableStateOf(true) }
@@ -146,7 +150,37 @@ fun MarketDetailScreen(
 
         Button(
             onClick = {
-                println("[order] $orderType ${if (isBuy) "Buy" else "Sell"} $amount @ $price")
+                // Лог для дебага
+                println("[order] Sending $orderType ${if (isBuy) "Buy" else "Sell"} $amount @ $price for $symbol")
+
+                // Установка данных для TradeViewModel
+                tradeViewModel.assetName.value = symbol
+                tradeViewModel.amount.value = amount
+
+                if (orderType == "Limit") {
+                    if (isBuy) {
+                        tradeViewModel.lastAsk.value = price.ifEmpty { "0" }
+                        tradeViewModel.place("Buy")
+                    } else {
+                        tradeViewModel.lastBid.value = price.ifEmpty { "0" }
+                        tradeViewModel.place("Sell")
+                    }
+                } else {
+                    // Для Market Order можно подтягивать лучшие цены из snapshot
+                    val marketPrice = if (isBuy) {
+                        snapshot?.asks?.firstOrNull()?.price ?: "0"
+                    } else {
+                        snapshot?.bids?.firstOrNull()?.price ?: "0"
+                    }
+
+                    if (isBuy) {
+                        tradeViewModel.lastAsk.value = marketPrice.toString()
+                        tradeViewModel.place("Buy")
+                    } else {
+                        tradeViewModel.lastBid.value = marketPrice.toString()
+                        tradeViewModel.place("Sell")
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {

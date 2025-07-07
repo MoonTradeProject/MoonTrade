@@ -1,42 +1,34 @@
 package com.example.moontrade.ui.screens.main_screens.trade_sub_screens
 
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.moontrade.viewmodels.TradeViewModel
 
 @Composable
-fun ExchangeTab() {
-    var from by remember { mutableStateOf("") }
-    var to by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text("Exchange Crypto", style = MaterialTheme.typography.titleMedium)
+fun ExchangeTab(vm: TradeViewModel = hiltViewModel()) {
+    Column(Modifier.padding(16.dp)) {
 
         OutlinedTextField(
-            value = from,
-            onValueChange = { from = it },
-            label = { Text("From (e.g. BTC)") },
+            value = vm.amount.value,
+            onValueChange = { vm.amount.value = it },
+            label = { Text("Amount (${vm.assetName.value})") },
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
-            value = to,
-            onValueChange = { to = it },
-            label = { Text("To (e.g. ETH)") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        Spacer(Modifier.height(12.dp))
 
         Button(
-            onClick = { /* TODO: execute exchange */ },
+            onClick = {
+                vm.place("Buy")
+                vm.place("Sell")
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Exchange")
+            Text("Exchange (Buy → Sell)")
         }
     }
 }

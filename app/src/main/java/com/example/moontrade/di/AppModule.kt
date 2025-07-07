@@ -7,9 +7,11 @@ import com.example.moontrade.auth.AuthPreferences
 import com.example.moontrade.auth.AuthRepository
 import com.example.moontrade.data.api.AuthApi
 import com.example.moontrade.data.api.MarketApi
+import com.example.moontrade.data.api.OrdersApi
 import com.example.moontrade.data.api.TournamentApi
 import com.example.moontrade.data.repository.AuthRepositoryImpl
 import com.example.moontrade.data.repository.TournamentRepository
+import com.example.moontrade.data.repository.TradeRepository
 import com.example.moontrade.session.SessionManager
 import com.example.moontrade.utils.LocalDateTimeAdapter
 import com.google.gson.Gson
@@ -68,6 +70,16 @@ object AppModule {
     ): com.example.moontrade.data.storage.ProfileStorage {
         return com.example.moontrade.data.storage.ProfileStorage(context)
     }
+
+
+    @Provides @Singleton
+    fun provideOrdersApi(retrofit: Retrofit): OrdersApi =
+        retrofit.create(OrdersApi::class.java)
+
+    @Provides @Singleton
+    fun provideTradeRepository(
+        api: OrdersApi
+    ): TradeRepository = TradeRepository(api)
 }
 
 @Module

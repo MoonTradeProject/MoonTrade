@@ -1,34 +1,31 @@
 package com.example.moontrade.ui.screens.main_screens.trade_sub_screens
 
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.moontrade.viewmodels.TradeViewModel
 
 @Composable
-fun BuyTab() {
-    var amount by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text("Buy Crypto", style = MaterialTheme.typography.titleMedium)
+fun BuyTab(vm: TradeViewModel = hiltViewModel()) {
+    Column(Modifier.padding(16.dp)) {
 
         OutlinedTextField(
-            value = amount,
-            onValueChange = { amount = it },
-            label = { Text("Amount in USDT") },
+            value = vm.amount.value,
+            onValueChange = { vm.amount.value = it },
+            label = { Text("Amount (${vm.assetName.value})") },
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(Modifier.height(12.dp))
+
         Button(
-            onClick = { /* TODO: execute buy */ },
+            onClick = { vm.place("Buy") },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Buy")
+            Text("Buy @ ${vm.lastAsk.value}")
         }
     }
 }
