@@ -84,4 +84,9 @@ dependencies {
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("androidx.compose.material:material-icons-extended:<version>")
+
+
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.31.3-beta")
 }

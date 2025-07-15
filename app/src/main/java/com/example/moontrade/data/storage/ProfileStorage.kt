@@ -1,41 +1,53 @@
 package com.example.moontrade.data.storage
 
-
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import androidx.core.content.edit
 
 @Singleton
 class ProfileStorage @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext context: Context
 ) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("profile", Context.MODE_PRIVATE)
 
-    fun saveNickname(nickname: String) {
-        prefs.edit() { putString("nickname", nickname) }
-    }
+    /* nickname ---------------------------------------------------------------- */
 
-    fun loadNickname(): String {
-        return prefs.getString("nickname", "TraderX") ?: "TraderX"
-    }
+    fun saveNickname(nickname: String) =
+        prefs.edit { putString("nickname", nickname) }
 
-    fun saveTags(tags: List<String>) {
-        prefs.edit() { putString("tags", tags.joinToString(",")) }
-    }
+    fun loadNickname(): String =
+        prefs.getString("nickname", "TraderX") ?: "TraderX"
 
-    fun loadTags(): List<String> {
-        val raw = prefs.getString("tags", "Sniper,Top 10") ?: ""
-        return raw.split(",").filter { it.isNotBlank() }
-    }
-    fun saveAvatarId(id: Int) {
+    /* tags -------------------------------------------------------------------- */
+
+    fun saveTags(tags: List<String>) =
+        prefs.edit { putString("tags", tags.joinToString(",")) }
+
+    fun loadTags(): List<String> =
+        prefs.getString("tags", "Sniper,Top 10")
+            ?.split(',')
+            ?.filter { it.isNotBlank() }
+            ?: emptyList()
+
+    /* built-in avatar id (-1 = custom url) ------------------------------------ */
+
+    fun saveAvatarId(id: Int) =
         prefs.edit { putInt("avatarId", id) }
-    }
 
-    fun loadAvatarId(): Int {
-        return prefs.getInt("avatarId", 0)
-    }
+    fun loadAvatarId(): Int =
+        prefs.getInt("avatarId", 0)
+
+    /* custom avatar url ------------------------------------------------------- */
+
+    fun saveAvatarUrl(url: String?) =
+        prefs.edit {
+            if (url != null) putString("avatarUrl", url) else remove("avatarUrl")
+        }
+
+    fun loadAvatarUrl(): String? =
+        prefs.getString("avatarUrl", null)
 }

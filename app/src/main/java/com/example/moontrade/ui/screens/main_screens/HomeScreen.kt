@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.moontrade.R
 import com.example.moontrade.model.Mode
 import com.example.moontrade.model.WebSocketStatus
@@ -139,14 +140,26 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.Start
                 ) {
                     val avatarId by profileViewModel.avatarId.collectAsState()
+                    val avatarUrl by profileViewModel.avatarUrl.collectAsState()
 
-                    Image(
-                        painter = painterResource(id = avatarResIdFrom(avatarId)),
-                        contentDescription = "Avatar",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                    )
+                    if (avatarId == -1 && avatarUrl != null) {
+                        Image(
+                            painter = rememberAsyncImagePainter(avatarUrl),
+                            contentDescription = "Custom Avatar",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(id = avatarResIdFrom(avatarId)),
+                            contentDescription = "Built-in Avatar",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                        )
+                    }
+
 
 
                     Spacer(modifier = Modifier.width(16.dp))
