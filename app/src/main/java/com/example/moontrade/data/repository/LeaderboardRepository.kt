@@ -5,12 +5,15 @@ import com.example.moontrade.model.LeaderboardResponse
 import com.example.moontrade.session.SessionManager
 import javax.inject.Inject
 
+import com.example.moontrade.model.Mode
+
 class LeaderboardRepository @Inject constructor(
     private val api: LeaderboardApi,
     private val session: SessionManager
 ) {
-    suspend fun fetchLeaderboard(mode: String = "main"): LeaderboardResponse =
-        session.getValidToken()?.let { token ->
-            api.getLeaderboard(mode, "Bearer $token")
-        } ?: error("No valid token")
+    suspend fun fetchLeaderboard(mode: Mode): LeaderboardResponse {
+        val token = session.getValidToken() ?: error("No valid token")
+        return api.getLeaderboard(mode.toQueryMap(), "Bearer $token")
+    }
 }
+

@@ -20,6 +20,17 @@ sealed class Mode {
         }
     }
 
+    fun toQueryMap(): Map<String, String> {
+        return when (this) {
+            is Mode.Main -> mapOf("mode" to "main")
+            is Mode.Tournament -> mapOf(
+                "mode" to "tournament",
+                "tournament_id" to tournamentId
+            )
+        }
+    }
+
+
     companion object {
         fun fromJson(json: JsonElement): Mode? {
             return when {
@@ -33,4 +44,6 @@ sealed class Mode {
             }
         }
     }
+
+
 }

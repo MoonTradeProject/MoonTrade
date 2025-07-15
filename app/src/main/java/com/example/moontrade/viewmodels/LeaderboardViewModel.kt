@@ -2,8 +2,8 @@ package com.example.moontrade.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.moontrade.model.LeaderboardEntry
 import com.example.moontrade.data.repository.LeaderboardRepository
+import com.example.moontrade.model.LeaderboardEntry
 import com.example.moontrade.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,10 +24,10 @@ class LeaderboardViewModel @Inject constructor(
     fun loadLeaderboard() {
         viewModelScope.launch {
             try {
-                val currentMode = session.mode.value.toString().lowercase()
-                println("📥 [LeaderboardViewModel] Loading leaderboard with mode=$currentMode")
+                val mode = session.mode.value
+                println("📥 [LeaderboardViewModel] Loading leaderboard with mode=$mode")
 
-                val response = repository.fetchLeaderboard(currentMode)
+                val response = repository.fetchLeaderboard(mode)
 
                 println("✅ [LeaderboardViewModel] Loaded ${response.entries.size} entries")
                 response.entries.forEach {
@@ -41,6 +41,4 @@ class LeaderboardViewModel @Inject constructor(
             }
         }
     }
-
-
 }
