@@ -6,10 +6,12 @@ import androidx.annotation.RequiresApi
 import com.example.moontrade.auth.AuthPreferences
 import com.example.moontrade.auth.AuthRepository
 import com.example.moontrade.data.api.AuthApi
+import com.example.moontrade.data.api.LeaderboardApi
 import com.example.moontrade.data.api.MarketApi
 import com.example.moontrade.data.api.OrdersApi
 import com.example.moontrade.data.api.TournamentApi
 import com.example.moontrade.data.repository.AuthRepositoryImpl
+import com.example.moontrade.data.repository.LeaderboardRepository
 import com.example.moontrade.data.repository.TournamentRepository
 import com.example.moontrade.data.repository.TradeRepository
 import com.example.moontrade.session.SessionManager
@@ -80,6 +82,20 @@ object AppModule {
     fun provideTradeRepository(
         api: OrdersApi
     ): TradeRepository = TradeRepository(api)
+
+
+    @Provides @Singleton
+    fun provideLeaderboardApi(retrofit: Retrofit): LeaderboardApi =
+        retrofit.create(LeaderboardApi::class.java)
+
+    @Provides @Singleton
+    fun provideLeaderboardRepository(
+        api: LeaderboardApi,
+        session: SessionManager
+    ): LeaderboardRepository = LeaderboardRepository(api, session)
+
+
+
 }
 
 @Module

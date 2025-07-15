@@ -17,7 +17,7 @@ import com.example.moontrade.ui.screens.authentication.*
 import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.ui.screens.main_screens.*
 import com.example.moontrade.ui.screens.onboarding.*
-import com.example.moontrade.ui.screens.profile.PlayerProfeleScreen
+import com.example.moontrade.ui.screens.profile.PlayerProfileScreen
 import com.example.moontrade.ui.theme.ThemeViewModel
 import com.example.moontrade.viewmodels.*
 
@@ -35,7 +35,8 @@ fun AppNavigation() {
     val profileViewModel: ProfileViewModel = hiltViewModel()
     val marketDetailViewModel: MarketDetailViewModel = hiltViewModel();
     val tradeViewModel: TradeViewModel = hiltViewModel()
-
+    val selectedPlayerViewModel: SelectedPlayerViewModel = hiltViewModel()
+    val leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
     val bottomBarRoutes = listOf(
@@ -103,14 +104,14 @@ fun AppNavigation() {
                 MarketsScreen(navController, marketViewModel)
             }
             composable(NavRoutes.RATINGS) {
-                RatingsScreen(navController)
+                RatingsScreen(navController, leaderboardViewModel, selectedPlayerViewModel)
             }
             composable(NavRoutes.TOURNAMENTS) {
                 TournamentsScreen(navController, tournamentsViewModel)
             }
             composable(NavRoutes.PLAYER_PROFILE) { backStackEntry ->
                 val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
-                PlayerProfeleScreen(navController, playerId)
+                PlayerProfileScreen(navController, selectedPlayerViewModel)
             }
             composable(
                 route = "${NavRoutes.MARKET_DETAIL}/{symbol}",
