@@ -12,6 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.time.LocalDateTime
 import javax.inject.Singleton
 import com.example.moontrade.data.api.ProfileApi
+import com.example.moontrade.data.api.UserApi
 /**
  * Holds the single global Gson + Retrofit instances for the whole app.
  * NO other module should provide Gson or Retrofit!
@@ -21,6 +22,10 @@ import com.example.moontrade.data.api.ProfileApi
 object NetworkModule {
 
 
+    @Provides
+    @Singleton
+    fun provideUserApi(retrofit: Retrofit): UserApi =
+        retrofit.create(UserApi::class.java)
 
     @Provides
     @Singleton

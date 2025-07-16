@@ -2,13 +2,11 @@ package com.example.moontrade.ui.screens.main_screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,14 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.moontrade.BuildConfig
 import com.example.moontrade.R
 import com.example.moontrade.model.Mode
 import com.example.moontrade.model.WebSocketStatus
 import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.PlayerCard
 import com.example.moontrade.viewmodels.*
-
 
 data class SelectableMode(val mode: Mode, val label: String)
 
@@ -39,7 +35,8 @@ fun HomeScreen(
     balanceViewModel: BalanceViewModel,
     tournamentsViewModel: TournamentsViewModel,
     profileViewModel: ProfileViewModel,
-    leaderboardViewModel: LeaderboardViewModel
+    leaderboardViewModel: LeaderboardViewModel,
+    userAssetsViewModel: UserAssetsViewModel = hiltViewModel()
 ) {
     val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
     val topPlayers = leaderboardEntries.take(5)
@@ -49,23 +46,29 @@ fun HomeScreen(
     val avatarId by profileViewModel.avatarId.collectAsState()
     val avatarUrl by profileViewModel.avatarUrl.collectAsState()
 
-    val mode by balanceViewModel.mode.collectAsState()
+    val currentMode by balanceViewModel.mode.collectAsState()
     val balance by balanceViewModel.balance.collectAsState()
     val status by balanceViewModel.status.collectAsState()
     val tournaments by tournamentsViewModel.tournaments.collectAsState()
+    val userAssets by userAssetsViewModel.assets.collectAsState()
 
     val selectableModes = listOf(SelectableMode(Mode.Main, "Main")) +
             tournaments.filter { it.isJoined }.map {
                 SelectableMode(Mode.Tournament(it.id.toString()), it.name)
             }
 
-    var selected by remember(mode, selectableModes) {
-        mutableStateOf(selectableModes.find { it.mode == mode } ?: selectableModes.first())
+    var selected by remember(currentMode, selectableModes) {
+        mutableStateOf(selectableModes.find { it.mode == currentMode } ?: selectableModes.first())
     }
 
-    LaunchedEffect(Unit) {
-        balanceViewModel.connect()
+    val selectedMode = selected.mode
+
+    LaunchedEffect(selectedMode) {
+        println("🔄 Mode switched to $selectedMode — loading data...")
+        balanceViewModel.changeMode(selectedMode)
         leaderboardViewModel.loadLeaderboard()
+        userAssetsViewModel.loadUserAssets()
+        balanceViewModel.connect()
     }
 
     Scaffold(
@@ -92,7 +95,6 @@ fun HomeScreen(
                                         onClick = {
                                             selected = item
                                             expanded = false
-                                            balanceViewModel.changeMode(item.mode)
                                         }
                                     )
                                 }
@@ -140,8 +142,7 @@ fun HomeScreen(
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (avatarId == -1 && avatarUrl != null) {
                         Image(
@@ -204,12 +205,16 @@ fun HomeScreen(
                 }
             }
 
-            item {
-                Text("Your Assets", style = MaterialTheme.typography.titleLarge)
+            if (userAssets.isNotEmpty()) {
+                item {
+                    Text("Your Assets", style = MaterialTheme.typography.titleLarge)
+                }
+
+                items(userAssets) { asset ->
+                    AssetCard(label = asset.asset_name, value = asset.amount.toPlainString())
+                }
             }
 
-            item { AssetCard("BTC", "₿ 0.42") }
-            item { AssetCard("ETH", "Ξ 3.1") }
             item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
@@ -222,7 +227,9 @@ fun AssetCard(label: String, value: String) {
         colors = CardDefaults.elevatedCardColors()
     ) {
         Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
