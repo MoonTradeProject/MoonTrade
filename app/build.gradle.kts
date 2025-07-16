@@ -19,14 +19,21 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
     buildTypes {
-        release {
+        getByName("debug") {
+            // 🔧 Used when running locally (Android emulator → host machine)
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000\"")
+        }
+
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            // 🌍 Used in production (actual deployed backend)
+            buildConfigField("String", "BASE_URL", "\"https://api.moontrade.io\"")
         }
     }
 
@@ -42,6 +49,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

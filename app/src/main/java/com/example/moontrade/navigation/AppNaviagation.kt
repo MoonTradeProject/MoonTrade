@@ -98,7 +98,7 @@ fun AppNavigation() {
                 LoginScreen(navController, authViewModel)
             }
             composable(NavRoutes.HOME) {
-                HomeScreen(navController, balanceViewModel, tournamentsViewModel, profileViewModel)
+                HomeScreen(navController, balanceViewModel, tournamentsViewModel, profileViewModel, leaderboardViewModel)
             }
             composable(NavRoutes.MARKETS) {
                 MarketsScreen(navController, marketViewModel)

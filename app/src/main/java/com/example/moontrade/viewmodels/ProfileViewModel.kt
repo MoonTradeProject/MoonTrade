@@ -19,7 +19,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
-
+import com.example.moontrade.BuildConfig
 private const val TAG = "AvatarUpload"
 
 @HiltViewModel
@@ -61,18 +61,24 @@ class ProfileViewModel @Inject constructor(
         _avatarId.value = id
         storage.saveAvatarId(id)
 
-        _avatarUrl.value = null
-        storage.saveAvatarUrl(null)
+      //  _avatarUrl.value = null
+       // storage.saveAvatarUrl(null)
     }
 
     /** Called after successful upload to the server. */
-    private fun updateAvatarUrl(url: String) {
-        _avatarUrl.value = url
-        storage.saveAvatarUrl(url)
+    val baseUrl = BuildConfig.BASE_URL
+
+    private fun updateAvatarUrl(path: String) {
+        val timestamp = System.currentTimeMillis()
+        val fullUrl = "$baseUrl$path?t=$timestamp"
+
+        _avatarUrl.value = fullUrl
+        storage.saveAvatarUrl(fullUrl)
 
         _avatarId.value = -1
         storage.saveAvatarId(-1)
     }
+
 
     /* avatar upload ---------------------------------------------------------- */
 

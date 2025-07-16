@@ -21,18 +21,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.moontrade.BuildConfig
 import com.example.moontrade.R
 import com.example.moontrade.model.Mode
 import com.example.moontrade.model.WebSocketStatus
 import com.example.moontrade.navigation.NavRoutes
-import com.example.moontrade.viewmodels.BalanceViewModel
-import com.example.moontrade.viewmodels.ProfileViewModel
-import com.example.moontrade.viewmodels.TournamentsViewModel
+import com.example.moontrade.ui.screens.components.PlayerCard
+import com.example.moontrade.viewmodels.*
 
-data class SelectableMode(
-    val mode: Mode,
-    val label: String
-)
+
+data class SelectableMode(val mode: Mode, val label: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,10 +38,16 @@ fun HomeScreen(
     navController: NavController,
     balanceViewModel: BalanceViewModel,
     tournamentsViewModel: TournamentsViewModel,
-    profileViewModel: ProfileViewModel
+    profileViewModel: ProfileViewModel,
+    leaderboardViewModel: LeaderboardViewModel
 ) {
+    val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
+    val topPlayers = leaderboardEntries.take(5)
+
     val nickname by profileViewModel.nickname.collectAsState()
     val selectedTags by profileViewModel.selectedTags.collectAsState()
+    val avatarId by profileViewModel.avatarId.collectAsState()
+    val avatarUrl by profileViewModel.avatarUrl.collectAsState()
 
     val mode by balanceViewModel.mode.collectAsState()
     val balance by balanceViewModel.balance.collectAsState()
@@ -61,6 +65,7 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         balanceViewModel.connect()
+        leaderboardViewModel.loadLeaderboard()
     }
 
     Scaffold(
@@ -133,34 +138,24 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item {
-                // Profile header with avatar + nickname + tags right-aligned
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    val avatarId by profileViewModel.avatarId.collectAsState()
-                    val avatarUrl by profileViewModel.avatarUrl.collectAsState()
-
                     if (avatarId == -1 && avatarUrl != null) {
                         Image(
                             painter = rememberAsyncImagePainter(avatarUrl),
                             contentDescription = "Custom Avatar",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape)
+                            modifier = Modifier.size(100.dp).clip(CircleShape)
                         )
                     } else {
                         Image(
                             painter = painterResource(id = avatarResIdFrom(avatarId)),
                             contentDescription = "Built-in Avatar",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape)
+                            modifier = Modifier.size(100.dp).clip(CircleShape)
                         )
                     }
-
-
 
                     Spacer(modifier = Modifier.width(16.dp))
 
@@ -168,13 +163,8 @@ fun HomeScreen(
                         modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        Text(
-                            text = nickname,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
+                        Text(nickname, style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(8.dp))
-
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -202,36 +192,14 @@ fun HomeScreen(
                 }
             }
 
-            item {
-                Text("Top Traders", style = MaterialTheme.typography.titleLarge)
-            }
+            if (topPlayers.isNotEmpty()) {
+                item {
+                    Text("Top Traders", style = MaterialTheme.typography.titleLarge)
+                }
 
-            val topPlayers = listOf(
-                "TraderA" to "+25.3%",
-                "TraderB" to "+18.4%",
-                "TraderC" to "+16.7%",
-                "TraderD" to "+12.1%",
-                "TraderE" to "+10.5%"
-            )
-
-            items(topPlayers) { (name, roi) ->
-                ElevatedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { navController.navigate("player_profile/$name") },
-                    colors = CardDefaults.elevatedCardColors()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(name, style = MaterialTheme.typography.bodyLarge)
-                            Text("ROI: $roi", style = MaterialTheme.typography.bodyMedium)
-                        }
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Go")
+                items(topPlayers) { entry ->
+                    PlayerCard(entry = entry) {
+                        navController.navigate("player_profile/${entry.uid}")
                     }
                 }
             }
@@ -242,10 +210,7 @@ fun HomeScreen(
 
             item { AssetCard("BTC", "₿ 0.42") }
             item { AssetCard("ETH", "Ξ 3.1") }
-
-            item {
-                Spacer(modifier = Modifier.height(80.dp))
-            }
+            item { Spacer(modifier = Modifier.height(80.dp)) }
         }
     }
 }
@@ -257,9 +222,7 @@ fun AssetCard(label: String, value: String) {
         colors = CardDefaults.elevatedCardColors()
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
