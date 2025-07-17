@@ -150,32 +150,13 @@ fun MarketDetailScreen(
 
                 tradeViewModel.assetName.value = symbol
                 tradeViewModel.amount.value = amount
+                tradeViewModel.updateSnapshot(snapshot)
 
                 val execType = if (orderType == "Market") "market" else "limit"
-
-                if (orderType == "Limit") {
-                    if (isBuy) {
-                        tradeViewModel.lastAsk.value = price.ifEmpty { "0" }
-                        tradeViewModel.place("buy", execType)
-                    } else {
-                        tradeViewModel.lastBid.value = price.ifEmpty { "0" }
-                        tradeViewModel.place("sell", execType)
-                    }
-                } else {
-                    val marketPrice = if (isBuy) {
-                        snapshot?.asks?.firstOrNull()?.price ?: "0"
-                    } else {
-                        snapshot?.bids?.firstOrNull()?.price ?: "0"
-                    }
-
-                    if (isBuy) {
-                        tradeViewModel.lastAsk.value = marketPrice.toString()
-                        tradeViewModel.place("buy", execType)
-                    } else {
-                        tradeViewModel.lastBid.value = marketPrice.toString()
-                        tradeViewModel.place("sell", execType)
-                    }
-                }
+                tradeViewModel.place(
+                    side = if (isBuy) "buy" else "sell",
+                    execType = execType
+                )
             },
             modifier = Modifier.fillMaxWidth()
         ) {

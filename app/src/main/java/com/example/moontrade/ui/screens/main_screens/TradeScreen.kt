@@ -40,7 +40,7 @@ fun TradeScreen(navController: NavController) {
         ) {
 
 
-            val balance by vm.session.balance.collectAsState("0")
+            val balance by vm.balance.collectAsState("0")
             BalanceHeader(
                 userBalance      = balance.toDoubleOrNull() ?: 0.0,
                 selectedCurrency = "USDT"

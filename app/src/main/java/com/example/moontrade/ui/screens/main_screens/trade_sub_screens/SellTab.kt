@@ -25,7 +25,7 @@ fun SellTab(vm: TradeViewModel = hiltViewModel()) {
             onClick = { vm.place("Sell") },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Sell @ ${vm.lastBid.value}")
+            Text("Sell @ ${vm.lastBid}")
         }
     }
 }
