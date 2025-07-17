@@ -31,6 +31,9 @@ class WebSocketManager @Inject constructor() {
     private val _balance = MutableStateFlow("Loading…")
     val balance: StateFlow<String> = _balance
 
+    private val _roi = MutableStateFlow<String>("–")
+    val roi: StateFlow<String> = _roi
+
     private val _status = MutableStateFlow<WebSocketStatus>(WebSocketStatus.Idle)
     val status: StateFlow<WebSocketStatus> = _status
 
@@ -102,6 +105,7 @@ class WebSocketManager @Inject constructor() {
                 val res = gson.fromJson(text, BalanceResponse::class.java)
                 scope.launch {
                     _balance.value = "${res.balance} USDT"
+                    _roi.value = res.roi?.let { "${"%.2f".format(it)}%" } ?: "–"
                 }
             }.onFailure {
                 Log.e(TAG, "❌ Failed to parse balance", it)

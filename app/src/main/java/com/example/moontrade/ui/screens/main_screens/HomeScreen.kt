@@ -45,6 +45,7 @@ fun HomeScreen(
     val selectedTags by profileViewModel.selectedTags.collectAsState()
     val avatarId by profileViewModel.avatarId.collectAsState()
     val avatarUrl by profileViewModel.avatarUrl.collectAsState()
+    val roi by balanceViewModel.roi.collectAsState()
 
     val currentMode by balanceViewModel.mode.collectAsState()
     val balance by balanceViewModel.balance.collectAsState()
@@ -188,7 +189,7 @@ fun HomeScreen(
                         Spacer(Modifier.height(8.dp))
                         Text(balance, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
                         Spacer(Modifier.height(4.dp))
-                        Text("ROI: +3.4%", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text("ROI: $roi")
                     }
                 }
             }

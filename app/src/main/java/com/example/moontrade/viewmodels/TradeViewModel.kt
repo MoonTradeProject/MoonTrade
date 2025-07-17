@@ -21,35 +21,47 @@ class TradeViewModel @Inject constructor(
     private val session: SessionManager
 ) : ViewModel() {
 
+    /** ---------- PUBLIC STATE BOUND TO THE UI ---------- */
     val balance: StateFlow<String> get() = session.balance
-    val amount = mutableStateOf("")
-    val assetName = mutableStateOf("BTCUSDT")
+    val amount    = mutableStateOf("")          // amount typed by the user
+    val price     = mutableStateOf("")          // price typed by the user (for limit orders)
+    val assetName = mutableStateOf("BTCUSDT")   // current instrument
 
+    /** ---------- BOOK SNAPSHOT FROM WEBSOCKET ---------- */
     private var snapshot: OrderBookSnapshot? = null
+    fun updateSnapshot(newSnapshot: OrderBookSnapshot?) { snapshot = newSnapshot }
 
-    fun updateSnapshot(newSnapshot: OrderBookSnapshot?) {
-        snapshot = newSnapshot
-    }
     val lastAsk get() = snapshot?.asks?.firstOrNull()?.price?.toString() ?: "-"
     val lastBid get() = snapshot?.bids?.firstOrNull()?.price?.toString() ?: "-"
 
+    /**
+     * Place an order.
+     *
+     * @param side      "buy" or "sell"
+     * @param execType  "market" or "limit"
+     */
     fun place(side: String, execType: String = "limit") = viewModelScope.launch {
-        Log.d("TradeViewModel", "\uD83D\uDE80 place() called with side=$side, amount=${amount.value}, execType=$execType")
+        Log.d(
+            "TradeViewModel",
+            "🚀 place() side=$side execType=$execType amount=${amount.value} price=${price.value}"
+        )
 
-        val token = session.getValidToken()
-        if (token == null) {
-            Log.e("TradeViewModel", "\u274C No valid token, cannot place order")
+        /* ---------- 0. AUTH ---------- */
+        val token = session.getValidToken() ?: run {
+            Log.e("TradeViewModel", "❌ No valid token, cannot place order")
             return@launch
         }
 
-        val mode = session.mode.value
-        val (modeStr, tid) = mode.toWire()
-
-        val rawPrice = when (side.lowercase()) {
-            "buy"  -> snapshot?.asks?.firstOrNull()?.price?.toString()
-            "sell" -> snapshot?.bids?.firstOrNull()?.price?.toString()
-            else   -> null
-        } ?: "0"
+        /* ---------- 1. RESOLVE PRICE ---------- */
+        val rawPrice = when (execType.lowercase()) {
+            "limit"  -> price.value                       // user-typed price
+            "market" -> when (side.lowercase()) {         // best price from book
+                "buy"  -> snapshot?.asks?.firstOrNull()?.price?.toString()
+                "sell" -> snapshot?.bids?.firstOrNull()?.price?.toString()
+                else   -> null
+            } ?: "0"
+            else -> "0"
+        }
 
         val priceFormatted = rawPrice.toBigDecimalOrNull()
             ?.setScale(6, RoundingMode.HALF_UP)
@@ -61,29 +73,35 @@ class TradeViewModel @Inject constructor(
             ?.stripTrailingZeros()
             ?.toPlainString() ?: "0"
 
+        /* ---------- 2. BUILD REQUEST ---------- */
+        val mode = session.mode.value
+        val (modeStr, tid) = mode.toWire()
+
         Log.d(
             "TradeViewModel",
-            "\uD83D\uDCC8 Preparing order: asset=${assetName.value}, price=$priceFormatted, amount=$amountFormatted, mode=$modeStr, tid=$tid"
+            "📈 Prepared order asset=${assetName.value}, price=$priceFormatted, amount=$amountFormatted, mode=$modeStr, tid=$tid"
         )
 
         val req = PlaceOrderRequest(
-            mode = mode.toJson(),
-            asset_name = assetName.value,
-            price = priceFormatted,
-            amount = amountFormatted,
-            exec_type = execType,
-            order_type = side
+            mode        = mode.toJson(),
+            asset_name  = assetName.value,
+            price       = priceFormatted,
+            amount      = amountFormatted,
+            exec_type   = execType.lowercase(),   // backend expects lower-case
+            order_type  = side.lowercase()        // "buy" | "sell"
         )
 
-        Log.d("TradeViewModel", "\uD83D\uDCE4 Sending PlaceOrderRequest: $req")
+        Log.d("TradeViewModel", "📤 Sending PlaceOrderRequest: $req")
 
+        /* ---------- 3. SEND ---------- */
         runCatching { repo.placeOrder(req, "Bearer $token") }
             .onSuccess { resp ->
-                Log.i("TradeViewModel", "\u2705 Order placed successfully: $resp")
+                Log.i("TradeViewModel", "✅ Order placed: $resp")
                 amount.value = ""
+                if (execType.equals("limit", true)) price.value = "" // clear limit price
             }
             .onFailure { e ->
-                Log.e("TradeViewModel", "\uD83D\uDCA5 Failed to place order: ${e.localizedMessage}", e)
+                Log.e("TradeViewModel", "💥 Failed to place order: ${e.localizedMessage}", e)
             }
     }
 }

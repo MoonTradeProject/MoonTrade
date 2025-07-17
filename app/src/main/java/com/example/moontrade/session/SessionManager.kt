@@ -38,6 +38,7 @@ class SessionManager @Inject constructor(
 
     val balance: StateFlow<String> = ws.balance
     val status: StateFlow<WebSocketStatus> = ws.status
+    val roi: StateFlow<String> = ws.roi
 
     init {
         // Preload saved token if available

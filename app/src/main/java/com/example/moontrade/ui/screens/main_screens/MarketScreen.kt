@@ -27,9 +27,7 @@ fun MarketsScreen(
     var query by remember { mutableStateOf("") }
 
     val filteredMarkets = remember(markets, query) {
-        markets.filter {
-            it.contains(query.trim(), ignoreCase = true)
-        }
+        markets.filter { it.contains(query.trim(), ignoreCase = true) }
     }
 
     Scaffold(
@@ -49,19 +47,19 @@ fun MarketsScreen(
                 label = { Text("Search markets") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+                    .padding(bottom = 16.dp),
                 singleLine = true
             )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 item {
                     Text(
                         text = "Available Markets",
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(vertical = 4.dp)
                     )
                 }
 
@@ -69,11 +67,6 @@ fun MarketsScreen(
                     val base = symbol.take(3).uppercase()
                     val quote = symbol.drop(3).uppercase()
                     val pretty = "$base / $quote"
-                    val fakePrice = remember(symbol) {
-                        Random.nextDouble(0.001, 1.0)
-                            .toBigDecimal()
-                            .setScale(5, RoundingMode.HALF_UP)
-                    }
 
                     Card(
                         modifier = Modifier
@@ -81,20 +74,21 @@ fun MarketsScreen(
                             .clickable {
                                 navController.navigate(NavRoutes.marketDetailRoute(symbol))
                             },
-                        elevation = CardDefaults.cardElevation(4.dp)
+                        shape = MaterialTheme.shapes.extraLarge,
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        elevation = CardDefaults.cardElevation(2.dp)
                     ) {
-                        Row(
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(horizontal = 20.dp, vertical = 14.dp)
                         ) {
-                            Text(text = pretty, style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                text = fakePrice.toPlainString(),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.End
+                                text = pretty,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.align(Alignment.CenterStart)
                             )
                         }
                     }
@@ -103,3 +97,4 @@ fun MarketsScreen(
         }
     }
 }
+

@@ -32,48 +32,57 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?) {
 
         Spacer(Modifier.height(4.dp))
 
-        snapshot?.asks?.take(20)?.forEach {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(Modifier.weight(1f))
-                Text(
-                    text = "%.2f".format(it.price),
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    color = Color.White
-                )
-                Text(
-                    text = "%.4f".format(it.volume),
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.End,
-                    color = Color.Red
-                )
-            }
-        } ?: Text("Loading...", color = Color.Gray)
+        // 🔺 ASKS — sort by price ASCENDING, but draw REVERSED
+        snapshot?.asks
+            ?.sortedBy { it.price }
+            ?.reversed()
+            ?.take(20)
+            ?.forEach {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "%.2f".format(it.price),
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "%.4f".format(it.volume),
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.End,
+                        color = Color.Red
+                    )
+                }
+            } ?: Text("Loading...", color = Color.Gray)
 
         HorizontalDivider(Modifier.padding(vertical = 6.dp), thickness = 1.dp, color = Color.Gray)
 
-        snapshot?.bids?.take(20)?.reversed()?.forEach {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "%.4f".format(it.volume),
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Start,
-                    color = Color.Green
-                )
-                Text(
-                    text = "%.2f".format(it.price),
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    color = Color.White
-                )
-                Spacer(Modifier.weight(1f))
+        // 🟢 BIDS — sort by price DESCENDING
+        snapshot?.bids
+            ?.sortedByDescending { it.price }
+            ?.take(20)
+            ?.forEach {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "%.4f".format(it.volume),
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Start,
+                        color = Color.Green
+                    )
+                    Text(
+                        text = "%.2f".format(it.price),
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
+                    Spacer(Modifier.weight(1f))
+                }
             }
-        }
     }
 }

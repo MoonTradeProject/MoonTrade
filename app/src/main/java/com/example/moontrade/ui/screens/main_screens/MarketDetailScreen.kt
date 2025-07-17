@@ -26,19 +26,20 @@ fun MarketDetailScreen(
 ) {
     val tradeViewModel: TradeViewModel = hiltViewModel()
 
+    /* ------------- LOCAL UI STATE ------------- */
     var orderType by remember { mutableStateOf("Limit") }
-    var isBuy by remember { mutableStateOf(true) }
-    var price by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
-    var stopLossEnabled by remember { mutableStateOf(false) }
-    var stopLoss by remember { mutableStateOf("") }
+    var isBuy     by remember { mutableStateOf(true) }
+    var stopLossEnabled   by remember { mutableStateOf(false) }
+    var stopLoss          by remember { mutableStateOf("") }
     var takeProfitEnabled by remember { mutableStateOf(false) }
-    var takeProfit by remember { mutableStateOf("") }
+    var takeProfit        by remember { mutableStateOf("") }
 
+    /* ------------- SNAPSHOT ------------- */
     val snapshot by viewModel.snapshot.collectAsState()
 
     LaunchedEffect(symbol) {
         viewModel.connect(symbol)
+        tradeViewModel.assetName.value = symbol      // актуальный тикер
     }
 
     Column(
@@ -47,7 +48,7 @@ fun MarketDetailScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-
+        /* Header */
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -55,10 +56,7 @@ fun MarketDetailScreen(
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
-            Text(
-                text = symbol,
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Text(symbol, style = MaterialTheme.typography.headlineSmall)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -68,12 +66,11 @@ fun MarketDetailScreen(
                     "Best Ask: ${snapshot?.asks?.firstOrNull()?.price ?: "-"}"
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
+        Spacer(Modifier.height(12.dp))
         OrderBookLive(snapshot = snapshot)
+        Spacer(Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
-
+        /* Order type */
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Order Type:")
             Spacer(Modifier.width(8.dp))
@@ -84,6 +81,7 @@ fun MarketDetailScreen(
             )
         }
 
+        /* Side */
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Side:")
             Spacer(Modifier.width(8.dp))
@@ -94,29 +92,35 @@ fun MarketDetailScreen(
             )
         }
 
+        /* ---------- PRICE (only for Limit) ---------- */
         if (orderType == "Limit") {
             OutlinedTextField(
-                value = price,
-                onValueChange = { price = it },
+                value = tradeViewModel.price.value,               // ★
+                onValueChange = {
+                    tradeViewModel.price.value = it               // ★
+                },
                 label = { Text("Price") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
         }
 
+        /* ---------- AMOUNT ---------- */
         OutlinedTextField(
-            value = amount,
-            onValueChange = { amount = it },
+            value = tradeViewModel.amount.value,                  // ★
+            onValueChange = {
+                tradeViewModel.amount.value = it                  // ★
+            },
             label = { Text("Amount") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
 
+        /* Stop-loss + take-profit (опц.) */
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(checked = stopLossEnabled, onCheckedChange = { stopLossEnabled = it })
             Text("Stop-Loss")
         }
-
         if (stopLossEnabled) {
             OutlinedTextField(
                 value = stopLoss,
@@ -131,7 +135,6 @@ fun MarketDetailScreen(
             Checkbox(checked = takeProfitEnabled, onCheckedChange = { takeProfitEnabled = it })
             Text("Take-Profit")
         }
-
         if (takeProfitEnabled) {
             OutlinedTextField(
                 value = takeProfit,
@@ -142,20 +145,16 @@ fun MarketDetailScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
+        /* ---------- SUBMIT BUTTON ---------- */
         Button(
             onClick = {
-                println("[order] Sending $orderType ${if (isBuy) "Buy" else "Sell"} $amount @ $price for $symbol")
-
-                tradeViewModel.assetName.value = symbol
-                tradeViewModel.amount.value = amount
-                tradeViewModel.updateSnapshot(snapshot)
-
                 val execType = if (orderType == "Market") "market" else "limit"
+                tradeViewModel.updateSnapshot(snapshot)   // для market-цены
                 tradeViewModel.place(
-                    side = if (isBuy) "buy" else "sell",
-                    execType = execType
+                    side      = if (isBuy) "buy" else "sell",
+                    execType  = execType
                 )
             },
             modifier = Modifier.fillMaxWidth()

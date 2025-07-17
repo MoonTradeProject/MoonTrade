@@ -19,7 +19,7 @@ class BalanceViewModel @Inject constructor(
     val status = session.status
     val mode: StateFlow<Mode> = session.mode
     val joinedTournamentIds: StateFlow<Set<UUID>> = session.joinedTournamentIds
-
+    val roi: StateFlow<String> = session.roi
 
     fun connect() = viewModelScope.launch {
         session.connectIfNeeded()
