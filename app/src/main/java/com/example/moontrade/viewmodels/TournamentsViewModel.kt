@@ -48,13 +48,16 @@ class TournamentsViewModel @Inject constructor(
                 for (t in result) {
                     Log.d("TournamentsVM", "📋 ${t.name} | status=${t.status} | joined=${t.isJoined} | start=${t.startTime}")
                 }
-
                 val currentMode = session.mode.value
                 if (currentMode is com.example.moontrade.model.Mode.Tournament) {
-                    val stillExists = activeTournaments.any { it.id == UUID.fromString(currentMode.tournamentId) }
+                    val tournamentId = UUID.fromString(currentMode.tournamentId)
+                    val matchingTournament = result.find { it.id == tournamentId }
 
-                    if (!stillExists) {
-                        Log.w("TournamentsVM", "⛔ Tournament ${currentMode.tournamentId} is no longer active — switching to Main mode")
+                    val isStillJoined = matchingTournament?.isJoined ?: false
+                    val isStillActive = matchingTournament?.status == TournamentStatus.Active
+
+                    if (!isStillJoined || !isStillActive) {
+                        Log.w("TournamentsVM", "⛔ User is no longer joined or tournament is inactive — switching to Main")
                         session.changeMode(com.example.moontrade.model.Mode.Main)
                     }
                 }
@@ -71,6 +74,7 @@ class TournamentsViewModel @Inject constructor(
             }
         }
     }
+
 
 
 
