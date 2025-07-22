@@ -36,7 +36,8 @@ fun HomeScreen(
     tournamentsViewModel: TournamentsViewModel,
     profileViewModel: ProfileViewModel,
     leaderboardViewModel: LeaderboardViewModel,
-    userAssetsViewModel: UserAssetsViewModel = hiltViewModel()
+    userAssetsViewModel: UserAssetsViewModel,
+    selectedPlayerViewModel: SelectedPlayerViewModel
 ) {
     val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
     val topPlayers = leaderboardEntries.take(5)
@@ -201,7 +202,8 @@ fun HomeScreen(
 
                 items(topPlayers) { entry ->
                     PlayerCard(entry = entry) {
-                        navController.navigate("player_profile/${entry.uid}")
+                        selectedPlayerViewModel.set(entry)
+                        navController.navigate(NavRoutes.PLAYER_PROFILE)
                     }
                 }
             }

@@ -38,7 +38,7 @@ fun AppNavigation() {
     val selectedPlayerViewModel: SelectedPlayerViewModel = hiltViewModel()
     val leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
-
+    val  userAssetsViewModel: UserAssetsViewModel = hiltViewModel()
     val bottomBarRoutes = listOf(
         NavRoutes.HOME,
         NavRoutes.MARKETS,
@@ -98,7 +98,13 @@ fun AppNavigation() {
                 LoginScreen(navController, authViewModel)
             }
             composable(NavRoutes.HOME) {
-                HomeScreen(navController, balanceViewModel, tournamentsViewModel, profileViewModel, leaderboardViewModel)
+                HomeScreen(navController,
+                    balanceViewModel,
+                    tournamentsViewModel,
+                    profileViewModel,
+                    leaderboardViewModel,
+                    userAssetsViewModel,
+                    selectedPlayerViewModel)
             }
             composable(NavRoutes.MARKETS) {
                 MarketsScreen(navController, marketViewModel)
