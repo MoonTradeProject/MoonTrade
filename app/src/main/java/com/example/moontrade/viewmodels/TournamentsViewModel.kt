@@ -8,12 +8,14 @@ import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.example.moontrade.data.dto.TournamentDto
 import com.example.moontrade.data.enums.TournamentPaymentMethod
+import com.example.moontrade.data.enums.TournamentStatus
 import com.example.moontrade.data.repository.TournamentRepository
 import com.example.moontrade.data.response.JoinTournamentResponse
 import com.example.moontrade.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,16 +35,35 @@ class TournamentsViewModel @Inject constructor(
     }
 
     @OptIn(UnstableApi::class)
-    private fun loadTournaments() {
+    internal fun loadTournaments() {
         viewModelScope.launch {
             try {
                 Log.d("TournamentsVM", "📡 Loading tournaments...")
                 val result = tournamentRepository.getTournaments()
-                Log.d("TournamentsVM", "✅ Got ${result.size} tournaments")
+
+                val activeTournaments = result.filter { it.status == TournamentStatus.Active }
+
+                Log.d("TournamentsVM", "✅ Got ${activeTournaments.size} active tournaments")
+
+                for (t in result) {
+                    Log.d("TournamentsVM", "📋 ${t.name} | status=${t.status} | joined=${t.isJoined} | start=${t.startTime}")
+                }
+
+                val currentMode = session.mode.value
+                if (currentMode is com.example.moontrade.model.Mode.Tournament) {
+                    val stillExists = activeTournaments.any { it.id == UUID.fromString(currentMode.tournamentId) }
+
+                    if (!stillExists) {
+                        Log.w("TournamentsVM", "⛔ Tournament ${currentMode.tournamentId} is no longer active — switching to Main mode")
+                        session.changeMode(com.example.moontrade.model.Mode.Main)
+                    }
+                }
+
                 session.setJoinedTournaments(
-                    result.filter { it.isJoined }.map { it.id }.toSet()
+                    activeTournaments.filter { it.isJoined }.map { it.id }.toSet()
                 )
-                _tournaments.value = result
+
+                _tournaments.value = activeTournaments
 
             } catch (e: Exception) {
                 Log.e("TournamentsVM", "❌ Failed to load tournaments: ${e.message}", e)
@@ -50,6 +71,8 @@ class TournamentsViewModel @Inject constructor(
             }
         }
     }
+
+
 
 
     @OptIn(UnstableApi::class)

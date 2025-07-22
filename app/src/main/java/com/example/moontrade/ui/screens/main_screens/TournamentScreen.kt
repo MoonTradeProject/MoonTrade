@@ -28,6 +28,14 @@ fun TournamentsScreen(
 
     val scrollState = rememberScrollState()
 
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            viewModel.loadTournaments()
+            kotlinx.coroutines.delay(30_000)
+        }
+    }
+
     Scaffold(
         topBar = { TopBar(title = "Tournaments", showBack = false) },
 
