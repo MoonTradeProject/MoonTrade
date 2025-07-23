@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.moontrade.auth.AuthViewModel
@@ -40,9 +41,12 @@ fun CreatePassword(
                     authViewModel.onPasswordChange(it)
                 },
                 label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(), // ← СКРЫВАЕТ ТЕКСТ
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = confirm,
                 onValueChange = {
@@ -50,6 +54,7 @@ fun CreatePassword(
                     authViewModel.onConfirmPasswordChange(it)
                 },
                 label = { Text("Confirm Password") },
+                visualTransformation = PasswordVisualTransformation(), // ← И ТУТ ТОЖЕ
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(24.dp))

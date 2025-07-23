@@ -3,9 +3,9 @@ package com.example.moontrade.ui.screens.main_screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.FlowRow          // ← добавили
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -14,9 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.moontrade.R
@@ -25,9 +28,10 @@ import com.example.moontrade.model.WebSocketStatus
 import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.PlayerCard
 import com.example.moontrade.viewmodels.*
+import com.google.accompanist.flowlayout.FlowRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 data class SelectableMode(val mode: Mode, val label: String)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -68,7 +72,6 @@ fun HomeScreen(
         balanceViewModel.connect()
     }
     LaunchedEffect(selectedMode) {
-        println("🔄 Mode switched to $selectedMode — loading data...")
         balanceViewModel.changeMode(selectedMode)
         leaderboardViewModel.loadLeaderboard()
         userAssetsViewModel.loadUserAssets()
@@ -77,6 +80,11 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF121212), // deep black
+                    titleContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                ),
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -86,15 +94,20 @@ fun HomeScreen(
 
                         Box {
                             TextButton(onClick = { expanded = true }) {
-                                Text(selected.label, style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    selected.label,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.White
+                                )
                             }
                             DropdownMenu(
                                 expanded = expanded,
-                                onDismissRequest = { expanded = false }
+                                onDismissRequest = { expanded = false },
+                                modifier = Modifier.background(Color(0xFF1E1E1E))
                             ) {
                                 selectableModes.forEach { item ->
                                     DropdownMenuItem(
-                                        text = { Text(item.label) },
+                                        text = { Text(item.label, color = Color.White) },
                                         onClick = {
                                             selected = item
                                             expanded = false
@@ -106,33 +119,46 @@ fun HomeScreen(
 
                         Spacer(Modifier.weight(1f))
 
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .background(
-                                    color = when (status) {
-                                        is WebSocketStatus.Connected -> Color(0xFF00E676)
-                                        is WebSocketStatus.Connecting -> Color.Yellow
-                                        is WebSocketStatus.Error -> Color.Red
-                                        WebSocketStatus.Idle -> Color.Gray
-                                    },
-                                    shape = CircleShape
-                                )
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(10.dp)
+                                    .background(
+                                        color = when (status) {
+                                            is WebSocketStatus.Connected -> Color(0xFF00E676)
+                                            is WebSocketStatus.Connecting -> Color.Yellow
+                                            is WebSocketStatus.Error -> Color.Red
+                                            WebSocketStatus.Idle -> Color.Gray
+                                        },
+                                        shape = CircleShape
+                                    )
+                            )
 
-                        Spacer(Modifier.width(8.dp))
-                        Text(balance, style = MaterialTheme.typography.titleMedium)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        navController.navigate(NavRoutes.SETTINGS)
-                    }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                            Text(
+                                balance,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White
+                            )
+
+                            IconButton(onClick = {
+                                navController.navigate(NavRoutes.SETTINGS)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Settings",
+                                    tint = Color.White
+                                )
+                            }
+                        }
                     }
                 }
             )
         }
+
+
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -143,71 +169,123 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)) // глубокий чёрный
                 ) {
-                    if (avatarId == -1 && avatarUrl != null) {
-                        Image(
-                            painter = rememberAsyncImagePainter(avatarUrl),
-                            contentDescription = "Custom Avatar",
-                            modifier = Modifier.size(100.dp).clip(CircleShape)
-                        )
-                    } else {
-                        Image(
-                            painter = painterResource(id = avatarResIdFrom(avatarId)),
-                            contentDescription = "Built-in Avatar",
-                            modifier = Modifier.size(100.dp).clip(CircleShape)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.Start
+                    Row(
+                        modifier = Modifier
+                            .padding(20.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(nickname, style = MaterialTheme.typography.titleMedium)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        FlowRow(                                      // ← теперь импорт есть
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            selectedTags.forEach {
-                                AssistChip(onClick = {}, label = { Text(it) })
+                        if (avatarId == -1 && avatarUrl != null) {
+                            Image(
+                                painter = rememberAsyncImagePainter(avatarUrl),
+                                contentDescription = "Custom Avatar",
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .clip(CircleShape)
+                            )
+                        } else {
+                            Image(
+                                painter = painterResource(id = avatarResIdFrom(avatarId)),
+                                contentDescription = "Built-in Avatar",
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .clip(CircleShape)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                nickname,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                selectedTags.forEach {
+                                    AssistChip(
+                                        onClick = {},
+                                        label = {
+                                            Text(it)
+                                        },
+                                        colors = AssistChipDefaults.assistChipColors(
+                                            containerColor = Color(0xFF2C2C2C),
+                                            labelColor = Color.White
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
 
+
             item {
-                ElevatedCard(
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Portfolio", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        Spacer(Modifier.height(8.dp))
-                        Text(balance, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Column(
+                        modifier = Modifier.padding(20.dp)
+                    ) {
+                        Text(
+                            "Portfolio",
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            balance,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFFD700)
+                        )
                         Spacer(Modifier.height(4.dp))
-                        Text("ROI: $roi")
+                        Text(
+                            "ROI: $roi",
+                            fontSize = 14.sp,
+                            color = Color.LightGray
+                        )
                     }
                 }
             }
+
 
             if (topPlayers.isNotEmpty()) {
                 item {
                     Text("Top Traders", style = MaterialTheme.typography.titleLarge)
                 }
 
-                items(topPlayers) { entry ->
-                    PlayerCard(entry = entry) {
+                itemsIndexed(topPlayers) { index, entry ->
+                    val medal = when (index) {
+                        0 -> "\uD83E\uDD47" // 🥇
+                        1 -> "\uD83E\uDD48" // 🥈
+                        2 -> "\uD83E\uDD49" // 🥉
+                        else -> null
+                    }
+
+                    PlayerCard(entry = entry, medal = medal) {
                         selectedPlayerViewModel.set(entry)
                         navController.navigate(NavRoutes.PLAYER_PROFILE)
                     }
                 }
             }
+
 
             if (userAssets.isNotEmpty()) {
                 item {
@@ -243,3 +321,5 @@ fun AssetCard(label: String, value: String) {
         }
     }
 }
+
+fun Brush.toColor(): Color = Color.White.copy(alpha = 0.08f)
