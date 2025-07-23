@@ -30,6 +30,7 @@ import com.example.moontrade.ui.screens.components.PlayerCard
 import com.example.moontrade.viewmodels.*
 import com.google.accompanist.flowlayout.FlowRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.moontrade.ui.theme.ThemeViewModel
 
 data class SelectableMode(val mode: Mode, val label: String)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,8 +42,10 @@ fun HomeScreen(
     profileViewModel: ProfileViewModel,
     leaderboardViewModel: LeaderboardViewModel,
     userAssetsViewModel: UserAssetsViewModel,
-    selectedPlayerViewModel: SelectedPlayerViewModel
+    selectedPlayerViewModel: SelectedPlayerViewModel,
+    themeViewModel: ThemeViewModel
 ) {
+    val isDark  by themeViewModel.isDarkTheme.collectAsState()
     val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
     val topPlayers = leaderboardEntries.take(5)
 
@@ -67,6 +70,24 @@ fun HomeScreen(
         mutableStateOf(selectableModes.find { it.mode == currentMode } ?: selectableModes.first())
     }
 
+
+
+    val topBarBg = if (isDark) Color(0xFF121212) else Color.White
+    val topBarText = if (isDark) Color.White else Color.Black
+    val dropdownBg = if (isDark) Color(0xFF1E1E1E) else Color(0xFFEFEFEF)
+
+    val avatarCardColor = if (isDark) Color(0xFF1A1A1A) else Color(0xFFF4F4F4)
+    val chipColor = if (isDark) Color(0xFF2C2C2C) else Color(0xFFE0E0E0)
+    val chipTextColor = if (isDark) Color.White else Color.Black
+    val nicknameColor = if (isDark) Color.White else Color.Black
+
+    val portfolioCardColor = if (isDark) Color(0xFF1C1C1E) else Color(0xFFF2F2F2)
+    val portfolioLabelColor = if (isDark) Color.Gray else Color.DarkGray
+    val portfolioRoiColor = if (isDark) Color.LightGray else Color.Gray
+    val balanceGold = Color(0xFFFFD700)
+
+
+
     val selectedMode = selected.mode
     LaunchedEffect(Unit) {
         balanceViewModel.connect()
@@ -81,9 +102,9 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF121212), // deep black
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = topBarBg,
+                    titleContentColor = topBarText,
+                    actionIconContentColor = topBarText
                 ),
                 title = {
                     Row(
@@ -97,17 +118,17 @@ fun HomeScreen(
                                 Text(
                                     selected.label,
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = Color.White
+                                    color = topBarText
                                 )
                             }
                             DropdownMenu(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false },
-                                modifier = Modifier.background(Color(0xFF1E1E1E))
+                                modifier = Modifier.background(dropdownBg)
                             ) {
                                 selectableModes.forEach { item ->
                                     DropdownMenuItem(
-                                        text = { Text(item.label, color = Color.White) },
+                                        text = { Text(item.label, color = topBarText) },
                                         onClick = {
                                             selected = item
                                             expanded = false
@@ -140,7 +161,7 @@ fun HomeScreen(
                             Text(
                                 balance,
                                 style = MaterialTheme.typography.titleMedium,
-                                color = Color.White
+                                color = topBarText
                             )
 
                             IconButton(onClick = {
@@ -149,7 +170,7 @@ fun HomeScreen(
                                 Icon(
                                     imageVector = Icons.Default.Settings,
                                     contentDescription = "Settings",
-                                    tint = Color.White
+                                    tint = topBarText
                                 )
                             }
                         }
@@ -170,15 +191,13 @@ fun HomeScreen(
         ) {
             item {
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)) // глубокий чёрный
+                    colors = CardDefaults.cardColors(containerColor = avatarCardColor)
                 ) {
                     Row(
-                        modifier = Modifier
-                            .padding(20.dp),
+                        modifier = Modifier.padding(20.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (avatarId == -1 && avatarUrl != null) {
@@ -206,7 +225,7 @@ fun HomeScreen(
                                 nickname,
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = nicknameColor
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
@@ -218,12 +237,10 @@ fun HomeScreen(
                                 selectedTags.forEach {
                                     AssistChip(
                                         onClick = {},
-                                        label = {
-                                            Text(it)
-                                        },
+                                        label = { Text(it) },
                                         colors = AssistChipDefaults.assistChipColors(
-                                            containerColor = Color(0xFF2C2C2C),
-                                            labelColor = Color.White
+                                            containerColor = chipColor,
+                                            labelColor = chipTextColor
                                         )
                                     )
                                 }
@@ -233,37 +250,36 @@ fun HomeScreen(
                 }
             }
 
-
+//Portfolio
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1C1C1E))
+                    colors = CardDefaults.cardColors(containerColor = portfolioCardColor)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp)
-                    ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             "Portfolio",
                             fontSize = 16.sp,
-                            color = Color.Gray
+                            color = portfolioLabelColor
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
                             balance,
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFFD700)
+                            color = balanceGold
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
                             "ROI: $roi",
                             fontSize = 14.sp,
-                            color = Color.LightGray
+                            color = portfolioRoiColor
                         )
                     }
                 }
             }
+
 
 
             if (topPlayers.isNotEmpty()) {

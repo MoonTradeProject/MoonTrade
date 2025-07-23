@@ -104,10 +104,11 @@ fun AppNavigation() {
                     profileViewModel,
                     leaderboardViewModel,
                     userAssetsViewModel,
-                    selectedPlayerViewModel)
+                    selectedPlayerViewModel,
+                    themeViewModel)
             }
             composable(NavRoutes.MARKETS) {
-                MarketsScreen(navController, marketViewModel)
+                MarketsScreen(navController, marketViewModel, themeViewModel)
             }
             composable(NavRoutes.RATINGS) {
                 RatingsScreen(navController, leaderboardViewModel, selectedPlayerViewModel)
