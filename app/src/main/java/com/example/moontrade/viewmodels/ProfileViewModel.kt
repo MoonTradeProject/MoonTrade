@@ -57,12 +57,25 @@ class ProfileViewModel @Inject constructor(
     }
 
     /** User picked one of the built-in avatars. */
-    fun updateAvatarId(id: Int) {
+    fun updateAvatarId(id: Int, description: String = "") {
         _avatarId.value = id
         storage.saveAvatarId(id)
 
-      //  _avatarUrl.value = null
-       // storage.saveAvatarUrl(null)
+
+        val extensions = mapOf(
+            0 to "png", 1 to "png", 2 to "png", 3 to "png", 4 to "png",
+            5 to "jpg", 6 to "jpg", 7 to "jpg", 8 to "jpg"
+        )
+
+        val ext = extensions[id] ?: "jpg" // fallback
+        val path = "/avatars/avatar_${id}.$ext"
+        val timestamp = System.currentTimeMillis()
+        val fullUrl = "$baseUrl$path?t=$timestamp"
+
+        _avatarUrl.value = fullUrl
+        storage.saveAvatarUrl(fullUrl)
+
+        saveProfile(description)
     }
 
     /** Called after successful upload to the server. */

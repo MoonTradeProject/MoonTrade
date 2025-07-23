@@ -3,6 +3,7 @@ package com.example.moontrade.ui.screens.main_screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.FlowRow          // ← добавили
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -16,7 +17,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.moontrade.R
@@ -64,13 +64,14 @@ fun HomeScreen(
     }
 
     val selectedMode = selected.mode
-
+    LaunchedEffect(Unit) {
+        balanceViewModel.connect()
+    }
     LaunchedEffect(selectedMode) {
         println("🔄 Mode switched to $selectedMode — loading data...")
         balanceViewModel.changeMode(selectedMode)
         leaderboardViewModel.loadLeaderboard()
         userAssetsViewModel.loadUserAssets()
-        balanceViewModel.connect()
     }
 
     Scaffold(
@@ -168,7 +169,7 @@ fun HomeScreen(
                     ) {
                         Text(nickname, style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(8.dp))
-                        FlowRow(
+                        FlowRow(                                      // ← теперь импорт есть
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {

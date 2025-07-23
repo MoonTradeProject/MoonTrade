@@ -180,7 +180,8 @@ fun EditProfileScreen(
                                     MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                 else Color.Transparent
                             )
-                            .clickable { tempAvatarId = id }
+                            .clickable { tempAvatarId = id
+                                viewModel.updateAvatarId(id, description) }
                             .padding(4.dp)
                     ) {
                         Image(
@@ -198,14 +199,17 @@ fun EditProfileScreen(
                 onClick = {
                     viewModel.updateNickname(tempNickname)
                     viewModel.updateSelectedTags(tempTags)
-                    viewModel.updateAvatarId(tempAvatarId)   // -1 = custom
 
-                    viewModel.saveProfile(description)
+                    if (tempAvatarId == -1) {
+                        viewModel.saveProfile(description)
+                    }
+
                     navController.popBackStack()
                 }
             ) {
                 Text("Save Changes")
             }
+
         }
     }
 }

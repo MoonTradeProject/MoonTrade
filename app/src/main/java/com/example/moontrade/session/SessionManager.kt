@@ -92,16 +92,33 @@ class SessionManager @Inject constructor(
         scope.launch {
             if (_isConnected.value) return@launch
             val token = getValidToken() ?: return@launch
-            ws.connect(token, _mode.value)
-            _isConnected.value = true
+            ws.connect(token, _mode.value) {
+                _isConnected.value = true
+            }
         }
     }
 
     fun changeMode(mode: Mode) {
         println("🌐 [SessionManager] Received changeMode: $mode")
         _mode.value = mode
-        ws.changeMode(mode)
+
+        scope.launch {
+            val token = getValidToken() ?: return@launch
+
+            if (_isConnected.value) {
+                ws.sendChangeMode(mode)
+            } else {
+                ws.connect(token, mode) {
+                    _isConnected.value = true
+                }
+            }
+        }
     }
+
+
+
+
+
 
     fun disconnect() {
         ws.disconnect()
