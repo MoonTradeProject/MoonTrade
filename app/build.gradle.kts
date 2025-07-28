@@ -22,7 +22,7 @@ android {
     buildTypes {
         getByName("debug") {
             // 🔧 Used when running locally (Android emulator → host machine)
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000\"")
+            buildConfigField("String", "BASE_URL", "\"http://insectivora.eu:1010\"")
         }
 
         getByName("release") {
@@ -33,7 +33,7 @@ android {
             )
 
             // 🌍 Used in production (actual deployed backend)
-            buildConfigField("String", "BASE_URL", "\"https://api.moontrade.io\"")
+            buildConfigField("String", "BASE_URL", "\"http://insectivora.eu:1010\"")
         }
     }
 

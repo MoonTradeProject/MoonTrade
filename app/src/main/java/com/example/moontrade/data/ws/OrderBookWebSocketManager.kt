@@ -14,7 +14,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val TAG = "OrderBookWS"
-private const val WS_URL_BASE = "ws://10.0.2.2:3000/ws/book/"
+private const val WS_URL_BASE = "ws://insectivora.eu:1010/ws/book/"
+
 
 @Singleton
 class OrderBookWebSocketManager @Inject constructor() {

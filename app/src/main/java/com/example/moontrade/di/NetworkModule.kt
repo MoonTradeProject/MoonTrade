@@ -43,7 +43,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(gson: Gson): Retrofit =
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3000/")          // ← change if backend host differs
+            .baseUrl("http://insectivora.eu:1010/")          // ← change if backend host differs
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
 }

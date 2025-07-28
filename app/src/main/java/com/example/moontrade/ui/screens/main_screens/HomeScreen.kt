@@ -1,5 +1,6 @@
 package com.example.moontrade.ui.screens.main_screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -200,7 +201,9 @@ fun HomeScreen(
                         modifier = Modifier.padding(20.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (avatarId == -1 && avatarUrl != null) {
+                        if (avatarId == -1 && !avatarUrl.isNullOrEmpty()) {
+                            Log.d("AvatarDebug", "🖼 Loading custom avatar: $avatarUrl")
+
                             Image(
                                 painter = rememberAsyncImagePainter(avatarUrl),
                                 contentDescription = "Custom Avatar",

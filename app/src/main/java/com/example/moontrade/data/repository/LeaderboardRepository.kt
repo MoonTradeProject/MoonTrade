@@ -11,9 +11,20 @@ class LeaderboardRepository @Inject constructor(
     private val api: LeaderboardApi,
     private val session: SessionManager
 ) {
-    suspend fun fetchLeaderboard(mode: Mode): LeaderboardResponse {
+    suspend fun fetchLeaderboard(mode: Mode): LeaderboardResponse = runCatching {
         val token = session.getValidToken() ?: error("No valid token")
-        return api.getLeaderboard(mode.toQueryMap(), "Bearer $token")
+        val queryMap = mode.toQueryMap()
+
+        android.util.Log.d("LeaderboardRepo", "📌 Fetching leaderboard with query: $queryMap")
+        android.util.Log.d("LeaderboardRepo", "🔑 Using token: ${token.take(20)}...")
+
+        val response = api.getLeaderboard(queryMap, "Bearer $token")
+        android.util.Log.d("LeaderboardRepo", "✅ Leaderboard fetched successfully: $response")
+
+        response
+    }.getOrElse { e ->
+        android.util.Log.e("LeaderboardRepo", "❌ Leaderboard fetch failed", e)
+        throw e
     }
 }
 

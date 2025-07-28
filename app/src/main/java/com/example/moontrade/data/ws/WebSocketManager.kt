@@ -17,7 +17,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val TAG = "BalanceWS"
-private const val WS_URL = "ws://10.0.2.2:3000/ws/balance"
+private const val WS_URL = "ws://insectivora.eu:1010/ws/balance"
+
 
 @Singleton
 class WebSocketManager @Inject constructor() {
@@ -129,10 +130,16 @@ class WebSocketManager @Inject constructor() {
             scope.launch {
                 delay(3000)
                 Log.d(TAG, "🔄 Reconnect scheduled")
+
+
+                socket?.cancel()
+                socket = null
+
                 val token = idTokenRef.get()
                 val mode = currentMode.get()
                 connect(token, mode) { onConnected?.invoke() }
             }
         }
+
     }
 }

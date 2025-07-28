@@ -83,7 +83,12 @@ class ProfileViewModel @Inject constructor(
 
     private fun updateAvatarUrl(path: String) {
         val timestamp = System.currentTimeMillis()
-        val fullUrl = "$baseUrl$path?t=$timestamp"
+        Log.d("ConfigCheck", "🔧 BuildConfig.BASE_URL = ${BuildConfig.BASE_URL}")
+
+        val base = if (baseUrl.startsWith("http")) baseUrl else "http://$baseUrl"
+        val fullUrl = "$base$path?t=$timestamp"
+
+        Log.d("AvatarDebug", "✅ Fixed fullUrl: $fullUrl")
 
         _avatarUrl.value = fullUrl
         storage.saveAvatarUrl(fullUrl)
@@ -91,6 +96,7 @@ class ProfileViewModel @Inject constructor(
         _avatarId.value = -1
         storage.saveAvatarId(-1)
     }
+
 
 
     /* avatar upload ---------------------------------------------------------- */
