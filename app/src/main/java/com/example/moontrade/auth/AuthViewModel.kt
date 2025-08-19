@@ -43,7 +43,12 @@ class AuthViewModel @Inject constructor(
         touchIdEnabled.value = newValue
     }
 
-    fun isPasswordValid() = password.value.length >= 8
+    fun isPasswordValid(): Boolean {
+        val passwordValue = password.value
+        return passwordValue.length >= 6 &&
+                passwordValue.any { it.isUpperCase() } &&
+                passwordValue.any { it.isDigit() }
+    }
     fun isConfirmPasswordValid() = password.value == confirmPassword.value
 
     fun register(onSuccess: () -> Unit, onFailure: (String) -> Unit) {
@@ -122,6 +127,7 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
+
 
     fun verifyOtp(
         onSuccess: () -> Unit,

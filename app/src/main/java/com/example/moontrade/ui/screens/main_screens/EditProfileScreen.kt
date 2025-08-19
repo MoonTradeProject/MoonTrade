@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -34,8 +36,6 @@ fun EditProfileScreen(
     navController: NavController,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    /* ---- state from ViewModel ------------------------------------------------ */
-
     val nickname      by viewModel.nickname.collectAsState()
     val selectedTags  by viewModel.selectedTags.collectAsState()
     val avatarId      by viewModel.avatarId.collectAsState()
@@ -44,26 +44,22 @@ fun EditProfileScreen(
     val availableTags = viewModel.availableTags
     val context       = LocalContext.current
 
-    /* ---- local editable copies --------------------------------------------- */
-
     var tempNickname  by remember { mutableStateOf(nickname) }
     var tempTags      by remember { mutableStateOf(selectedTags.toMutableList()) }
     var tempAvatarId  by remember { mutableIntStateOf(avatarId) }
     var description   by remember { mutableStateOf("") }
-
-    /* ---- image picker ------------------------------------------------------- */
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
             viewModel.uploadAvatarFromUri(context, it) {
-                tempAvatarId = -1                  // custom avatar selected
+                tempAvatarId = -1
             }
         }
     }
 
-    /* ---- UI ---------------------------------------------------------------- */
+    val scrollState = rememberScrollState()
 
     Scaffold(
         topBar = {
@@ -77,11 +73,11 @@ fun EditProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(padding)
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            /* Nickname -------------------------------------------------------- */
             OutlinedTextField(
                 value = tempNickname,
                 onValueChange = { tempNickname = it },
@@ -89,7 +85,6 @@ fun EditProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            /* Description ----------------------------------------------------- */
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
@@ -97,7 +92,6 @@ fun EditProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            /* Tags ------------------------------------------------------------ */
             Text("Visible Tags", style = MaterialTheme.typography.titleMedium)
 
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -116,7 +110,6 @@ fun EditProfileScreen(
                 }
             }
 
-            /* Upload avatar --------------------------------------------------- */
             Text("Upload Avatar", style = MaterialTheme.typography.titleMedium)
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -136,14 +129,14 @@ fun EditProfileScreen(
                 }
             }
 
-            /* Choose built-in avatar ----------------------------------------- */
             Text("Choose Avatar", style = MaterialTheme.typography.titleMedium)
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
-                modifier = Modifier.height(240.dp)
+                modifier = Modifier
+                    .height(240.dp)
+                    .fillMaxWidth()
             ) {
-                /* custom uploaded avatar */
                 if (avatarUrl != null) {
                     item {
                         val selected = tempAvatarId == -1
@@ -168,7 +161,6 @@ fun EditProfileScreen(
                     }
                 }
 
-                /* built-in avatars */
                 items(10) { id ->
                     val selected = id == tempAvatarId
                     Box(
@@ -180,8 +172,10 @@ fun EditProfileScreen(
                                     MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                 else Color.Transparent
                             )
-                            .clickable { tempAvatarId = id
-                                viewModel.updateAvatarId(id, description) }
+                            .clickable {
+                                tempAvatarId = id
+                                viewModel.updateAvatarId(id, description)
+                            }
                             .padding(4.dp)
                     ) {
                         Image(
@@ -193,7 +187,6 @@ fun EditProfileScreen(
                 }
             }
 
-            /* Save button ------------------------------------------------------ */
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
@@ -209,7 +202,6 @@ fun EditProfileScreen(
             ) {
                 Text("Save Changes")
             }
-
         }
     }
 }
