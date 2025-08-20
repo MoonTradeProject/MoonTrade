@@ -4,7 +4,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import kotlinx.coroutines.flow.StateFlow
 
 interface AuthRepository {
-    suspend fun register(email: String, password: String): Boolean
+    suspend fun register(email: String, password: String): RegisterResult
     suspend fun login(email: String, password: String): Boolean
     fun logout()
     fun getIsAuthenticatedFlow(): StateFlow<Boolean>

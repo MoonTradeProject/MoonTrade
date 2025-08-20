@@ -3,6 +3,7 @@ package com.example.moontrade.data.repository
 import android.util.Log
 import com.example.moontrade.auth.AuthPreferences
 import com.example.moontrade.auth.AuthRepository
+import com.example.moontrade.auth.RegisterResult
 import com.example.moontrade.data.api.AuthApi
 import com.example.moontrade.model.RegisterRequest
 import com.example.moontrade.session.SessionManager
@@ -27,14 +28,14 @@ class AuthRepositoryImpl @Inject constructor(
     private val _isAuth = MutableStateFlow(auth.currentUser != null)
     override fun getIsAuthenticatedFlow(): StateFlow<Boolean> = _isAuth.asStateFlow()
 
-    override suspend fun register(email: String, password: String): Boolean = runCatching {
+    override suspend fun register(email: String, password: String): RegisterResult = runCatching {
         Log.d("AuthRepositoryImpl", "📌 Starting Firebase registration for $email")
 
         auth.createUserWithEmailAndPassword(email, password).await()
         Log.d("AuthRepositoryImpl", "✅ Firebase account created")
 
         val token = auth.currentUser?.getIdToken(true)?.await()?.token
-            ?: throw IllegalStateException("❌ Firebase token is null")
+            ?: return RegisterResult.Error("Firebase token is null")
 
         Log.d("AuthRepositoryImpl", "📌 Got Firebase token: ${token.take(20)}...")
 
@@ -48,12 +49,12 @@ class AuthRepositoryImpl @Inject constructor(
 
         session.connectIfNeeded()
         _isAuth.value = true
-        true
+
+        RegisterResult.Success
     }.getOrElse { e ->
         Log.e("AuthRepositoryImpl", "❌ Register failed", e)
-        false
+        RegisterResult.Error(e.message ?: "Unknown registration error")
     }
-
 
     override suspend fun login(email: String, password: String): Boolean = runCatching {
         auth.signInWithEmailAndPassword(email, password).await()

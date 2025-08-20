@@ -5,9 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +24,9 @@ class AuthViewModel @Inject constructor(
 
     private val _isLoggedIn = MutableStateFlow(authRepository.getIsAuthenticatedFlow().value)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     fun onEmailChange(newEmail: String) {
         email.value = newEmail
@@ -49,31 +50,51 @@ class AuthViewModel @Inject constructor(
                 passwordValue.any { it.isUpperCase() } &&
                 passwordValue.any { it.isDigit() }
     }
-    fun isConfirmPasswordValid() = password.value == confirmPassword.value
 
     fun register(onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
-            val success = authRepository.register(email.value, password.value)
-            if (success) {
-                _isLoggedIn.value = true
-                onSuccess()
-            } else {
-                validationError.value = "Registration failed"
-                onFailure("Registration failed")
+            _isLoading.value = true
+            try {
+                when (val result = authRepository.register(email.value, password.value)) {
+                    is RegisterResult.Success -> {
+                        _isLoggedIn.value = true
+                        onSuccess()
+                    }
+                    is RegisterResult.Error -> {
+                        validationError.value = result.message
+                        onFailure(result.message)
+                    }
+
+                }
+            } catch (e: Exception) {
+                val errorMessage = e.message ?: "Server unavailable"
+                validationError.value = errorMessage
+                onFailure(errorMessage)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
     fun login(onSuccess: () -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
-            val success = authRepository.login(email.value, password.value)
-            if (success) {
-                authPreferences.saveIsAuthenticated(true)
-                _isLoggedIn.value = true
-                onSuccess()
-            } else {
-                validationError.value = "Login failed"
-                onFailure("Login failed")
+            _isLoading.value = true
+            try {
+                val success = authRepository.login(email.value, password.value)
+                if (success) {
+                    authPreferences.saveIsAuthenticated(true)
+                    _isLoggedIn.value = true
+                    onSuccess()
+                } else {
+                    validationError.value = "Invalid credentials"
+                    onFailure("Invalid credentials")
+                }
+            } catch (e: Exception) {
+                val msg = e.message ?: "Server unavailable"
+                validationError.value = msg
+                onFailure(msg)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
@@ -84,7 +105,9 @@ class AuthViewModel @Inject constructor(
         onFailure: (String) -> Unit
     ) {
         viewModelScope.launch {
+            _isLoading.value = true
             val result = authRepository.signInWithGoogle(account)
+            _isLoading.value = false
             if (result) {
                 _isLoggedIn.value = true
                 authPreferences.saveIsAuthenticated(true)
@@ -109,49 +132,8 @@ class AuthViewModel @Inject constructor(
         otpCode.value = ""
         validationError.value = null
     }
-    fun sendOtp(
-        onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                // TODO: Replace with Retrofit call to your backend that sends OTP to the email
-                // Example:
-                // val response = api.sendOtp(email.value)
-                // if (response.success) { onSuccess() } else { onFailure("Error sending code") }
-
-                println("[Mocked] Sending OTP to ${email.value}")
-                onSuccess() // Simulate success
-            } catch (e: Exception) {
-                onFailure(e.message ?: "Unknown Error")
-            }
-        }
-    }
-
-
-    fun verifyOtp(
-        onSuccess: () -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                println(" [Mocked] Verifying OTP: email = ${email.value}, code = ${otpCode.value}")
-
-                // TODO: Replace with Retrofit call to your backend that verifies OTP
-                // Example:
-                // val response = api.verifyOtp(email.value, otpCode.value)
-                // if (response.success) { onSuccess() } else { onFailure("Wrong code") }
-
-                val isValid = otpCode.value == "123456" // Temporary fake check
-                if (isValid) {
-                    onSuccess()
-                } else {
-                    onFailure("Wrong code")
-                }
-            } catch (e: Exception) {
-                onFailure(e.message ?: "Error checking code")
-            }
-        }
-    }
-
+}
+sealed class RegisterResult {
+    object Success : RegisterResult()
+    data class Error(val message: String) : RegisterResult()
 }
