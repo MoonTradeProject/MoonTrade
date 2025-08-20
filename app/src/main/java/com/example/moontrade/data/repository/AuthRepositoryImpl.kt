@@ -8,6 +8,7 @@ import com.example.moontrade.data.api.AuthApi
 import com.example.moontrade.model.RegisterRequest
 import com.example.moontrade.session.SessionManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
@@ -37,23 +38,35 @@ class AuthRepositoryImpl @Inject constructor(
         val token = auth.currentUser?.getIdToken(true)?.await()?.token
             ?: return RegisterResult.Error("Firebase token is null")
 
-        Log.d("AuthRepositoryImpl", "📌 Got Firebase token: ${token.take(20)}...")
-
         prefs.saveIdToken(token)
 
         val req = RegisterRequest(token, email, email.substringBefore("@"))
-        Log.d("AuthRepositoryImpl", "📤 Sending register request: $req")
+        Log.d("AuthRepositoryImpl", "📤 Sending register request to backend: $req")
 
-        authApi.register(req)
-        Log.d("AuthRepositoryImpl", "✅ Register request sent successfully")
+        try {
+            authApi.register(req) // 🔥 это может упасть
+            Log.d("AuthRepositoryImpl", "✅ Backend registration successful")
+        } catch (e: Exception) {
+            Log.e("AuthRepositoryImpl", "❌ Backend registration failed", e)
+
+            try {
+                val credential = EmailAuthProvider.getCredential(email, password)
+                auth.currentUser?.reauthenticate(credential)?.await()
+                auth.currentUser?.delete()?.await()
+                Log.d("AuthRepositoryImpl", "✅ Firebase user deleted after failure")
+            } catch (deleteError: Exception) {
+                Log.e("AuthRepositoryImpl", "❌ Failed to delete Firebase user", deleteError)
+            }
+
+            return RegisterResult.Error("Server unavailable — registration cancelled")
+        }
 
         session.connectIfNeeded()
         _isAuth.value = true
-
         RegisterResult.Success
     }.getOrElse { e ->
-        Log.e("AuthRepositoryImpl", "❌ Register failed", e)
-        RegisterResult.Error(e.message ?: "Unknown registration error")
+        Log.e("AuthRepositoryImpl", "❌ Full registration failed", e)
+        RegisterResult.Error(e.message ?: "Unknown error")
     }
 
     override suspend fun login(email: String, password: String): Boolean = runCatching {
