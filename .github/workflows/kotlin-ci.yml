@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -21,10 +21,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build with Gradle
+      - name: Restore google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          mkdir -p app/src/main/
+          echo "$GOOGLE_SERVICES_JSON" > app/src/main/google-services.json
+
+
+      - name: Build project
         run: ./gradlew build --stacktrace
 
-      - name: Push artifacts to CI branch
+
+      - name: Push code back if build successful
         if: success()
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -36,15 +45,16 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           BRANCH="${GIT_REF##*/}"
-          CI_BRANCH="ci-builds"
+          echo "Pushing code back to branch: $BRANCH"
 
-          mkdir -p build-artifacts
-          cp -r app/build/libs/* build-artifacts/ || true
-          git add build-artifacts || true
+
+          git add -A
           if git diff --cached --quiet; then
-            echo "No build artifacts to commit."
+            echo "No changes to commit. Skipping push."
             exit 0
           fi
-          git commit -m "ci: build artifacts from $BRANCH"
+          git commit -m "ci: build successful, pushing code back to $BRANCH"
+
+
           git remote set-url origin https://x-access-token:${PAT_TOKEN}@github.com/${REPO}.git
-          git push origin HEAD:${CI_BRANCH} --force
+          git push origin HEAD:${BRANCH}
