@@ -1,0 +1,50 @@
+name: Kotlin CI Build & Push
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: ./gradlew build --stacktrace
+
+      - name: Push artifacts to CI branch
+        if: success()
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          REPO: ${{ github.repository }}
+          GIT_REF: ${{ github.ref }}
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="${GIT_REF##*/}"
+          CI_BRANCH="ci-builds"
+
+          mkdir -p build-artifacts
+          cp -r app/build/libs/* build-artifacts/ || true
+          git add build-artifacts || true
+          if git diff --cached --quiet; then
+            echo "No build artifacts to commit."
+            exit 0
+          fi
+          git commit -m "ci: build artifacts from $BRANCH"
+          git remote set-url origin https://x-access-token:${PAT_TOKEN}@github.com/${REPO}.git
+          git push origin HEAD:${CI_BRANCH} --force
