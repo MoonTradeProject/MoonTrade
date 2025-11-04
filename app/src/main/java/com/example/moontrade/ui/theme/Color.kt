@@ -2,27 +2,42 @@ package com.example.moontrade.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// LIGHT THEME
-val LightBackground = Color(0xFFF8F9FC)
-val LightSurface = Color(0xFFFFFFFF)
-val LightTopBar = Color.White
-val LightText = Color(0xFF000000)
-val LightChip = Color(0xFFE0E0E0)
-val LightDropdown = Color(0xFFEFEFEF)
-val LightAvatarCard = Color(0xFFF4F4F4)
-val LightPortfolioCard = Color(0xFFF2F2F2)
-val LightPortfolioLabel = Color.DarkGray
-val LightPortfolioRoi = Color.Gray
-val Gold = Color(0xFFFFD700)
+// Brand — Violet / Purple
+val Violet50  = Color(0xFFF1EAFF)
+val Violet100 = Color(0xFFE2D5FF)
+val Violet200 = Color(0xFFC6ADFF)
+val Violet300 = Color(0xFFA985FF)
+val Violet400 = Color(0xFF35135A)   // акцент
+val Violet500 = Color(0xFF37155F)
+val Violet600 = Color(0xFF5B33D0)
+val Violet700 = Color(0xFF4B2AAC)
+val Violet800 = Color(0xFF3A2187)
+val Violet900 = Color(0xFF2C1969)
 
-// DARK THEME
-val DarkBackground = Color(0xFF090D16)
-val DarkSurface = Color(0xFF121212)
-val DarkTopBar = Color(0xFF121212)
-val DarkText = Color.White
-val DarkChip = Color(0xFF2C2C2C)
-val DarkDropdown = Color(0xFF1E1E1E)
-val DarkAvatarCard = Color(0xFF1A1A1A)
-val DarkPortfolioCard = Color(0xFF1C1C1E)
-val DarkPortfolioLabel = Color.Gray
-val DarkPortfolioRoi = Color.LightGray
+// Neutrals — Black / Ink
+val Ink950 = Color(0xFF05060A)
+val Ink900 = Color(0xFF130925)
+val Ink850 = Color(0xFF0E111B)
+val Ink800 = Color(0xFF0F0E10)
+val Ink700 = Color(0xFF1A1D2C)
+
+// Text
+val TextPrimaryDark    = Color(0xFFFFFFFF)
+val TextSecondaryDark  = Color(0xCCFFFFFF)
+val TextPrimaryLight   = Color(0xFF1A112E)
+val TextSecondaryLight = Color(0x991A112E)
+
+// Semantics
+val GreenUp   = Color(0xFF00E676)
+val RedDown   = Color(0xFFFF4D4F)
+val AmberWarn = Color(0xFFFFC107)
+
+// Light base
+val LightBackground = Color(0xFFF9F6FF)
+val LightSurface    = Color(0xFFFFFFFF)
+val LightTopBar     = Color(0xFFF7F1FF)
+
+// Dark base
+val DarkBackground = Ink900
+val DarkSurface    = Ink850
+val DarkTopBar     = Ink800

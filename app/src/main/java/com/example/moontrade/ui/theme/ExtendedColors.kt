@@ -1,54 +1,45 @@
 package com.example.moontrade.ui.theme
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 @Immutable
-data class MoonTradeExtendedColors(
-    val topBarBg: Color,
-    val topBarText: Color,
-    val dropdownBg: Color,
-    val avatarCard: Color,
-    val chip: Color,
-    val chipText: Color,
-    val nickname: Color,
-    val portfolioCard: Color,
-    val portfolioLabel: Color,
-    val portfolioRoi: Color,
-    val gold: Color,
+data class ExtendedColors(
+    val success: Color,
+    val danger: Color,
+    val warning: Color,
+    val glassSurface: Color,
+    val glassCard: Color,
+    val chartUp: Color,
+    val chartDown: Color,
+    val gradientPrimary: Brush,
+    val gradientAccent: Brush,
 )
 
-val LightExtendedColors = MoonTradeExtendedColors(
-    topBarBg = LightTopBar,
-    topBarText = LightText,
-    dropdownBg = LightDropdown,
-    avatarCard = LightAvatarCard,
-    chip = LightChip,
-    chipText = LightText,
-    nickname = LightText,
-    portfolioCard = LightPortfolioCard,
-    portfolioLabel = LightPortfolioLabel,
-    portfolioRoi = LightPortfolioRoi,
-    gold = Gold
+val DarkExtendedColors = ExtendedColors(
+    success = GreenUp,
+    danger = RedDown,
+    warning = AmberWarn,
+    glassSurface = Color(0xFF250848),
+    glassCard = Color(0xFF250848),
+    chartUp = GreenUp,
+    chartDown = RedDown,
+    gradientPrimary = Brush.linearGradient(listOf(Violet500, Violet400)),
+    gradientAccent  = Brush.linearGradient(listOf(Color(0xFF4E356A), Violet400)),
 )
 
-val DarkExtendedColors = MoonTradeExtendedColors(
-    topBarBg = DarkTopBar,
-    topBarText = DarkText,
-    dropdownBg = DarkDropdown,
-    avatarCard = DarkAvatarCard,
-    chip = DarkChip,
-    chipText = DarkText,
-    nickname = DarkText,
-    portfolioCard = DarkPortfolioCard,
-    portfolioLabel = DarkPortfolioLabel,
-    portfolioRoi = DarkPortfolioRoi,
-    gold = Gold
+val LightExtendedColors = ExtendedColors(
+    success = GreenUp,
+    danger = RedDown,
+    warning = AmberWarn,
+    glassSurface = Color(0x14000000),
+    glassCard = Color(0x12000000),
+    chartUp = GreenUp,
+    chartDown = RedDown,
+    gradientPrimary = Brush.linearGradient(listOf(Violet400, Color(0x00FFFFFF))),
+    gradientAccent  = Brush.linearGradient(listOf(Violet500, Violet300)),
 )
 
-internal val LocalExtendedColors = staticCompositionLocalOf { LightExtendedColors }
-
-val androidx.compose.material3.MaterialTheme.extended: MoonTradeExtendedColors
-    @Composable get() = LocalExtendedColors.current
+val LocalExtendedColors = staticCompositionLocalOf { DarkExtendedColors }

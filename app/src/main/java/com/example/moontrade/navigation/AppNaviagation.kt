@@ -33,12 +33,13 @@ fun AppNavigation() {
     val tournamentsViewModel: TournamentsViewModel = hiltViewModel()
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
-    val marketDetailViewModel: MarketDetailViewModel = hiltViewModel();
+    val marketDetailViewModel: MarketDetailViewModel = hiltViewModel()
     val tradeViewModel: TradeViewModel = hiltViewModel()
     val selectedPlayerViewModel: SelectedPlayerViewModel = hiltViewModel()
     val leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
+    val userAssetsViewModel: UserAssetsViewModel = hiltViewModel()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
-    val  userAssetsViewModel: UserAssetsViewModel = hiltViewModel()
+
     val bottomBarRoutes = listOf(
         NavRoutes.HOME,
         NavRoutes.MARKETS,
@@ -56,7 +57,6 @@ fun AppNavigation() {
             }
         }
     }
-
 
     val content: @Composable (PaddingValues) -> Unit = { padding ->
         NavHost(
@@ -98,14 +98,15 @@ fun AppNavigation() {
                 LoginScreen(navController, authViewModel)
             }
             composable(NavRoutes.HOME) {
-                HomeScreen(navController,
+                HomeScreen(
+                    navController,
                     balanceViewModel,
                     tournamentsViewModel,
                     profileViewModel,
                     leaderboardViewModel,
                     userAssetsViewModel,
-                    selectedPlayerViewModel,
-                    )
+                    selectedPlayerViewModel
+                )
             }
             composable(NavRoutes.MARKETS) {
                 MarketsScreen(navController, marketViewModel, themeViewModel)
@@ -116,8 +117,7 @@ fun AppNavigation() {
             composable(NavRoutes.TOURNAMENTS) {
                 TournamentsScreen(navController, tournamentsViewModel)
             }
-            composable(NavRoutes.PLAYER_PROFILE) { backStackEntry ->
-                val playerId = backStackEntry.arguments?.getString("playerId") ?: ""
+            composable(NavRoutes.PLAYER_PROFILE) {
                 PlayerProfileScreen(navController, selectedPlayerViewModel)
             }
             composable(
@@ -126,7 +126,10 @@ fun AppNavigation() {
             ) { backStackEntry ->
                 val symbol = backStackEntry.arguments?.getString("symbol")
                 MarketDetailScreen(
-                    navController = navController, symbol = symbol ?: "null", marketDetailViewModel)
+                    navController = navController,
+                    symbol = symbol ?: "null",
+                    marketDetailViewModel
+                )
             }
             composable(NavRoutes.SETTINGS) {
                 SettingsScreen(navController, authViewModel, themeViewModel)
@@ -137,9 +140,11 @@ fun AppNavigation() {
         }
     }
 
-
     if (currentRoute in bottomBarRoutes) {
-        Scaffold(bottomBar = { BottomBar(navController) }) { padding ->
+        Scaffold(
+            // 🔥 УБРАН topBar, оставлен только низ 🔥
+            bottomBar = { BottomBar(navController) }
+        ) { padding ->
             content(padding)
         }
     } else {
