@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -51,7 +52,6 @@ fun HomeScreen(
     userAssetsViewModel: UserAssetsViewModel,
     selectedPlayerViewModel: SelectedPlayerViewModel,
 ) {
-    // --- state from viewmodels ---
     val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
     val topPlayers = leaderboardEntries.take(5)
 
@@ -70,7 +70,6 @@ fun HomeScreen(
     val cs = MaterialTheme.colorScheme
     val ex = MaterialTheme.extended
 
-    // список режимов
     val selectableModes = remember(tournaments) {
         listOf(SelectableMode(Mode.Main, "Main")) +
                 tournaments.filter { it.isJoined }
@@ -81,7 +80,6 @@ fun HomeScreen(
         mutableStateOf(selectableModes.find { it.mode == currentMode } ?: selectableModes.first())
     }
 
-    // side effects
     val selectedMode = selected.mode
     LaunchedEffect(Unit) { balanceViewModel.connect() }
     LaunchedEffect(selectedMode) {
@@ -100,9 +98,8 @@ fun HomeScreen(
             TopBar(
                 title = null,
                 showBack = false,
-                navigationContent = { // ⬅️ слева селектор режимов
+                navigationContent = {
                     var expanded by remember { mutableStateOf(false) }
-
                     Box {
                         TextButton(onClick = { expanded = true }) {
                             Text(
@@ -128,20 +125,13 @@ fun HomeScreen(
                         }
                     }
                 },
-                centerContent = { // ⬅️ по центру — MOONTRADE
+                centerContent = {
                     val label = buildAnnotatedString {
-                        withStyle(SpanStyle(brush = ex.gradientAccent)) {
-                            append("MOONTRADE")
-                        }
+                        withStyle(SpanStyle(brush = ex.gradientAccent)) { append("MOONTRADE") }
                     }
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontSize = 20.sp,
-                        maxLines = 1
-                    )
+                    Text(text = label, style = MaterialTheme.typography.titleLarge, fontSize = 20.sp, maxLines = 1)
                 },
-                actions = { // ⬅️ справа — настройки
+                actions = {
                     IconButton(onClick = { navController.navigate(NavRoutes.SETTINGS) }) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
@@ -157,35 +147,38 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // 2) Профиль
+            // ---------- Единая карточка: профиль + TOTAL VALUE ----------
             item {
-                GlassCard {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (avatarId == -1 && !avatarUrl.isNullOrEmpty()) {
-                            Image(
-                                painter = rememberAsyncImagePainter(avatarUrl),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(CircleShape)
-                            )
-                        } else {
-                            Image(
-                                painter = painterResource(id = avatarResIdFrom(avatarId)),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(CircleShape)
-                            )
+                val roiValue = roi?.replace("%", "")?.replace(",", ".")?.toDoubleOrNull() ?: 0.0
+                val roiLabel = (if (roiValue >= 0) "+" else "") + String.format("%.1f%%", roiValue)
+
+                GlassCard(overlay = ex.gradientAccent) {
+
+                    // Верхняя часть
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+
+                        AvatarWithRing {
+                            if (avatarId == -1 && !avatarUrl.isNullOrEmpty()) {
+                                Image(rememberAsyncImagePainter(avatarUrl), null, Modifier.clip(CircleShape))
+                            } else {
+                                Image(
+                                    painter = painterResource(id = avatarResIdFrom(avatarId)),
+                                    contentDescription = null,
+                                    modifier = Modifier.clip(CircleShape)
+                                )
+                            }
                         }
 
                         Spacer(Modifier.width(16.dp))
 
                         Column(Modifier.weight(1f)) {
-                            Text(nickname, style = MaterialTheme.typography.titleLarge, color = cs.onSurface)
+                            GradientText(
+                                text = if (nickname.isBlank()) "CryptoMaster" else nickname,
+                                brush = ex.gradientAvatar,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Pill("ACTIVE", ex.gradientPrimary, leadingDot = true)
                             Spacer(Modifier.height(8.dp))
                             FlowRow(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -204,27 +197,49 @@ fun HomeScreen(
                             }
                         }
                     }
-                }
-            }
 
-            // 3) Портфель
-            item {
-                GlassCard(overlay = ex.gradientAccent) {
-                    Text("TOTAL VALUE", color = cs.onSurface.copy(alpha = .65f), fontSize = 16.sp)
-                    Spacer(Modifier.height(6.dp))
-                    Text(balance, style = MaterialTheme.typography.displaySmall, color = cs.onSurface)
-                    Spacer(Modifier.height(6.dp))
-                    val roiValue = roi?.replace("%", "")?.replace(",", ".")?.toDoubleOrNull() ?: 0.0
-                    Text(
-                        "ROI: $roi",
-                        color = if (roiValue < 0) ex.danger else ex.success
+                    // Разделительная линия
+                    Spacer(Modifier.height(16.dp))
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        Color.White.copy(.04f),
+                                        Color.White.copy(.12f),
+                                        Color.White.copy(.04f)
+                                    )
+                                )
+                            )
                     )
+                    Spacer(Modifier.height(16.dp))
+
+                    // Нижняя часть: TOTAL VALUE + ROI
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("TOTAL VALUE", color = cs.onSurface.copy(alpha = .65f), style = MaterialTheme.typography.labelLarge)
+                            Spacer(Modifier.height(8.dp))
+                            Text(balance, style = MaterialTheme.typography.displaySmall, color = Color.White)
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                text = (if (roiValue >= 0) "+" else "-") + "$1 234,56 24H", // замени на своё значение
+                                color = if (roiValue >= 0) ex.success else ex.danger,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        RoiCard(roi = roiLabel)
+                    }
                 }
             }
 
-            // 4) Топ-трейдеры
+            // ---------- Топ-трейдеры ----------
             if (topPlayers.isNotEmpty()) {
-                item { Text("Top Traders", style = MaterialTheme.typography.titleLarge, color = cs.onBackground) }
+                item {
+                    Text("Top Traders", style = MaterialTheme.typography.titleLarge, color = cs.onBackground)
+                }
                 itemsIndexed(topPlayers) { index, entry ->
                     val medal = when (index) { 0 -> "🥇"; 1 -> "🥈"; 2 -> "🥉"; else -> null }
                     PlayerCard(entry = entry, medal = medal) {
@@ -234,7 +249,7 @@ fun HomeScreen(
                 }
             }
 
-            // 5) Активы
+            // ---------- Активы ----------
             if (userAssets.isNotEmpty()) {
                 item { Text("Your Assets", style = MaterialTheme.typography.titleLarge, color = cs.onBackground) }
                 items(userAssets) { asset ->
@@ -284,6 +299,87 @@ private fun GlassCard(
         Column(Modifier.padding(18.dp), content = content)
     }
 }
+
+@Composable
+private fun GradientText(text: String, brush: Brush, style: TextStyle) {
+    Text(
+        text = buildAnnotatedString { withStyle(SpanStyle(brush = brush)) { append(text) } },
+        style = style
+    )
+}
+
+@Composable
+private fun Pill(label: String, brush: Brush, leadingDot: Boolean = false) {
+    Surface(
+        color = Color.Transparent,
+        shape = RoundedCornerShape(999.dp),
+        modifier = Modifier
+            .height(28.dp)
+            .border(1.dp, brush, RoundedCornerShape(999.dp))
+            .background(brush, RoundedCornerShape(999.dp))
+            .padding(horizontal = 12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (leadingDot) {
+                Box(
+                    Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(.85f))
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(label, color = Color.White, style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+@Composable
+private fun AvatarWithRing(content: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(64.dp)
+            .background(MaterialTheme.extended.gradientAvatar, CircleShape)
+            .padding(3.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surface, CircleShape)
+    ) { content() }
+}
+
+@Composable
+private fun RoiCard(roi: String) {
+    val ex = MaterialTheme.extended
+    val shape = RoundedCornerShape(18.dp)
+
+    Surface(
+        modifier = Modifier
+            .widthIn(min = 128.dp)
+            .clip(shape)
+            // фон — тот же «glass» что и у большой карточки (фиолетовый), без зелёной заливки
+            .background(ex.glassSurface, shape)
+            // тонкая фиолетовая окантовка, как на макете
+            .border(
+                1.dp,
+                Brush.linearGradient(
+                    listOf(Color(0x66B08BFF), Color(0x334E2EA8))
+                ),
+                shape
+            ),
+        color = Color.Transparent,
+        shape = shape
+    ) {
+        Column(
+            Modifier.padding(vertical = 14.dp, horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("ROI", color = Color.White.copy(.7f), style = MaterialTheme.typography.labelMedium)
+            Spacer(Modifier.height(6.dp))
+            // зелёный только у значения
+            Text(roi, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.extended.success)
+        }
+    }
+}
+
 
 @Composable
 private fun StatusDot(status: WebSocketStatus) {
