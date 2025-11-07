@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -179,7 +180,7 @@ fun EditProfileScreen(
                             .padding(4.dp)
                     ) {
                         Image(
-                            painter = painterResource(id = avatarResIdFrom(id)),
+                            painter = painterResource(id = avatarResIdFromLocal(id)),
                             contentDescription = "Avatar $id",
                             modifier = Modifier.size(64.dp)
                         )
@@ -207,8 +208,8 @@ fun EditProfileScreen(
 }
 
 /* helper to map built-in avatar id → drawable ------------------------------ */
-@Composable
-fun avatarResIdFrom(id: Int): Int = when (id) {
+@DrawableRes
+private fun avatarResIdFromLocal(id: Int): Int = when (id) {
     0 -> R.drawable.avatar_0
     1 -> R.drawable.avatar_1
     2 -> R.drawable.avatar_2
