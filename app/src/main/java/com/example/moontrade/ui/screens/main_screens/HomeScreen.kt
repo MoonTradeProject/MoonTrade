@@ -1,6 +1,5 @@
 package com.example.moontrade.ui.screens.main_screens
 
-import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,8 +15,15 @@ import com.example.moontrade.model.Mode
 import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.main_screens.home_sub_screens.*
 import com.example.moontrade.viewmodels.*
+import java.util.Locale
 
-@SuppressLint("DefaultLocale")
+/**
+ * displays:
+ *  - user profile summary (nickname, avatar, tags)
+ *  - current balance and ROI
+ *  - portfolio preview (user assets)
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -25,14 +31,9 @@ fun HomeScreen(
     balanceViewModel: BalanceViewModel,
     tournamentsViewModel: TournamentsViewModel,
     profileViewModel: ProfileViewModel,
-    leaderboardViewModel: LeaderboardViewModel,
     userAssetsViewModel: UserAssetsViewModel,
-    selectedPlayerViewModel: SelectedPlayerViewModel,
 ) {
-    // Collecting reactive state from all ViewModels
-    val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
-    val topPlayers = leaderboardEntries.take(5)
-
+    // --- Reactive state from ViewModels
     val nickname by profileViewModel.nickname.collectAsState()
     val selectedTags by profileViewModel.selectedTags.collectAsState()
     val avatarId by profileViewModel.avatarId.collectAsState()
@@ -45,31 +46,30 @@ fun HomeScreen(
     val tournaments by tournamentsViewModel.tournaments.collectAsState()
     val userAssets by userAssetsViewModel.assets.collectAsState()
 
-    // Build list of available modes (Main + joined tournaments)
+    // --- Available modes (Main + joined tournaments)
     val selectableModes = remember(tournaments) {
         listOf(SelectableMode(Mode.Main, "Main")) +
                 tournaments.filter { it.isJoined }
                     .map { SelectableMode(Mode.Tournament(it.id.toString()), it.name) }
     }
 
-    // Keep track of which mode is selected
+    // --- Currently selected mode
     var selected by remember(currentMode, selectableModes) {
         mutableStateOf(selectableModes.find { it.mode == currentMode } ?: selectableModes.first())
     }
 
-    // Connect to balance socket when HomeScreen appears
+    // --- Connect to the balance WebSocket on screen start
     LaunchedEffect(Unit) { balanceViewModel.connect() }
 
-    // When mode changes, reload data for leaderboard and assets ---
+    // --- Reload data when mode changes
     LaunchedEffect(selected.mode) {
         balanceViewModel.changeMode(selected.mode)
-        leaderboardViewModel.loadLeaderboard()
         userAssetsViewModel.loadUserAssets()
     }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    //  Main screen layout
+    // --- Main screen layout
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -83,6 +83,7 @@ fun HomeScreen(
             )
         }
     ) { padding ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -91,10 +92,11 @@ fun HomeScreen(
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Profile + Balance + ROI card
+            // --- User profile + balance + ROI
             item {
                 val roiValue = roi.replace("%", "").replace(",", ".").toDoubleOrNull() ?: 0.0
-                val roiLabel = (if (roiValue >= 0) "+" else "") + String.format("%.1f%%", roiValue)
+                val roiLabel = (if (roiValue >= 0) "+" else "") +
+                        String.format(Locale.US, "%.1f%%", roiValue)
 
                 ProfileSummaryCard(
                     nickname = nickname,
@@ -108,30 +110,31 @@ fun HomeScreen(
                 )
             }
 
-            // Top 5 traders section
-            TopTradersSection(
-                top = topPlayers,
-                onClickPlayer = {
-                    selectedPlayerViewModel.set(it)
-                    navController.navigate(NavRoutes.PLAYER_PROFILE)
-                }
-            )
+            // --- Portfolio / assets preview
+            item {
+                AssetsSection(
+                    assets = userAssets.map { a ->
+                        UserAssetUi(
+                            name = a.asset_name,
+                            amount = a.amount,
+                            change = listOf(-2.5, 1.2, 0.8, -0.6).random() // temporary visual placeholder
+                        )
+                    }
+                )
+            }
 
-            // User assets list
-            AssetsSection(
-                assets = userAssets.map { a ->
-                    UserAssetUi(a.asset_name, a.amount)
-                }
-            )
-
-            // Extra space at the bottom (for scroll padding)
+            // --- Bottom spacing for safe scrolling
             item { Spacer(Modifier.height(80.dp)) }
         }
     }
 }
 
-/* ---------------- Helper function ---------------- */
+/* ---------------- Helper ---------------- */
 
+/**
+ * Maps the avatar ID from the user profile to the corresponding drawable resource.
+ * Returns [R.drawable.img] if no match is found.
+ */
 @DrawableRes
 private fun resolveAvatarRes(id: Int): Int = when (id) {
     0 -> R.drawable.avatar_0

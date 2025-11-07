@@ -1,7 +1,5 @@
 package com.example.moontrade.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -21,7 +19,6 @@ import com.example.moontrade.ui.screens.profile.PlayerProfileScreen
 import com.example.moontrade.ui.theme.ThemeViewModel
 import com.example.moontrade.viewmodels.*
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -34,7 +31,7 @@ fun AppNavigation() {
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
     val marketDetailViewModel: MarketDetailViewModel = hiltViewModel()
-    val tradeViewModel: TradeViewModel = hiltViewModel()
+   // val tradeViewModel: TradeViewModel = hiltViewModel()
     val selectedPlayerViewModel: SelectedPlayerViewModel = hiltViewModel()
     val leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
     val userAssetsViewModel: UserAssetsViewModel = hiltViewModel()
@@ -103,9 +100,9 @@ fun AppNavigation() {
                     balanceViewModel,
                     tournamentsViewModel,
                     profileViewModel,
-                    leaderboardViewModel,
+                    //leaderboardViewModel,
                     userAssetsViewModel,
-                    selectedPlayerViewModel
+                    //selectedPlayerViewModel
                 )
             }
             composable(NavRoutes.MARKETS) {
@@ -142,7 +139,6 @@ fun AppNavigation() {
 
     if (currentRoute in bottomBarRoutes) {
         Scaffold(
-            // 🔥 УБРАН topBar, оставлен только низ 🔥
             bottomBar = { BottomBar(navController) }
         ) { padding ->
             content(padding)
