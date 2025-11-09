@@ -117,7 +117,8 @@ fun HomeScreen(
                         UserAssetUi(
                             name = a.asset_name,
                             amount = a.amount,
-                            change = listOf(-2.5, 1.2, 0.8, -0.6).random() // temporary visual placeholder
+                            assetValue = a.asset_value,
+                            change = listOf(-2.5, 1.2, 0.8, -0.6).random()
                         )
                     }
                 )
