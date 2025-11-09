@@ -1,6 +1,7 @@
 package com.example.moontrade.data.repository
 
 import android.util.Log
+import com.example.moontrade.BuildConfig
 import com.example.moontrade.auth.AuthPreferences
 import com.example.moontrade.auth.AuthRepository
 import com.example.moontrade.auth.RegisterResult
@@ -42,7 +43,7 @@ class AuthRepositoryImpl @Inject constructor(
 
         val req = RegisterRequest(token, email, email.substringBefore("@"))
         Log.d("AuthRepositoryImpl", "📤 Sending register request to backend: $req")
-
+        Log.d("AuthRepositoryImpl", "🌍 Base URL: ${BuildConfig.BASE_URL}")
         try {
             authApi.register(req) // 🔥 это может упасть
             Log.d("AuthRepositoryImpl", "✅ Backend registration successful")

@@ -22,6 +22,16 @@ class ProfileStorage @Inject constructor(
     fun loadNickname(): String =
         prefs.getString("nickname", "TraderX") ?: "TraderX"
 
+    /* description ------------------------------------------------------------- */
+
+
+
+    fun saveDescription(description: String) =
+        prefs.edit { putString("description", description) }
+
+    fun loadDescription(): String =
+        prefs.getString("description", "") ?: ""
+
     /* tags -------------------------------------------------------------------- */
 
     fun saveTags(tags: List<String>) =

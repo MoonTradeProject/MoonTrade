@@ -48,7 +48,8 @@ fun EditProfileScreen(
     var tempNickname  by remember { mutableStateOf(nickname) }
     var tempTags      by remember { mutableStateOf(selectedTags.toMutableList()) }
     var tempAvatarId  by remember { mutableIntStateOf(avatarId) }
-    var description   by remember { mutableStateOf("") }
+    val descriptionVm by viewModel.description.collectAsState()
+    var description by remember(descriptionVm) { mutableStateOf(descriptionVm) }
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
@@ -175,7 +176,7 @@ fun EditProfileScreen(
                             )
                             .clickable {
                                 tempAvatarId = id
-                                viewModel.updateAvatarId(id, description)
+                                viewModel.updateAvatarId(id)
                             }
                             .padding(4.dp)
                     ) {
@@ -191,12 +192,18 @@ fun EditProfileScreen(
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
+
                     viewModel.updateNickname(tempNickname)
                     viewModel.updateSelectedTags(tempTags)
+                    viewModel.updateDescription(description)
 
-                    if (tempAvatarId == -1) {
-                        viewModel.saveProfile(description)
+
+                    if (tempAvatarId != avatarId) {
+                        viewModel.updateAvatarId(tempAvatarId)
                     }
+
+
+                    viewModel.saveProfile()
 
                     navController.popBackStack()
                 }
