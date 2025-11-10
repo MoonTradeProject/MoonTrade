@@ -29,17 +29,17 @@ fun MarketDetailScreen(
     /* ------------- LOCAL UI STATE ------------- */
     var orderType by remember { mutableStateOf("Limit") }
     var isBuy     by remember { mutableStateOf(true) }
-    var stopLossEnabled   by remember { mutableStateOf(false) }
-    var stopLoss          by remember { mutableStateOf("") }
-    var takeProfitEnabled by remember { mutableStateOf(false) }
-    var takeProfit        by remember { mutableStateOf("") }
+//    var stopLossEnabled   by remember { mutableStateOf(false) }
+//    var stopLoss          by remember { mutableStateOf("") }
+//    var takeProfitEnabled by remember { mutableStateOf(false) }
+//    var takeProfit        by remember { mutableStateOf("") }
 
     /* ------------- SNAPSHOT ------------- */
     val snapshot by viewModel.snapshot.collectAsState()
 
     LaunchedEffect(symbol) {
         viewModel.connect(symbol)
-        tradeViewModel.assetName.value = symbol      // актуальный тикер
+        tradeViewModel.assetName.value = symbol
     }
 
     Column(
@@ -67,7 +67,10 @@ fun MarketDetailScreen(
         )
 
         Spacer(Modifier.height(12.dp))
-        OrderBookLive(snapshot = snapshot)
+        Row(Modifier.fillMaxWidth()) {
+            OrderBookLive(snapshot = snapshot)
+        }
+
         Spacer(Modifier.height(24.dp))
 
         /* Order type */
@@ -116,35 +119,6 @@ fun MarketDetailScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        /* Stop-loss + take-profit (опц.) */
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = stopLossEnabled, onCheckedChange = { stopLossEnabled = it })
-            Text("Stop-Loss")
-        }
-        if (stopLossEnabled) {
-            OutlinedTextField(
-                value = stopLoss,
-                onValueChange = { stopLoss = it },
-                label = { Text("Stop-Loss Price") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(checked = takeProfitEnabled, onCheckedChange = { takeProfitEnabled = it })
-            Text("Take-Profit")
-        }
-        if (takeProfitEnabled) {
-            OutlinedTextField(
-                value = takeProfit,
-                onValueChange = { takeProfit = it },
-                label = { Text("Take-Profit Price") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
         Spacer(Modifier.height(16.dp))
 
         /* ---------- SUBMIT BUTTON ---------- */
@@ -161,6 +135,36 @@ fun MarketDetailScreen(
         ) {
             Text(if (isBuy) "Buy" else "Sell")
         }
+
+
+        /* Stop-loss + take-profit (commented for now, TBA) */
+//        Row(verticalAlignment = Alignment.CenterVertically) {
+//            Checkbox(checked = stopLossEnabled, onCheckedChange = { stopLossEnabled = it })
+//            Text("Stop-Loss")
+//        }
+//        if (stopLossEnabled) {
+//            OutlinedTextField(
+//                value = stopLoss,
+//                onValueChange = { stopLoss = it },
+//                label = { Text("Stop-Loss Price") },
+//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+//                modifier = Modifier.fillMaxWidth()
+//            )
+//        }
+//
+//        Row(verticalAlignment = Alignment.CenterVertically) {
+//            Checkbox(checked = takeProfitEnabled, onCheckedChange = { takeProfitEnabled = it })
+//            Text("Take-Profit")
+//        }
+//        if (takeProfitEnabled) {
+//            OutlinedTextField(
+//                value = takeProfit,
+//                onValueChange = { takeProfit = it },
+//                label = { Text("Take-Profit Price") },
+//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+//                modifier = Modifier.fillMaxWidth()
+//            )
+//        }
     }
 }
 

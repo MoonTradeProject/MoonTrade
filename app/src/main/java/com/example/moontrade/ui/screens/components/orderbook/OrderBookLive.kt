@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.example.moontrade.model.OrderBookSnapshot
 
 @Composable
-fun OrderBookLive(snapshot: OrderBookSnapshot?) {
+fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -25,7 +25,6 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?) {
         Spacer(Modifier.height(8.dp))
 
         Row(Modifier.fillMaxWidth()) {
-            Text("Vol", modifier = Modifier.weight(1f), textAlign = TextAlign.Start, color = Color.Gray)
             Text("Price", modifier = Modifier.weight(1f), textAlign = TextAlign.Center, color = Color.Gray)
             Text("Vol", modifier = Modifier.weight(1f), textAlign = TextAlign.End, color = Color.Gray)
         }
@@ -69,19 +68,19 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?) {
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "%.4f".format(it.volume),
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Start,
-                        color = Color.Green
-                    )
+                    Spacer(Modifier.weight(1f))
                     Text(
                         text = "%.2f".format(it.price),
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         color = Color.White
                     )
-                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "%.4f".format(it.volume),
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.End,
+                        color = Color.Green
+                    )
                 }
             }
     }
