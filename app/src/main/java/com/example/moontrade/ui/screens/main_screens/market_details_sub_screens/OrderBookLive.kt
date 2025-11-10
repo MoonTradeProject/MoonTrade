@@ -1,4 +1,4 @@
-package com.example.moontrade.ui.screens.components.orderbook
+package com.example.moontrade.ui.screens.main_screens.market_details_sub_screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,6 +13,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.moontrade.model.OrderBookSnapshot
 
+
+//        Text(
+//            "Best Bid: ${snapshot?.bids?.firstOrNull()?.price ?: "-"}    |    " +
+//                    "Best Ask: ${snapshot?.asks?.firstOrNull()?.price ?: "-"}"
+//        )
 @Composable
 fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
     Column(
