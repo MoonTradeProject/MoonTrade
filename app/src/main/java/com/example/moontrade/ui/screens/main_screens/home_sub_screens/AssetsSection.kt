@@ -23,9 +23,12 @@ data class UserAssetUi(
     val change: Double? = null
 )
 
-
 @Composable
-fun AssetsSection(assets: List<UserAssetUi>) {
+fun AssetsSection(
+    assets: List<UserAssetUi>,
+    isLoading: Boolean,
+    error: String?
+) {
     val cs = MaterialTheme.colorScheme
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -35,35 +38,40 @@ fun AssetsSection(assets: List<UserAssetUi>) {
             color = cs.onBackground
         )
 
-        if (assets.isEmpty()) {
-            Text("No assets or failed to load", color = cs.onSurface.copy(alpha = .6f))
-        } else {
-            assets.forEach { a ->
-                AssetRow(
-                    label = a.name,
-                    value = a.amount.toPlainString(),
-                    assetValueUsd = a.assetValue
-                        .setScale(2, RoundingMode.HALF_UP)
-                        .toPlainString(),
-                    change = a.change
+        when {
+            isLoading -> {
+                Text("Loading…", color = cs.onSurface.copy(alpha = .6f))
+            }
+            error != null -> {
+                Text("Failed to load: $error", color = cs.error)
+            }
+            assets.isEmpty() -> {
+                Text("No assets available", color = cs.onSurface.copy(alpha = .6f))
+            }
+            else -> {
+                assets.forEach { a ->
+                    AssetRow(
+                        label = a.name,
+                        value = a.amount.toPlainString(),
+                        assetValueUsd = a.assetValue
+                            .setScale(2, RoundingMode.HALF_UP)
+                            .toPlainString(),
+                        change = a.change
+                    )
+                }
+
+                val total = assets.fold(BigDecimal.ZERO) { acc, asset -> acc + asset.assetValue }
+
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "Total value: $${total.setScale(2, RoundingMode.HALF_UP)}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = cs.onSurface
                 )
             }
-
-
-            val total = assets.fold(BigDecimal.ZERO) { acc, asset ->
-                acc + asset.assetValue
-            }
-
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "Total value: $${total.setScale(2, RoundingMode.HALF_UP)}",
-                style = MaterialTheme.typography.titleMedium,
-                color = cs.onSurface
-            )
         }
     }
 }
-
 
 @Composable
 private fun AssetRow(
@@ -119,7 +127,6 @@ private fun AssetRow(
                     )
                 }
             }
-
 
             if (change != null) {
                 val color = if (change >= 0) ex.success else ex.danger

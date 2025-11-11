@@ -8,8 +8,8 @@ import retrofit2.http.Query
 interface AssetsApi {
     @GET("user/assets")
     suspend fun getUserAssets(
-        @Query("scope") scope: String,                 // "main" | "tournament"
-        @Query("tournament_id") tournamentId: String?, // null для main
+        @Query("mode") mode: String,
+        @Query("tournamentId") tournamentId: String?,
         @Header("Authorization") bearer: String
     ): List<UserAsset>
 }

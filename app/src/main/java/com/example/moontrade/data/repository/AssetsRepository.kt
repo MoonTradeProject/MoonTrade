@@ -10,11 +10,11 @@ class AssetsRepository @Inject constructor(
     private val api: AssetsApi,
     private val session: SessionManager
 ) {
-    suspend fun fetchUserAssets(mode: Mode) : List<UserAsset> {
+    suspend fun fetchUserAssets(mode: Mode): List<UserAsset> {
         val token = session.getValidToken() ?: error("No valid token")
         return when (mode) {
             is Mode.Main -> api.getUserAssets("main", null, "Bearer $token")
-            is Mode.Tournament -> api.getUserAssets("tournament", mode.tournamentId, "Bearer $token")
+            is Mode.Tournament -> api.getUserAssets("tournament", mode.tournamentId.toString(), "Bearer $token")
         }
     }
 }

@@ -46,6 +46,10 @@ fun HomeScreen(
     val tournaments by tournamentsViewModel.tournaments.collectAsState()
     val userAssets by userAssetsViewModel.assets.collectAsState()
 
+    // --- New states for loading and error
+    val isLoading by userAssetsViewModel.loading.collectAsState()
+    val assetsError by userAssetsViewModel.error.collectAsState()
+
     // --- Available modes (Main + joined tournaments)
     val selectableModes = remember(tournaments) {
         listOf(SelectableMode(Mode.Main, "Main")) +
@@ -61,11 +65,15 @@ fun HomeScreen(
     // --- Connect to the balance WebSocket on screen start
     LaunchedEffect(Unit) { balanceViewModel.connect() }
 
-    // --- Reload data when mode changes
+// --- First load of user assets when entering screen
+    LaunchedEffect(Unit) { userAssetsViewModel.loadUserAssets() }
+
+// --- Reload data when mode changes
     LaunchedEffect(selected.mode) {
         balanceViewModel.changeMode(selected.mode)
         userAssetsViewModel.loadUserAssets()
     }
+
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -120,7 +128,9 @@ fun HomeScreen(
                             assetValue = a.asset_value,
                             change = listOf(-2.5, 1.2, 0.8, -0.6).random()
                         )
-                    }
+                    },
+                    isLoading = isLoading,
+                    error = assetsError
                 )
             }
 

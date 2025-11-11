@@ -20,24 +20,30 @@ class UserAssetsViewModel @Inject constructor(
 
     private val _assets = MutableStateFlow<List<UserAsset>>(emptyList())
     val assets: StateFlow<List<UserAsset>> = _assets.asStateFlow()
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
 
     fun loadUserAssets() {
         viewModelScope.launch {
             try {
+                _loading.value = true
+                _error.value = null
+
                 val mode = session.mode.value
                 println("📥 [UserAssetsViewModel] Loading assets with mode=$mode")
 
                 val result = repository.fetchUserAssets(mode)
 
                 println("✅ [UserAssetsViewModel] Loaded ${result.size} assets")
-                result.forEach {
-                    println("→ ${it.asset_name}: amount=${it.amount}")
-                }
-
                 _assets.value = result
             } catch (e: Exception) {
                 println("❌ [UserAssetsViewModel] Failed to load assets: ${e.message}")
-                e.printStackTrace()
+                _error.value = e.message ?: "Failed to load assets"
+            } finally {
+                _loading.value = false
             }
         }
     }
