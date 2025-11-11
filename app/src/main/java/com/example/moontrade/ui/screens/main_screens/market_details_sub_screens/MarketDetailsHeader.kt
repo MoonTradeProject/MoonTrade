@@ -13,18 +13,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.example.moontrade.viewmodels.MarketDetailViewModel
 
 @Composable
 fun TopBarWithBackButton(
     symbol: String,
     navController: NavController,
+    viewModel: MarketDetailViewModel,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth().statusBarsPadding(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { navController.popBackStack() }) {
+        IconButton(onClick = {
+            viewModel.disconnect()
+            navController.popBackStack()
+        }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back"

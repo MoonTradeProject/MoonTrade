@@ -21,42 +21,37 @@ fun TradeForm(
 ) {
 
 
-    var orderType by remember { mutableStateOf("Limit") }
+    var orderType by remember { mutableStateOf("Market") }
     var isBuy by remember { mutableStateOf(true) }
+
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        Text(
-            "Best Ask: ${snapshot?.asks?.firstOrNull()?.price ?: "-"}    " +
-                    "Best Bid: ${snapshot?.bids?.firstOrNull()?.price ?: "-"}"
+
+        BestPrices(snapshot = snapshot)
+
+        /* ---------- SIDE ---------- */
+        Spacer(Modifier.height(5.dp))
+        AnimatedSegmentedButton(
+            options = listOf("Buy", "Sell"),
+            selectedIndex = if (isBuy) 0 else 1,
+            onSelectedIndex = { isBuy = it == 0 },
+            modifier = Modifier.fillMaxWidth()
         )
+
         /* ---------- ORDER TYPE ---------- */
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Order Type:")
             Spacer(Modifier.width(8.dp))
             DropdownMenuBox(
                 selected = orderType,
-                options = listOf("Limit", "Market"),
+                options = listOf("Market", "Limit"),
                 onSelected = { orderType = it }
             )
         }
-
-
-
-        /* ---------- SIDE ---------- */
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Side:")
-            Spacer(Modifier.width(8.dp))
-            SegmentedButton(
-                options = listOf("Buy", "Sell"),
-                selectedIndex = if (isBuy) 0 else 1,
-                onSelectedIndex = { isBuy = it == 0 }
-            )
-        }
-
 
 
         /* ---------- PRICE (only for Limit) ---------- */

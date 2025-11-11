@@ -84,7 +84,7 @@ fun MarketDetailScreen(
 
     Scaffold(
         topBar = {
-            TopBarWithBackButton(symbol = symbol, navController = navController)
+            TopBarWithBackButton(symbol = symbol, navController = navController, viewModel = viewModel)
         }
     ) { innerPadding ->
 

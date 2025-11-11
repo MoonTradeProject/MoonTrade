@@ -71,6 +71,9 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.geometry)
+    implementation(libs.androidx.compose.foundation.layout)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
