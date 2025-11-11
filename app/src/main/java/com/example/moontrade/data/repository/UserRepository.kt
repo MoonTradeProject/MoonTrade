@@ -10,7 +10,8 @@ class UserRepository @Inject constructor(
     private val api: UserApi,
     private val session: SessionManager
 ) {
-
+    @Deprecated("Use AssetsRepository.fetchUserAssets")
+    @Suppress("unused")
     suspend fun fetchUserAssets(mode: Mode): List<UserAsset> {
         val token = session.getValidToken() ?: error("No valid token")
 
@@ -19,7 +20,7 @@ class UserRepository @Inject constructor(
             is Mode.Tournament -> {
                 val tid = mode.tournamentId
                 println("📤 Sending Tournament ID = $tid")
-                api.getUserAssets("tournament", tid.toString(), "Bearer $token")
+                api.getUserAssets("tournament", tid, "Bearer $token")
             }
         }
     }

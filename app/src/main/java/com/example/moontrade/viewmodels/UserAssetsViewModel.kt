@@ -2,7 +2,7 @@ package com.example.moontrade.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.moontrade.data.repository.UserRepository
+import com.example.moontrade.data.repository.AssetsRepository
 import com.example.moontrade.model.UserAsset
 import com.example.moontrade.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserAssetsViewModel @Inject constructor(
-    private val repository: UserRepository,
+    private val repository: AssetsRepository,
     private val session: SessionManager
 ) : ViewModel() {
 
@@ -26,8 +26,6 @@ class UserAssetsViewModel @Inject constructor(
             try {
                 val mode = session.mode.value
                 println("📥 [UserAssetsViewModel] Loading assets with mode=$mode")
-
-                _assets.value = emptyList()
 
                 val result = repository.fetchUserAssets(mode)
 
