@@ -23,13 +23,10 @@ fun PriceText(
 
     val adjustedDecimals = if (integerPartLength >= 3) 2 else decimals
 
-    // Safely limit decimals between 0 and 8
     val safeDecimals = adjustedDecimals.coerceIn(0, 8)
 
-    // Build format string dynamically (e.g., "%.4f")
     val formatted = "%.${safeDecimals}f".format(value)
 
-    // Adjust font size dynamically based on total width
     val fontSize = when {
         formatted.length > 12 -> 12.sp
         formatted.length > 8 -> 14.sp

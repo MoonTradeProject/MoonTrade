@@ -46,17 +46,18 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
                 ) {
                     PriceText(//price
                         value = it.price,
-                        color = Color.White,
+                        color = Color.Red,
                         textAlign = TextAlign.Start,
                         modifier = Modifier.weight(1f),
                     )
                     PriceText(//volume
                         value = it.volume,
-                        color = Color.Red,
+                        color = Color.White,
                         textAlign = TextAlign.End,
                         modifier = Modifier.weight(1f),
                     )
                 }
+                Spacer(modifier = Modifier.height(2.dp))
             } ?: Text("Loading...", color = Color.Gray)
 
         HorizontalDivider(Modifier.padding(vertical = 6.dp), thickness = 1.dp, color = Color.Gray)
@@ -73,17 +74,18 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
                 ) {
                     PriceText(//price
                         value = it.price,
-                        color = Color.White,
+                        color = Color.Green,
                         textAlign = TextAlign.Start,
                         modifier = Modifier.weight(1f),
                     )
                     PriceText(//volume
                         value = it.volume,
-                        color = Color.Green,
+                        color = Color.White,
                         textAlign = TextAlign.End,
                         modifier = Modifier.weight(1f),
                     )
                 }
-            }
+                Spacer(modifier = Modifier.height(2.dp))
+            } ?: Text("Loading...", color = Color.Gray)
     }
 }

@@ -94,7 +94,6 @@ fun MarketDetailScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            /* 🟩 Trade Form — 3/5 of width */
             Column(
                 modifier = Modifier
                     .weight(3f)
@@ -105,7 +104,6 @@ fun MarketDetailScreen(
                 TradeForm(tradeViewModel = tradeViewModel, snapshot = snapshot)
             }
 
-            /* 🟦 Order Book — 2/5 of width */
             Column(
                 modifier = Modifier
                     .weight(2f)

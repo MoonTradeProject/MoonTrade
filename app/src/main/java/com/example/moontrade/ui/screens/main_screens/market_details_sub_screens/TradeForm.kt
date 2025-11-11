@@ -29,6 +29,10 @@ fun TradeForm(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
+        Text(
+            "Best Ask: ${snapshot?.asks?.firstOrNull()?.price ?: "-"}    " +
+                    "Best Bid: ${snapshot?.bids?.firstOrNull()?.price ?: "-"}"
+        )
         /* ---------- ORDER TYPE ---------- */
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Order Type:")
@@ -40,7 +44,7 @@ fun TradeForm(
             )
         }
 
-        Spacer(Modifier.height(8.dp))
+
 
         /* ---------- SIDE ---------- */
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -53,7 +57,7 @@ fun TradeForm(
             )
         }
 
-        Spacer(Modifier.height(8.dp))
+
 
         /* ---------- PRICE (only for Limit) ---------- */
         if (orderType == "Limit") {
