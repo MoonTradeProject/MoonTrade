@@ -14,10 +14,6 @@ import androidx.compose.ui.unit.dp
 import com.example.moontrade.model.OrderBookSnapshot
 
 
-//        Text(
-//            "Best Bid: ${snapshot?.bids?.firstOrNull()?.price ?: "-"}    |    " +
-//                    "Best Ask: ${snapshot?.asks?.firstOrNull()?.price ?: "-"}"
-//        )
 @Composable
 fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
     Column(
@@ -26,17 +22,18 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
             .background(Color.DarkGray.copy(alpha = 0.4f))
             .padding(8.dp)
     ) {
+
         Text("Order Book", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(8.dp))
 
         Row(Modifier.fillMaxWidth()) {
-            Text("Price", modifier = Modifier.weight(1f), textAlign = TextAlign.Center, color = Color.Gray)
+            Text("Price", modifier = Modifier.weight(1f), textAlign = TextAlign.Start, color = Color.Gray)
             Text("Vol", modifier = Modifier.weight(1f), textAlign = TextAlign.End, color = Color.Gray)
         }
 
         Spacer(Modifier.height(4.dp))
 
-        // 🔺 ASKS — sort by price ASCENDING, but draw REVERSED
+        // ASKS — sort by price ASCENDING, but draw REVERSED
         snapshot?.asks
             ?.sortedBy { it.price }
             ?.reversed()
@@ -44,47 +41,47 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
             ?.forEach {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        text = "%.2f".format(it.price),
+                    PriceText(//price
+                        value = it.price,
+                        color = Color.White,
+                        textAlign = TextAlign.Start,
                         modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
                     )
-                    Text(
-                        text = "%.4f".format(it.volume),
-                        modifier = Modifier.weight(1f),
+                    PriceText(//volume
+                        value = it.volume,
+                        color = Color.Red,
                         textAlign = TextAlign.End,
-                        color = Color.Red
+                        modifier = Modifier.weight(1f),
                     )
                 }
             } ?: Text("Loading...", color = Color.Gray)
 
         HorizontalDivider(Modifier.padding(vertical = 6.dp), thickness = 1.dp, color = Color.Gray)
 
-        // 🟢 BIDS — sort by price DESCENDING
+        // BIDS — sort by price DESCENDING
         snapshot?.bids
             ?.sortedByDescending { it.price }
             ?.take(20)
             ?.forEach {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        text = "%.2f".format(it.price),
+                    PriceText(//price
+                        value = it.price,
+                        color = Color.White,
+                        textAlign = TextAlign.Start,
                         modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
                     )
-                    Text(
-                        text = "%.4f".format(it.volume),
-                        modifier = Modifier.weight(1f),
+                    PriceText(//volume
+                        value = it.volume,
+                        color = Color.Green,
                         textAlign = TextAlign.End,
-                        color = Color.Green
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }

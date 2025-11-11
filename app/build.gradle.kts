@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.firebase.functions.ktx)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.media3.common.ktx)
+    implementation(libs.androidx.compose.ui)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
