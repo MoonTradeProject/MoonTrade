@@ -13,6 +13,8 @@ import java.time.LocalDateTime
 import javax.inject.Singleton
 import com.example.moontrade.data.api.ProfileApi
 import com.example.moontrade.data.api.UserApi
+import com.example.moontrade.data.repository.AssetsRepository
+
 /**
  * Holds the single global Gson + Retrofit instances for the whole app.
  * NO other module should provide Gson or Retrofit!
@@ -46,4 +48,19 @@ object NetworkModule {
             .baseUrl("http://insectivora.eu:1010/")          // ← change if backend host differs
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
+
+    @Suppress("unused")
+    @Provides @Singleton
+    fun provideAssetsApi(retrofit: Retrofit): com.example.moontrade.data.api.AssetsApi =
+        retrofit.create(com.example.moontrade.data.api.AssetsApi::class.java)
+
+    @Suppress("unused")
+    @Provides @Singleton
+    fun provideAssetsRepository(
+        api: com.example.moontrade.data.api.AssetsApi,
+        session: com.example.moontrade.session.SessionManager
+    ): AssetsRepository =
+        AssetsRepository(api, session)
+
+
 }
