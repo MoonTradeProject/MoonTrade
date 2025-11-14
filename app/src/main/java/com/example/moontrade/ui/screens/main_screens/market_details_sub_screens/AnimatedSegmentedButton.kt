@@ -24,7 +24,7 @@ fun AnimatedSegmentedButton(
 ) {
     val indicatorPadding = 4.dp
     val indicatorWidth = 105.dp // adjust as needed
-    val sliderColor = if (options[selectedIndex].lowercase() == "buy") Color.Green else Color.Red
+    val sliderColor = if (options[selectedIndex].lowercase() == "buy") Color(0xFF0BA200) else Color(0xFFB70000)
 
     // animate the horizontal position of the indicator
     val offsetX by animateDpAsState(targetValue = (indicatorWidth - 5.dp) * selectedIndex)

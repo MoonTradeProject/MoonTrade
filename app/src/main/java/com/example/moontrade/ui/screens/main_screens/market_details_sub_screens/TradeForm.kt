@@ -2,6 +2,7 @@ package com.example.moontrade.ui.screens.main_screens.market_details_sub_screens
 
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,11 +31,12 @@ fun TradeForm(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-
+        //best bid best ask area
         BestPrices(snapshot = snapshot)
 
-        /* ---------- SIDE ---------- */
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(8.dp))
+
+        //buy sell slider
         AnimatedSegmentedButton(
             options = listOf("Buy", "Sell"),
             selectedIndex = if (isBuy) 0 else 1,
@@ -42,7 +44,7 @@ fun TradeForm(
             modifier = Modifier.fillMaxWidth()
         )
 
-        /* ---------- ORDER TYPE ---------- */
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Order Type:")
             Spacer(Modifier.width(8.dp))
@@ -59,20 +61,24 @@ fun TradeForm(
             OutlinedTextField(
                 value = tradeViewModel.price.value,
                 onValueChange = { tradeViewModel.price.value = it },
-                label = { Text("Price") },
+                placeholder  = { Text("Price") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(8.dp))
-        }
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(8.dp),
+                singleLine = true,
 
+            )
+        }
+        Spacer(Modifier.height(5.dp))
         /* ---------- AMOUNT ---------- */
         OutlinedTextField(
             value = tradeViewModel.amount.value,
             onValueChange = { tradeViewModel.amount.value = it },
-            label = { Text("Amount") },
+            placeholder = { Text("Amount") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+            shape = RoundedCornerShape(8.dp),
+            singleLine = true,
         )
 
         Spacer(Modifier.height(16.dp))
@@ -120,24 +126,24 @@ fun DropdownMenuBox(
     }
 }
 
-@Composable
-fun SegmentedButton(
-    options: List<String>,
-    selectedIndex: Int,
-    onSelectedIndex: (Int) -> Unit
-) {
-    Row {
-        options.forEachIndexed { index, label ->
-            Button(
-                onClick = { onSelectedIndex(index) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (selectedIndex == index) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.surfaceVariant
-                ),
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(label)
-            }
-        }
-    }
-}
+//@Composable
+//fun SegmentedButton(
+//    options: List<String>,
+//    selectedIndex: Int,
+//    onSelectedIndex: (Int) -> Unit
+//) {
+//    Row {
+//        options.forEachIndexed { index, label ->
+//            Button(
+//                onClick = { onSelectedIndex(index) },
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = if (selectedIndex == index) MaterialTheme.colorScheme.primary
+//                    else MaterialTheme.colorScheme.surfaceVariant
+//                ),
+//                modifier = Modifier.weight(1f)
+//            ) {
+//                Text(label)
+//            }
+//        }
+//    }
+//}
