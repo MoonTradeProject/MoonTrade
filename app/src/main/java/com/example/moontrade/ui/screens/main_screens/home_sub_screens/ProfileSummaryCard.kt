@@ -11,15 +11,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.moontrade.ui.screens.components.glasskit.*
+import com.example.moontrade.ui.theme.Violet200
+import com.example.moontrade.ui.theme.Violet400
+import com.example.moontrade.ui.theme.Violet600
 import com.example.moontrade.ui.theme.extended
 import com.example.moontrade.utils.parseBigDecimalLoose
 import com.example.moontrade.utils.formatUsdFull
@@ -49,8 +53,15 @@ fun ProfileSummaryCard(
 
     GlassCard(overlay = ex.gradientAccent) {
         // top part
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            AvatarWithRing {
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            AvatarWithRing(
+                size = 100.dp,
+                innerColor = Color.Transparent,
+                borderPadding = 0.dp
+            ) {
                 if (avatarId == -1 && !avatarUrl.isNullOrEmpty()) {
                     Image(
                         rememberAsyncImagePainter(avatarUrl),
@@ -70,17 +81,53 @@ fun ProfileSummaryCard(
                 }
             }
 
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(36.dp))
 
-            Column(Modifier.weight(1f)) {
-                GradientText(
-                    text = if (nickname.isBlank()) "CryptoMaster" else nickname,
-                    brush = ex.gradientAvatar,
-                    style = MaterialTheme.typography.titleLarge
+            Column(Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                val displayName = if (nickname.isBlank()) "CryptoMaster" else nickname
+
+
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        //
+                        fontWeight = FontWeight.Bold,
+                        shadow = Shadow(
+                            color = Color.Black.copy(alpha = 0.35f),
+                            offset = Offset(0f, 2f),
+                            blurRadius = 1f
+                        )
+                    ),
+                    color = cs.onSurface.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+
                 )
                 Spacer(Modifier.height(8.dp))
-                Pill("ACTIVE", ex.gradientPrimary, leadingDot = true)
+
+                val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+
+                val activeBrush = if (isDark) {
+                    Brush.horizontalGradient(
+                        listOf(
+                            Violet400.copy(alpha = 0.95f),
+                            Violet600.copy(alpha = 0.95f)
+                        )
+                    )
+                } else {
+
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.80f),
+                            Violet200.copy(alpha = 0.85f)
+                        )
+                    )
+                }
+                ActiveStatusPill()
+
                 Spacer(Modifier.height(8.dp))
+
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -142,15 +189,17 @@ fun ProfileSummaryCard(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
+                    val ex = MaterialTheme.extended
+
                     Text(
                         text = amountUi,
                         style = amountStyle,
-                        color = Color.White,
+                        color = ex.positiveText,
                         maxLines = 1,
                         modifier = Modifier.alignByBaseline()
                     )
 
-                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.width(10.dp))
 
                     Text(
                         text = "USDT",
@@ -170,7 +219,6 @@ fun ProfileSummaryCard(
         }
     }
 }
-
 @Composable
 private fun RoiCard(roi: String, isPositive: Boolean) {
     val ex = MaterialTheme.extended
@@ -182,10 +230,10 @@ private fun RoiCard(roi: String, isPositive: Boolean) {
         modifier = Modifier
             .widthIn(min = 120.dp)
             .clip(shape)
-            .background(ex.glassSurface, shape)
+
             .border(
-                1.dp,
-                Brush.linearGradient(listOf(Color(0x66B08BFF), Color(0x334E2EA8))),
+                3.dp,
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
                 shape
             ),
         color = Color.Transparent,
