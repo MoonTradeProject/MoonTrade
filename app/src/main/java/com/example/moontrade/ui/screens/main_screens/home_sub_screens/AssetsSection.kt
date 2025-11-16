@@ -1,20 +1,18 @@
 package com.example.moontrade.ui.screens.main_screens.home_sub_screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.moontrade.ui.screens.components.glasskit.GlassCard
-import com.example.moontrade.ui.theme.extended
+import com.example.moontrade.ui.screens.components.glasskit.UserAssetCard
 import java.math.BigDecimal
-import java.math.RoundingMode
-import java.util.Locale
+import com.example.moontrade.utils.formatFiat
 
 data class UserAssetUi(
     val name: String,
@@ -32,109 +30,54 @@ fun AssetsSection(
     val cs = MaterialTheme.colorScheme
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
         Text(
-            text = "Your Assets",
-            style = MaterialTheme.typography.titleLarge,
-            color = cs.onBackground
+            text = "YOUR ASSETS",
+            color = cs.onSurface.copy(alpha = .65f),
+            style = MaterialTheme.typography.labelLarge
         )
 
         when {
             isLoading -> {
-                Text("Loading…", color = cs.onSurface.copy(alpha = .6f))
-            }
-            error != null -> {
-                Text("Failed to load: $error", color = cs.error)
-            }
-            assets.isEmpty() -> {
-                Text("No assets available", color = cs.onSurface.copy(alpha = .6f))
-            }
-            else -> {
-                assets.forEach { a ->
-                    AssetRow(
-                        label = a.name,
-                        value = a.amount.toPlainString(),
-                        assetValueUsd = a.assetValue
-                            .setScale(2, RoundingMode.HALF_UP)
-                            .toPlainString(),
-                        change = a.change
-                    )
-                }
-
-                val total = assets.fold(BigDecimal.ZERO) { acc, asset -> acc + asset.assetValue }
-
-                Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "Total value: $${total.setScale(2, RoundingMode.HALF_UP)}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = cs.onSurface
+                    text = "Loading…",
+                    color = cs.onSurface.copy(alpha = .6f)
                 )
             }
-        }
-    }
-}
 
-@Composable
-private fun AssetRow(
-    label: String,
-    value: String,
-    assetValueUsd: String,
-    change: Double?
-) {
-    val cs = MaterialTheme.colorScheme
-    val ex = MaterialTheme.extended
-
-    GlassCard {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .background(ex.gradientAccent),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = label.firstOrNull()?.uppercase() ?: "?",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-
-                Spacer(Modifier.width(12.dp))
-
-                Column {
-                    Text(
-                        label,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = cs.onSurface
-                    )
-                    Text(
-                        text = "Amount: $value",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = cs.onSurface.copy(alpha = .7f)
-                    )
-                    Text(
-                        text = "≈ $$assetValueUsd",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = cs.primary
-                    )
-                }
+            error != null -> {
+                Text(
+                    text = "Failed to load: $error",
+                    color = cs.error
+                )
             }
 
-            if (change != null) {
-                val color = if (change >= 0) ex.success else ex.danger
-                val sign = if (change >= 0) "+" else ""
+            assets.isEmpty() -> {
                 Text(
-                    "$sign${String.format(Locale.US, "%.2f", change)}%",
-                    color = color,
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "No assets available",
+                    color = cs.onSurface.copy(alpha = .6f)
+                )
+            }
+
+            else -> {
+                // список карточек ассетов
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    assets.forEach { a ->
+                        UserAssetCard(
+                            asset = a,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+
+                val total = assets.fold(BigDecimal.ZERO) { acc, item -> acc + item.assetValue }
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    text = "Total value: $${formatFiat(total)}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = cs.onSurface
                 )
             }
         }
