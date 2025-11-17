@@ -4,6 +4,8 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,6 +15,7 @@ import androidx.navigation.NavController
 import com.example.moontrade.R
 import com.example.moontrade.model.Mode
 import com.example.moontrade.navigation.NavRoutes
+import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.main_screens.home_sub_screens.*
 import com.example.moontrade.viewmodels.*
 import java.util.Locale
@@ -65,15 +68,14 @@ fun HomeScreen(
     // --- Connect to the balance WebSocket on screen start
     LaunchedEffect(Unit) { balanceViewModel.connect() }
 
-// --- First load of user assets when entering screen
+    // --- First load of user assets when entering screen
     LaunchedEffect(Unit) { userAssetsViewModel.loadUserAssets() }
 
-// --- Reload data when mode changes
+    // --- Reload data when mode changes
     LaunchedEffect(selected.mode) {
         balanceViewModel.changeMode(selected.mode)
         userAssetsViewModel.loadUserAssets()
     }
-
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -83,11 +85,24 @@ fun HomeScreen(
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            HomeTopBar(
-                selected = selected,
-                items = selectableModes,
-                onSelect = { selected = it },
-                onOpenSettings = { navController.navigate(NavRoutes.SETTINGS) }
+            TopBar(
+                title = null,
+                showBack = false, // на хоуме стрелка не нужна
+                navigationContent = {
+                    ModeSelector(
+                        selected = selected,
+                        items = selectableModes,
+                        onSelect = { selected = it }
+                    )
+                },
+                actions = {
+                    IconButton(onClick = { navController.navigate(NavRoutes.SETTINGS) }) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -102,7 +117,11 @@ fun HomeScreen(
         ) {
             // --- User profile + balance + ROI
             item {
-                val roiValue = roi.replace("%", "").replace(",", ".").toDoubleOrNull() ?: 0.0
+                val roiValue = roi
+                    .replace("%", "")
+                    .replace(",", ".")
+                    .toDoubleOrNull() ?: 0.0
+
                 val roiLabel = (if (roiValue >= 0) "+" else "") +
                         String.format(Locale.US, "%.1f%%", roiValue)
 
