@@ -1,19 +1,22 @@
 package com.example.moontrade.ui.screens.components.bars
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.automirrored.outlined.ShowChart
+import androidx.compose.material.icons.outlined.EmojiEvents
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.moontrade.ui.theme.*
 
 data class BottomNavItem(
     val route: String,
@@ -22,44 +25,70 @@ data class BottomNavItem(
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem("home", "Home", Icons.Default.Home),
-    BottomNavItem("markets", "Markets", Icons.Default.CheckCircle),
-    BottomNavItem("ratings", "Ratings", Icons.Default.AccountCircle),
-    BottomNavItem("tournaments", "Tournaments", Icons.Default.Star)
+    BottomNavItem("home", "Home", Icons.Outlined.Home),
+    BottomNavItem("markets", "Market", Icons.AutoMirrored.Outlined.ShowChart),
+    BottomNavItem("ratings", "Rating", Icons.Outlined.Star),
+    BottomNavItem("tournaments", "Events", Icons.Outlined.EmojiEvents),
+    BottomNavItem("profile", "Profile", Icons.Outlined.Person)
 )
 
 @Composable
 fun BottomBar(navController: NavController) {
+    val cs = MaterialTheme.colorScheme
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val currentRoot = currentRoute?.substringBefore('/')
 
     NavigationBar(
-        containerColor = Ink950,  // почти чёрный фон бара
-        tonalElevation = 0.dp     // убираем “туман”
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        containerColor = cs.background,
+        tonalElevation = 0.dp,
+        windowInsets = WindowInsets(0)
     ) {
         bottomNavItems.forEach { item ->
-            val selected = currentRoot == item.route
 
-            NavigationBarItem(
-                selected = selected,
-                icon = { Icon(item.icon, null) },
-                label = { Text(item.label) },
-                onClick = {
-                    if (!selected) {
-                        navController.navigate(item.route) {
-                            launchSingleTop = true
-                        }
-                    }
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = Violet800,           // подсветка выбранного пункта
-                    selectedIconColor = Violet200,        // фиолетовая иконка
-                    selectedTextColor = Violet200,        // фиолетовая подпись
-                    unselectedIconColor = TextSecondaryDark, // серые невыбранные
-                    unselectedTextColor = TextSecondaryDark
-                )
-            )
+            NavigationBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                containerColor = cs.background,
+                tonalElevation = 0.dp,
+                windowInsets = WindowInsets(0)
+            ) {
+                bottomNavItems.forEach { item ->
+                    val selected = currentRoot == item.route
+
+                    NavigationBarItem(
+                        selected = selected,
+                        icon = {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = item.label,
+                                maxLines = 1
+                            )
+                        },
+                        onClick = {
+                            if (!selected) navController.navigate(item.route) { launchSingleTop = true }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            indicatorColor = cs.primary,
+                            selectedIconColor = cs.onPrimary,
+                            selectedTextColor = cs.onPrimary,
+                            unselectedIconColor = cs.onSurfaceVariant,
+                            unselectedTextColor = cs.onSurfaceVariant
+                        ),
+                        modifier = Modifier.padding(horizontal = 0.dp)
+                    )
+                }
+            }
+
         }
     }
 }

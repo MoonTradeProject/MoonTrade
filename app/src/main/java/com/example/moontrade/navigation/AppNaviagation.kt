@@ -17,6 +17,7 @@ import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.ui.screens.main_screens.*
 import com.example.moontrade.ui.screens.onboarding.*
 import com.example.moontrade.ui.screens.profile.PlayerProfileScreen
+import com.example.moontrade.ui.screens.profile.UserProfileScreen
 import com.example.moontrade.ui.theme.ThemeViewModel
 import com.example.moontrade.viewmodels.*
 
@@ -114,6 +115,12 @@ fun AppNavigation() {
             }
             composable(NavRoutes.TOURNAMENTS) {
                 TournamentsScreen(navController, tournamentsViewModel)
+            }
+            composable(NavRoutes.PROFILE) {
+                UserProfileScreen(
+                    navController = navController,
+                    profileViewModel = profileViewModel
+                )
             }
             composable(NavRoutes.PLAYER_PROFILE) {
                 PlayerProfileScreen(navController, selectedPlayerViewModel)
