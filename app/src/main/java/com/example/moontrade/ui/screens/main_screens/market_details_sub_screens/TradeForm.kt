@@ -12,6 +12,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.moontrade.model.OrderBookSnapshot
+import com.example.moontrade.utils.PriceCounter
 import com.example.moontrade.viewmodels.TradeViewModel
 
 @Composable
@@ -24,6 +25,7 @@ fun TradeForm(
 
     var orderType by remember { mutableStateOf("Market") }
     var isBuy by remember { mutableStateOf(true) }
+    val price = PriceCounter(snapshot, tradeViewModel.amount.value, if (isBuy) "buy" else "sell")
 
 
     Column(
@@ -80,6 +82,18 @@ fun TradeForm(
             shape = RoundedCornerShape(8.dp),
             singleLine = true,
         )
+        Spacer(Modifier.height(5.dp))
+
+//        Text("" +
+//                PriceCounter(
+//                    snapshot = snapshot,
+//                    amount = tradeViewModel.amount.value,
+//                    side = if (isBuy) "buy" else "sell"
+//                ))
+
+        Text(
+            text = price.takeIf { it != 0.0 }?.toString() ?: ""
+        )
 
         Spacer(Modifier.height(16.dp))
 
@@ -97,6 +111,7 @@ fun TradeForm(
         ) {
             Text(if (isBuy) "Buy" else "Sell")
         }
+
     }
 }
 
