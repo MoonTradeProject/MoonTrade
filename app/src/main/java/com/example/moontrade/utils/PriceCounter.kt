@@ -67,5 +67,5 @@ fun PriceCounter(
         remaining -= taken
     }
 
-    return if (remaining > 0) "Not enough liquidity" else "Price:$totalCost"
+    return if (remaining > 0) "Not enough liquidity" else "=$$totalCost"
 }

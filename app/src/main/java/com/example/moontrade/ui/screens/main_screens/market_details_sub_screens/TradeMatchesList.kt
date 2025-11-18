@@ -20,7 +20,7 @@ import java.util.*
 fun TradeMatchesList(matches: List<TradeMatch>,  modifier: Modifier = Modifier) {
 
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         reverseLayout = true
     ) {
         items(matches) { match ->

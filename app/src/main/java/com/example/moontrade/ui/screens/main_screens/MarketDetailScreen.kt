@@ -13,20 +13,24 @@ import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.
 import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.TradeMatchesList
 import com.example.moontrade.viewmodels.MarketDetailViewModel
 import com.example.moontrade.viewmodels.TradeViewModel
+import com.example.moontrade.viewmodels.UserAssetsViewModel
 
 @Composable
 fun MarketDetailScreen(
     navController: NavController,
     symbol: String,
-    viewModel: MarketDetailViewModel
+    viewModel: MarketDetailViewModel,
+    userAssetsViewModel: UserAssetsViewModel,
 ) {
     val tradeViewModel: TradeViewModel = hiltViewModel()
     val snapshot by viewModel.snapshot.collectAsState()
+    val userAssets by userAssetsViewModel.assets.collectAsState()
 
     LaunchedEffect(symbol) {
         viewModel.disconnect()
         viewModel.connect(symbol)
         tradeViewModel.assetName.value = symbol
+        println("userAssets = $userAssets")
     }
 
     DisposableEffect(Unit) {
@@ -52,12 +56,14 @@ fun MarketDetailScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    //.weight(1f)
+                    .wrapContentHeight()
             ) {
                 Column(
                     modifier = Modifier
                         .weight(3f)
-                        .fillMaxHeight()
+//                        .fillMaxHeight()
+                        .wrapContentHeight()
                         .verticalScroll(rememberScrollState())
                         .padding(end = 8.dp)
                 ) {
@@ -67,7 +73,8 @@ fun MarketDetailScreen(
                 Column(
                     modifier = Modifier
                         .weight(2f)
-                        .fillMaxHeight()
+//                        .fillMaxHeight()
+                        .wrapContentHeight()
                 ) {
                     OrderBookLive(snapshot = snapshot)
                 }
@@ -77,10 +84,10 @@ fun MarketDetailScreen(
 
 
             TradeMatchesList(
-                matches = snapshot?.matches ?: emptyList(),
+                matches = snapshot?.matches?.takeLast(15) ?: emptyList(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .weight(1f)
             )
         }
     }

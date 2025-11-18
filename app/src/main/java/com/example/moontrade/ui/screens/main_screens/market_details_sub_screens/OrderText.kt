@@ -21,7 +21,7 @@ fun PriceText(
 ) {
     val integerPartLength = value.toInt().toString().length
 
-    val adjustedDecimals = if (integerPartLength >= 3) 2 else decimals
+    val adjustedDecimals = if (integerPartLength >= 3) 1 else decimals
 
     val safeDecimals = adjustedDecimals.coerceIn(0, 8)
 
