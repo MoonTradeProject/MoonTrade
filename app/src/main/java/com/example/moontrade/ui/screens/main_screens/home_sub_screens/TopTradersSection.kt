@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.LazyListScope
@@ -17,11 +16,27 @@ fun LazyListScope.TopTradersSection(
 ) {
     if (top.isEmpty()) return
 
-    item { Text("Top Traders", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground) }
+    item {
+        Text(
+            "Top Traders",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+
     items(top.size) { index ->
         val entry = top[index]
-        val medal = when (index) { 0 -> "🥇"; 1 -> "🥈"; 2 -> "🥉"; else -> null }
-        PlayerCard(entry = entry, medal = medal) { onClickPlayer(entry) }
+        val medal = when (index) {
+            0 -> "🥇"
+            1 -> "🥈"
+            2 -> "🥉"
+            else -> null
+        }
+        PlayerCard(
+            entry = entry,
+            medal = medal
+        ) { onClickPlayer(entry) }
     }
+
     item { Spacer(Modifier.height(8.dp)) }
 }

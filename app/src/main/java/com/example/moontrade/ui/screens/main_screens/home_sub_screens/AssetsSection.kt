@@ -10,9 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.moontrade.ui.screens.components.glasskit.GlassCard
 import com.example.moontrade.ui.screens.components.glasskit.UserAssetCard
-import java.math.BigDecimal
 import com.example.moontrade.utils.formatFiat
+import java.math.BigDecimal
 
 data class UserAssetUi(
     val name: String,
@@ -74,11 +75,23 @@ fun AssetsSection(
 
                 Spacer(Modifier.height(8.dp))
 
-                Text(
-                    text = "Total value: $${formatFiat(total)}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = cs.onSurface
-                )
+                //
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column {
+                        Text(
+                            text = "Total value",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = cs.onSurface.copy(alpha = 0.65f)
+                        )
+                        Text(
+                            text = "$${formatFiat(total)}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = cs.onSurface
+                        )
+                    }
+                }
             }
         }
     }
