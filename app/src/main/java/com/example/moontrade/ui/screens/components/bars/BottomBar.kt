@@ -1,5 +1,6 @@
 package com.example.moontrade.ui.screens.components.bars
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,10 +14,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.moontrade.ui.theme.Violet600
 
 data class BottomNavItem(
     val route: String,
@@ -39,56 +41,54 @@ fun BottomBar(navController: NavController) {
     val currentRoute = navBackStackEntry?.destination?.route
     val currentRoot = currentRoute?.substringBefore('/')
 
-    NavigationBar(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        containerColor = cs.background,
-        tonalElevation = 0.dp,
-        windowInsets = WindowInsets(0)
+            .padding(bottom = 10.dp)
     ) {
-        bottomNavItems.forEach { item ->
+        NavigationBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            containerColor = cs.background,
+            tonalElevation = 20.dp,
+            windowInsets = WindowInsets(0)
+        ) {
+            bottomNavItems.forEach { item ->
+                val selected = currentRoot == item.route
 
-            NavigationBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                containerColor = cs.background,
-                tonalElevation = 0.dp,
-                windowInsets = WindowInsets(0)
-            ) {
-                bottomNavItems.forEach { item ->
-                    val selected = currentRoot == item.route
-
-                    NavigationBarItem(
-                        selected = selected,
-                        icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.label,
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = item.label,
-                                maxLines = 1
-                            )
-                        },
-                        onClick = {
-                            if (!selected) navController.navigate(item.route) { launchSingleTop = true }
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = cs.primary,
-                            selectedIconColor = cs.onPrimary,
-                            selectedTextColor = cs.onPrimary,
-                            unselectedIconColor = cs.onSurfaceVariant,
-                            unselectedTextColor = cs.onSurfaceVariant
-                        ),
-                        modifier = Modifier.padding(horizontal = 0.dp)
-                    )
-                }
+                NavigationBarItem(
+                    selected = selected,
+                    icon = {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.label
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = item.label,
+                            maxLines = 1
+                        )
+                    },
+                    onClick = {
+                        if (!selected) {
+                            navController.navigate(item.route) {
+                                launchSingleTop = true
+                            }
+                        }
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = Violet600,
+                        selectedIconColor = cs.onPrimary,
+                        selectedTextColor = cs.onPrimary,
+                        unselectedIconColor = Violet600,
+                        unselectedTextColor = cs.onSurfaceVariant
+                    ),
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                )
             }
-
         }
     }
 }
+

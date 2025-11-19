@@ -52,7 +52,6 @@ fun HomeScreen(
     val tournaments by tournamentsViewModel.tournaments.collectAsState()
     val userAssets by userAssetsViewModel.assets.collectAsState()
 
-    // leaderboard entries для карусели
     val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
 
     // --- New states for loading and error
@@ -96,7 +95,7 @@ fun HomeScreen(
         topBar = {
             TopBar(
                 title = null,
-                showBack = false, // на хоуме стрелка не нужна
+                showBack = false,
                 navigationContent = {
                     ModeSelector(
                         selected = selected,
@@ -121,7 +120,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 24.dp),
+                .padding(horizontal = 16.dp, vertical = 0.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             // --- User profile + balance + ROI
@@ -145,7 +144,6 @@ fun HomeScreen(
                     avatarResIdFrom = ::resolveAvatarRes
                 )
             }
-
             // --- Portfolio / assets preview
             item {
                 AssetsSection(
@@ -174,7 +172,7 @@ fun HomeScreen(
             }
 
             // --- Bottom spacing for safe scrolling
-            item { Spacer(Modifier.height(80.dp)) }
+            item { Spacer(Modifier.height(60.dp)) }
         }
     }
 }
