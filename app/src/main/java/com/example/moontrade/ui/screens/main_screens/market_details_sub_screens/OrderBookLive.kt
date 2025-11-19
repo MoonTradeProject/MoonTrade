@@ -29,14 +29,14 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
         ?: emptyList()
 
     val filledAsks = asks.toMutableList().apply {
-        val missing = 6 - size
+        val missing = 7 - size
         repeat(if (missing > 0) missing else 0) {
             add(OrderBookLevel(price = 0.0, volume = 0.0))
         }
     }
 
     val filledBids = bids.toMutableList().apply {
-        val missing = 6 - size
+        val missing = 7 - size
         repeat(if (missing > 0) missing else 0) {
             add(OrderBookLevel(price = 0.0, volume = 0.0))
         }
@@ -62,7 +62,7 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
         Spacer(Modifier.height(4.dp))
 
         // ASKS — sort by price ASCENDING, but draw REVERSED
-        filledAsks.take(6).reversed().forEach{
+        filledAsks.take(7).reversed().forEach{
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -89,7 +89,7 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
         // BIDS — sort by price DESCENDING
         filledBids
             .sortedByDescending { it.price }
-            .take(6)
+            .take(7)
             .forEach {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -112,4 +112,5 @@ fun OrderBookLive(snapshot: OrderBookSnapshot?, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(2.dp))
             } ?: Text("Loading...", color = Color.Gray)
     }
+    Spacer(modifier = Modifier.height(32.dp))
 }

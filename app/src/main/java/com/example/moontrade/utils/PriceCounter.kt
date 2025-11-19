@@ -3,38 +3,6 @@ package com.example.moontrade.utils
 import com.example.moontrade.model.OrderBookLevel
 import com.example.moontrade.model.OrderBookSnapshot
 
-//fun PriceCounter(
-//    snapshot: OrderBookSnapshot?,
-//    amount: String,
-//    side: String
-//): Double {
-//    val amountDouble = amount.toDouble()
-//    if (snapshot == null || amountDouble <= 0) return 0.0
-//
-//    val levels: List<OrderBookLevel> = when (side) {
-//        "buy" -> snapshot.asks ?: emptyList()
-//        "sell" -> snapshot.bids ?: emptyList()
-//        else -> return 0.0
-//    }
-//
-//    var remaining = amountDouble
-//    var totalCost = 0.0
-//
-//    levels.forEach { level ->
-//        if (remaining <= 0) return@forEach
-//
-//        val price = level.price
-//        val vol = level.volume
-//
-//        val taken = minOf(remaining, vol)
-//
-//        totalCost += taken * price
-//        remaining -= taken
-//    }
-//
-//    return if (remaining > 0) Double.NaN else totalCost
-//}
-
 fun PriceCounter(
     snapshot: OrderBookSnapshot?,
     amount: String?,

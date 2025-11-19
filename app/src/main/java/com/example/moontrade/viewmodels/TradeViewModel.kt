@@ -40,7 +40,7 @@ class TradeViewModel @Inject constructor(
      * @param side      "buy" or "sell"
      * @param execType  "market" or "limit"
      */
-    fun place(side: String, execType: String = "limit") = viewModelScope.launch {
+    fun place(side: String, execType: String = "limit", userAssetsViewModel: UserAssetsViewModel? = null) = viewModelScope.launch {
         Log.d(
             "TradeViewModel",
             "🚀 place() side=$side execType=$execType amount=${amount.value} price=${price.value}"
@@ -99,6 +99,7 @@ class TradeViewModel @Inject constructor(
                 Log.i("TradeViewModel", "✅ Order placed: $resp")
                 amount.value = ""
                 if (execType.equals("limit", true)) price.value = "" // clear limit price
+                userAssetsViewModel?.loadUserAssets()
             }
             .onFailure { e ->
                 Log.e("TradeViewModel", "💥 Failed to place order: ${e.localizedMessage}", e)
