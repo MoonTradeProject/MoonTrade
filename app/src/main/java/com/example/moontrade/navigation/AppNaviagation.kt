@@ -33,10 +33,11 @@ fun AppNavigation() {
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
     val marketDetailViewModel: MarketDetailViewModel = hiltViewModel()
-   // val tradeViewModel: TradeViewModel = hiltViewModel()
+    // val tradeViewModel: TradeViewModel = hiltViewModel()
     val selectedPlayerViewModel: SelectedPlayerViewModel = hiltViewModel()
     val leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
     val userAssetsViewModel: UserAssetsViewModel = hiltViewModel()
+
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
     val bottomBarRoutes = listOf(
@@ -96,35 +97,46 @@ fun AppNavigation() {
             composable(NavRoutes.LOGIN) {
                 LoginScreen(navController, authViewModel)
             }
+
+            // HOME
             composable(NavRoutes.HOME) {
                 HomeScreen(
                     navController,
                     balanceViewModel,
                     tournamentsViewModel,
                     profileViewModel,
-                    //leaderboardViewModel,
                     userAssetsViewModel,
-                    //selectedPlayerViewModel
+                    leaderboardViewModel,
+                    selectedPlayerViewModel
                 )
             }
+
+            // MARKETS
             composable(NavRoutes.MARKETS) {
                 MarketsScreen(navController, marketViewModel, themeViewModel)
             }
+
+            // RATINGS
             composable(NavRoutes.RATINGS) {
                 RatingsScreen(navController, leaderboardViewModel, selectedPlayerViewModel)
             }
+
+            // TOURNAMENTS
             composable(NavRoutes.TOURNAMENTS) {
                 TournamentsScreen(navController, tournamentsViewModel)
             }
+
+            // USER PROFILE
             composable(NavRoutes.PROFILE) {
-                UserProfileScreen(
-                    navController = navController,
-                    profileViewModel = profileViewModel
-                )
+                UserProfileScreen(navController, profileViewModel)
             }
+
+            // OTHER PLAYER PROFILE
             composable(NavRoutes.PLAYER_PROFILE) {
                 PlayerProfileScreen(navController, selectedPlayerViewModel)
             }
+
+            // MARKET DETAIL
             composable(
                 route = "${NavRoutes.MARKET_DETAIL}/{symbol}",
                 arguments = listOf(navArgument("symbol") { type = NavType.StringType })
@@ -136,9 +148,13 @@ fun AppNavigation() {
                     marketDetailViewModel
                 )
             }
+
+            // ⚙ SETTINGS
             composable(NavRoutes.SETTINGS) {
                 SettingsScreen(navController, authViewModel, themeViewModel)
             }
+
+            // ✏ EDIT PROFILE
             composable(NavRoutes.PROFILE_EDIT) {
                 EditProfileScreen(navController, profileViewModel)
             }

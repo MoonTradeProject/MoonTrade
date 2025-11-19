@@ -1,87 +1,125 @@
 package com.example.moontrade.ui.screens.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.example.moontrade.BuildConfig
 import com.example.moontrade.R
 import com.example.moontrade.model.LeaderboardEntry
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import com.example.moontrade.ui.screens.components.glasskit.AvatarWithRing
+import com.example.moontrade.ui.screens.components.glasskit.GlassCard
+import com.example.moontrade.ui.theme.extended
+import com.example.moontrade.utils.formatPercent
 
 @Composable
 fun PlayerCard(
     entry: LeaderboardEntry,
     medal: String? = null,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val cs = MaterialTheme.colorScheme
+    val ex = MaterialTheme.extended
+
+    //
     val avatarUrl = if (entry.avatar_url?.startsWith("/") == true) {
         BuildConfig.BASE_URL + entry.avatar_url
     } else {
         entry.avatar_url
     }
 
-    ElevatedCard(
-        modifier = Modifier
+    val roi = entry.roi
+    val roiText = formatPercent(roi, keepPlus = true, decimals = 2)
+
+    val displayRoiText = when {
+        roi > 10_000.0  -> "> 10,000%"
+        roi < -10_000.0 -> "< -10,000%"
+        else            -> roiText
+    }
+
+    val roiColor = when {
+        roi > 0.0  -> ex.assetChangePositive
+        roi < 0.0  -> ex.assetChangeNegative
+        else       -> cs.onSurfaceVariant
+    }
+
+    GlassCard(
+        modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 6.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-        )
+            .heightIn(min = 96.dp)
+            .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             if (medal != null) {
                 Text(
                     text = medal,
-                    fontSize = 24.sp,
-                    modifier = Modifier.padding(end = 12.dp)
+                    style = MaterialTheme.typography.titleLarge
                 )
-            }
-
-            if (!avatarUrl.isNullOrBlank()) {
-                Image(
-                    painter = rememberAsyncImagePainter(avatarUrl),
-                    contentDescription = "Player Avatar",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                )
+                Spacer(Modifier.width(12.dp))
             } else {
-                Image(
-                    painter = painterResource(R.drawable.avatar_0),
-                    contentDescription = "Default Avatar",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
+                Text(
+                    text = "#${entry.rank}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = cs.onSurfaceVariant
+                )
+                Spacer(Modifier.width(12.dp))
+            }
+
+            AvatarWithRing(size = 48.dp) {
+                AsyncImage(
+                    model = avatarUrl ?: R.drawable.avatar_0,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(Modifier.width(12.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(entry.username, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
-                    text = "ROI: +%.1f%%".format(entry.roi),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (entry.roi >= 0) Color(0xFF00C853) else Color.Red
+                    text = entry.username,
+                    style = MaterialTheme.typography.titleMedium
                 )
-                if (!entry.description.isNullOrBlank()) {
-                    Text(entry.description, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                }
+
+                entry.description
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = cs.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "ROI",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = cs.onSurfaceVariant
+                )
+                Text(
+                    text = displayRoiText,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = roiColor
+                )
             }
         }
     }

@@ -6,9 +6,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.moontrade.model.Mode
+import com.example.moontrade.ui.theme.Violet600
 import com.example.moontrade.ui.theme.extended
 
-// <-- вот твой SelectableMode, который раньше жил в HomeTopBar
 data class SelectableMode(
     val mode: Mode,
     val label: String
@@ -30,10 +30,9 @@ fun ModeSelector(
             Text(
                 text = selected.label,
                 style = MaterialTheme.typography.titleMedium,
-                color = cs.onSurface
+                color = Violet600
             )
         }
-
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },

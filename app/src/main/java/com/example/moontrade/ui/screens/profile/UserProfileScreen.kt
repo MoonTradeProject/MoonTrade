@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -21,7 +20,7 @@ import coil.compose.AsyncImage
 import com.example.moontrade.R
 import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.bars.TopBar
-import com.example.moontrade.ui.theme.extended
+import com.example.moontrade.ui.screens.components.glasskit.GlassCard
 import com.example.moontrade.viewmodels.ProfileViewModel
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -37,7 +36,6 @@ fun UserProfileScreen(
     val avatarId by profileViewModel.avatarId.collectAsState()
     val avatarUrl by profileViewModel.avatarUrl.collectAsState()
 
-    val ex = MaterialTheme.extended
     val cs = MaterialTheme.colorScheme
 
     Scaffold(
@@ -45,7 +43,7 @@ fun UserProfileScreen(
             TopBar(
                 title = "Profile",
                 showBack = true,
-                onBack = { navController.popBackStack() },   // ← СТРЕЛКА НАЗАД ТЕПЕРЬ РАБОТАЕТ
+                onBack = { navController.popBackStack() },
                 actions = {
                     IconButton(onClick = {
                         navController.navigate(NavRoutes.PROFILE_EDIT)
@@ -67,16 +65,14 @@ fun UserProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // --- Profile card
-            Surface(
+            GlassCard(
                 modifier = Modifier.fillMaxWidth(),
-                color = ex.glassCard.copy(alpha = 0.4f),
-                shape = RoundedCornerShape(28.dp),
-                tonalElevation = 0.dp,
-                shadowElevation = 0.dp
+                corner = 28.dp
             ) {
                 Column(
-                    modifier = Modifier.padding(24.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 

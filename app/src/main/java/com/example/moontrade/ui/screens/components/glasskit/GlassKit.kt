@@ -14,18 +14,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.moontrade.ui.screens.main_screens.home_sub_screens.UserAssetUi
-import com.example.moontrade.ui.theme.Violet200
-import com.example.moontrade.ui.theme.Violet300
-import com.example.moontrade.ui.theme.Violet600
+import com.example.moontrade.ui.theme.*
 import com.example.moontrade.ui.theme.extended
 import com.example.moontrade.utils.formatCryptoAmount
 import com.example.moontrade.utils.formatFiat
 import com.example.moontrade.utils.formatPercent
 
-
+@Composable
+private fun isDarkTheme(): Boolean {
+    val cs = MaterialTheme.colorScheme
+    return cs.background.luminance() < 0.5f
+}
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
@@ -34,44 +37,60 @@ fun GlassCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val ex = MaterialTheme.extended
+    val dark = isDarkTheme()
     val shape = RoundedCornerShape(corner)
 
+    val backgroundBrush: Brush
+    val borderBrush: Brush
+
+    if (dark) {
+        backgroundBrush = Brush.verticalGradient(
+            listOf(
+                Violet300.copy(alpha = 0.22f),
+                ex.glassCard.copy(alpha = 0.020f),
+                Violet600.copy(alpha = 0.22f)
+            )
+        )
+        borderBrush = Brush.linearGradient(
+            listOf(
+                Violet200.copy(alpha = 0.25f),
+                Violet200.copy(alpha = 0.24f)
+            )
+        )
+    } else {
+        backgroundBrush = Brush.verticalGradient(
+            listOf(
+                Color.White,
+                Color.White
+            )
+        )
+        borderBrush = Brush.linearGradient(
+            listOf(
+                Violet200.copy(alpha = 0.25f),
+                Violet200.copy(alpha = 0.34f)
+            )
+        )
+    }
     Box(
         modifier = modifier
             .clip(shape)
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Violet300.copy(alpha = 0.22f),   // сверху дымка
-                        ex.glassCard.copy(alpha = 0.020f),  // акцент на середину
-                        Violet600.copy(alpha = 0.22f)    // внизу подсветка
-                    )
-                )
-            )
+            .background(backgroundBrush)
             .border(
-                width = 0.25.dp,
-                brush = Brush.linearGradient(
-                    listOf(
-                        Violet200.copy(alpha = 0.25f),  // подсветка сверху
-                        Violet200.copy(alpha = 0.24f)  // затухает внизу
-                    )
-                ),
+                width = if (dark) 0.25.dp else 1.8.dp,
+                brush = borderBrush,
                 shape = shape
             )
             .padding(16.dp)
     ) {
-
-        // OPTIONAL overlay
         if (overlay != null) {
             Box(
                 Modifier
                     .matchParentSize()
-                    .graphicsLayer { alpha = 0.20f }
+                    .graphicsLayer { alpha = 0.18f }
                     .clip(shape)
                     .background(overlay)
             )
         }
-
         Column(content = content)
     }
 }
@@ -81,37 +100,27 @@ fun ActiveStatusPill(
     modifier: Modifier = Modifier,
     label: String = "ACTIVE"
 ) {
-    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val ex = MaterialTheme.extended
+    val cs = MaterialTheme.colorScheme
+    val dark = isDarkTheme()
     val shape = RoundedCornerShape(999.dp)
 
-    val backgroundBrush = if (isDark) {
-
-        Brush.horizontalGradient(
-            listOf(
-                Color(0xFF6F4BFF),
-                Color(0xFF9D73FF)
-            )
-        )
+    val backgroundBrush = if (dark) {
+        Brush.horizontalGradient(listOf(Violet600, Violet300))
     } else {
-
-        Brush.horizontalGradient(
-            listOf(
-                Color(0xFFFDFBFF),
-                Color(0xFFE4D6FF)
-            )
-        )
+        ex.gradientPrimary
     }
 
-    val borderColor = if (isDark) {
-        Color(0xFFD8C6FF).copy(alpha = 0.8f)
+    val borderColor = if (dark) {
+        Color.White.copy(alpha = 0.22f)
     } else {
-        Color(0xFFE0D3FF)
+        Color.Transparent
     }
 
-    val textColor = if (isDark) {
+    val textColor = if (dark) {
+        cs.onPrimary
+    } else {
         Color.White
-    } else {
-        Color(0xFF4B3A7A)
     }
 
     Box(
@@ -139,7 +148,6 @@ fun ActiveStatusPill(
     }
 }
 
-
 @Composable
 fun AvatarWithRing(
     modifier: Modifier = Modifier,
@@ -161,7 +169,7 @@ fun AvatarWithRing(
         content()
     }
 }
-/** карточка ассета */
+
 @Composable
 fun UserAssetCard(
     asset: UserAssetUi,
@@ -180,7 +188,6 @@ fun UserAssetCard(
         else           -> cs.onSurfaceVariant
     }
 
-
     GlassCard(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -190,7 +197,7 @@ fun UserAssetCard(
                 Text(
                     text = asset.name.first().uppercaseChar().toString(),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = cs.onSurface
                 )
             }
 
@@ -201,15 +208,15 @@ fun UserAssetCard(
             ) {
                 Text(
                     text = asset.name,
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Text(
                     text = "Amount: ${formatCryptoAmount(asset.amount)}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
                     text = "≈ ${formatFiat(asset.assetValue)}",
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
 

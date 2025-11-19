@@ -1,5 +1,6 @@
 package com.example.moontrade.ui.screens.components.bars
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -8,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-
+import com.example.moontrade.ui.theme.Violet600
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,15 +24,18 @@ fun TopBar(
     val cs = MaterialTheme.colorScheme
 
     CenterAlignedTopAppBar(
-        modifier = Modifier.padding(horizontal = 10.dp),
+        modifier = Modifier
+            .padding(top = 10.dp, start = 10.dp, end = 10.dp),
+        windowInsets = WindowInsets(0),
         navigationIcon = {
             when {
-
                 navigationContent != null -> navigationContent()
 
-                // на остальных экранах стрелка назад
                 showBack && onBack != null -> {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = onBack,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                             contentDescription = "Back"
@@ -54,9 +58,9 @@ fun TopBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = cs.background,
             scrolledContainerColor = cs.background,
-            navigationIconContentColor = cs.primary,
-            titleContentColor = cs.onBackground,
-            actionIconContentColor = cs.onBackground
+            navigationIconContentColor = Violet600,
+            titleContentColor = Violet600,
+            actionIconContentColor = Violet600
         )
     )
 }
