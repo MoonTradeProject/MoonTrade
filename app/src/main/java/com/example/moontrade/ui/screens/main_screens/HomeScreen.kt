@@ -25,6 +25,7 @@ import java.util.Locale
  *  - user profile summary (nickname, avatar, tags)
  *  - current balance and ROI
  *  - portfolio preview (user assets)
+ *  - top players carousel
  */
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +36,8 @@ fun HomeScreen(
     tournamentsViewModel: TournamentsViewModel,
     profileViewModel: ProfileViewModel,
     userAssetsViewModel: UserAssetsViewModel,
+    leaderboardViewModel: LeaderboardViewModel,
+    selectedPlayerViewModel: SelectedPlayerViewModel
 ) {
     // --- Reactive state from ViewModels
     val nickname by profileViewModel.nickname.collectAsState()
@@ -48,6 +51,8 @@ fun HomeScreen(
 
     val tournaments by tournamentsViewModel.tournaments.collectAsState()
     val userAssets by userAssetsViewModel.assets.collectAsState()
+
+    val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
 
     // --- New states for loading and error
     val isLoading by userAssetsViewModel.loading.collectAsState()
@@ -71,6 +76,9 @@ fun HomeScreen(
     // --- First load of user assets when entering screen
     LaunchedEffect(Unit) { userAssetsViewModel.loadUserAssets() }
 
+    // --- Load leaderboard once для карусели
+    LaunchedEffect(Unit) { leaderboardViewModel.loadLeaderboard() }
+
     // --- Reload data when mode changes
     LaunchedEffect(selected.mode) {
         balanceViewModel.changeMode(selected.mode)
@@ -87,7 +95,7 @@ fun HomeScreen(
         topBar = {
             TopBar(
                 title = null,
-                showBack = false, // на хоуме стрелка не нужна
+                showBack = false,
                 navigationContent = {
                     ModeSelector(
                         selected = selected,
@@ -112,7 +120,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 24.dp),
+                .padding(horizontal = 16.dp, vertical = 0.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             // --- User profile + balance + ROI
@@ -136,7 +144,6 @@ fun HomeScreen(
                     avatarResIdFrom = ::resolveAvatarRes
                 )
             }
-
             // --- Portfolio / assets preview
             item {
                 AssetsSection(
@@ -153,8 +160,19 @@ fun HomeScreen(
                 )
             }
 
+            // --- Top Players carousel
+            item {
+                TopPlayersCarousel(
+                    entries = leaderboardEntries,
+                    onClickPlayer = { entry ->
+                        selectedPlayerViewModel.set(entry)
+                        navController.navigate(NavRoutes.PLAYER_PROFILE)
+                    }
+                )
+            }
+
             // --- Bottom spacing for safe scrolling
-            item { Spacer(Modifier.height(80.dp)) }
+            item { Spacer(Modifier.height(60.dp)) }
         }
     }
 }

@@ -5,42 +5,24 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-/**
- * Extended design tokens used in addition to the default Material color scheme.
- * These colors cover:
- *  - Glass surfaces
- *  - Gradients
- *  - Semantic colors (success / danger)
- *  - Chart colors
- *  - Asset % colors
- *  - Extra text colors
- *  - Avatar ring gradient
- */
-
 @Immutable
 data class ExtendedColors(
 
-    /* Semantic colors */
     val success: Color,
     val danger: Color,
     val warning: Color,
 
-    /* Glass UI surfaces */
     val glassSurface: Color,
     val glassCard: Color,
 
-    /* Chart colors */
     val chartUp: Color,
     val chartDown: Color,
 
-    /* TOTAL VALUE text color */
     val positiveText: Color,
 
-    /* Asset percentage colors */
     val assetChangePositive: Color,
     val assetChangeNegative: Color,
 
-    /* Brand gradients */
     val gradientPrimary: Brush,
     val gradientAccent: Brush,
     val gradientPositive: Brush,
@@ -48,26 +30,27 @@ data class ExtendedColors(
 )
 
 /* -------------------------------------------------------------------------- */
-/* DARK THEME EXTENDED COLORS                                                 */
+/* DARK THEME                                              */
 /* -------------------------------------------------------------------------- */
 
+private val MetricPositiveDark = Color(0xFFDCC9FF)
+private val MetricNegativeDark = Color(0xFF9A7DE0)
+
 val DarkExtendedColors = ExtendedColors(
-    success = GreenUp,
-    danger = RedDown,
+    success = MetricPositiveDark,
+    danger = MetricNegativeDark,
     warning = AmberWarn,
 
     glassSurface = Color(0xFF250848),
     glassCard = Violet300,
 
-    chartUp = GreenUp,
-    chartDown = RedDown,
+    chartUp = MetricPositiveDark,
+    chartDown = MetricNegativeDark,
 
-    // TOTAL VALUE
-    positiveText = GreenUpLight,
+    positiveText = MetricPositiveDark,
 
-    // Asset % colors (dark)
-    assetChangePositive = Color(0xFF9BFACD),
-    assetChangeNegative = Color(0xFFFF9A84),
+    assetChangePositive = MetricPositiveDark,
+    assetChangeNegative = MetricNegativeDark,
 
     gradientPrimary = Brush.linearGradient(
         listOf(Violet500, Violet400)
@@ -76,7 +59,7 @@ val DarkExtendedColors = ExtendedColors(
         listOf(Violet500, Violet800)
     ),
     gradientPositive = Brush.linearGradient(
-        listOf(GreenUp, GreenUpLight)
+        listOf(MetricPositiveDark, MetricPositiveDark)
     ),
     gradientAvatar = Brush.linearGradient(
         listOf(Violet200, Violet500)
@@ -84,45 +67,58 @@ val DarkExtendedColors = ExtendedColors(
 )
 
 /* -------------------------------------------------------------------------- */
-/* LIGHT THEME EXTENDED COLORS                                                */
+/* LIGHT THEME*/
 /* -------------------------------------------------------------------------- */
 
+private val MetricPositiveLight = Violet600
+private val MetricNegativeLight = Violet400
+
 val LightExtendedColors = ExtendedColors(
-    success = GreenUp,
-    danger = RedDown,
+    success = MetricPositiveLight,
+    danger = MetricNegativeLight,
     warning = AmberWarn,
 
-    glassSurface = LightBackground,
-    glassCard = Color(0xFFF1EAFF),
+    glassSurface = Color(0xFFF4F5FA),
+    glassCard   = Color(0xFFFFFFFF),
 
-    chartUp = GreenUp,
-    chartDown = RedDown,
+    chartUp = MetricPositiveLight,
+    chartDown = MetricNegativeLight,
 
-    // TOTAL VALUE (calmer light green)
-    positiveText = Color(0xFF3FAF7A),
+    positiveText = MetricPositiveLight,
 
-    // Asset % colors (light)
-    assetChangePositive = Color(0xFF26A869),
-    assetChangeNegative = Color(0xFFD45B45),
+    assetChangePositive = MetricPositiveLight,
+    assetChangeNegative = MetricNegativeLight,
 
     gradientPrimary = Brush.linearGradient(
-        listOf(Violet100, Violet500)
+        listOf(
+            Color(0xFF6F4BFF),
+            Color(0xFF8B63FF)
+        )
     ),
     gradientAccent = Brush.linearGradient(
-        listOf(Violet200, Violet100)
+        listOf(
+            Color(0xFFFFFFFF),
+            Color(0xFFF2F2FF)
+        )
     ),
     gradientPositive = Brush.linearGradient(
-        listOf(Color(0xFF8FF7AE), Color(0xFF48D97A))
+        listOf(
+            MetricPositiveLight,
+            MetricPositiveLight
+        )
     ),
     gradientAvatar = Brush.linearGradient(
-        listOf(Violet300, Violet600)
+        listOf(
+            Color(0xFFFFFFFF),
+            Violet300
+        )
     )
 )
 
 /* -------------------------------------------------------------------------- */
+/* CompositionLocal                                                           */
+/* -------------------------------------------------------------------------- */
 
-val LocalExtendedColors = staticCompositionLocalOf { DarkExtendedColors }
-
-/**
- * Access via MaterialTheme.extended
- */
+val LocalExtendedColors = staticCompositionLocalOf<ExtendedColors> {
+    DarkExtendedColors
+}

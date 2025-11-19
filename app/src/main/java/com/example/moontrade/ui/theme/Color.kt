@@ -10,7 +10,7 @@ val Violet50  = Color(0xFFF1EAFF)
 val Violet100 = Color(0xFFFFFFFF)
 val Violet200 = Color(0xFFD8C6FF)
 val Violet300 = Color(0xFFC2A8F0)
-val Violet400 = Color(0xFF35135A)   // ключевой акцент
+val Violet400 = Color(0xFF35135A)
 val Violet500 = Color(0xFF37155F)
 val Violet600 = Color(0xFF5B33D0)
 val Violet700 = Color(0xFF47299B)
@@ -49,13 +49,14 @@ val RedDownLight  = Color(0xFFFF9A84)
 
 // Warning
 val AmberWarn     = Color(0xFFFFC285)
+
 // -----------------------------------------------------------------------------
 // Light Theme base
 // -----------------------------------------------------------------------------
 
-val LightBackground = Color(0xFFF4F1FA)
+val LightBackground = Color(0xFFFBFBFD)
 val LightSurface    = Color(0xFFFFFFFF)
-val LightTopBar     = Color(0xFFF7F1FF)
+val LightTopBar     = Color(0xFFFFFFFF)
 
 // -----------------------------------------------------------------------------
 // Dark Theme base
