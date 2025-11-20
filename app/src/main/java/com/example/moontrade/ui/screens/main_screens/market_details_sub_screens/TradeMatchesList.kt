@@ -18,12 +18,12 @@ import java.util.*
 
 @Composable
 fun TradeMatchesList(matches: List<TradeMatch>,  modifier: Modifier = Modifier) {
-
+    val limited = matches.takeLast(3)
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         reverseLayout = true
     ) {
-        items(matches) { match ->
+        items(limited) { match ->
             TradeMatchRow(match)
         }
     }

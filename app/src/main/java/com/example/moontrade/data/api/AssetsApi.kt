@@ -9,7 +9,7 @@ interface AssetsApi {
     @GET("user/assets")
     suspend fun getUserAssets(
         @Query("mode") mode: String,
-        @Query("tournamentId") tournamentId: String?,
+        @Query("tournament_id") tournamentId: String?,
         @Header("Authorization") bearer: String
     ): List<UserAsset>
 }
