@@ -22,3 +22,4 @@ interface FetchOrdersApi {
         @Path("id") orderId: String
     )
 }
+

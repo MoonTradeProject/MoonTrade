@@ -20,15 +20,18 @@ class OrdersRepository @Inject constructor(
         val mode = sessionManager.mode.value
 
         return when (mode) {
-            Mode.Main ->
-                api.getUserOrders(token, "main")
 
-            is Mode.Tournament ->
-                api.getUserOrders(
-                    token,
-                    "tournament",
-                    mode.tournamentId.toString()
-                )
+            Mode.Main -> api.getUserOrders(
+                token = token,
+                mode = "main",
+                tournamentId = null
+            )
+
+            is Mode.Tournament -> api.getUserOrders(
+                token = token,
+                mode = "tournament",
+                tournamentId = mode.tournamentId.toString()
+            )
         }
     }
 
@@ -39,4 +42,3 @@ class OrdersRepository @Inject constructor(
         api.cancelOrder("Bearer $rawToken", id)
     }
 }
-
