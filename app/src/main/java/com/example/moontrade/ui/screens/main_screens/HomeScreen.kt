@@ -173,6 +173,19 @@ fun HomeScreen(
 
             // --- Bottom spacing for safe scrolling
             item { Spacer(Modifier.height(60.dp)) }
+
+            item {
+                Button(
+                    onClick = { navController.navigate(NavRoutes.USER_ORDERS) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text("My Orders")
+                }
+            }
+
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.example.moontrade.data.repository
 
-import com.example.moontrade.data.api.OrdersApi
+import com.example.moontrade.data.api.PlaceOrdersApi
 import com.example.moontrade.model.PlaceOrderRequest
 import com.example.moontrade.model.PlaceOrderResponse
 import javax.inject.Inject
@@ -8,7 +8,7 @@ import javax.inject.Singleton
 
 @Singleton
 class TradeRepository @Inject constructor(
-    private val ordersApi: OrdersApi
+    private val ordersApi: PlaceOrdersApi
 ) {
     suspend fun placeOrder(
         req: PlaceOrderRequest,

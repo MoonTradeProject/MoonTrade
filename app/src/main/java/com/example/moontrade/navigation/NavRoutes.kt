@@ -25,5 +25,5 @@ object NavRoutes {
     fun marketDetailRoute(symbol: String) = "$MARKET_DETAIL/$symbol"
     const val SETTINGS = "settings"
     const val PROFILE_EDIT = "profile_edit"
-
+    const val USER_ORDERS = "user_orders"
 }
