@@ -2,6 +2,7 @@ package com.example.moontrade.ui.screens.main_screens.market_details_sub_screens
 
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -9,20 +10,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.unit.sp
 import com.example.moontrade.model.OrderBookSnapshot
+import com.example.moontrade.utils.PriceCounter
 import com.example.moontrade.viewmodels.TradeViewModel
+import com.example.moontrade.viewmodels.UserAssetsViewModel
 
 @Composable
 fun TradeForm(
     tradeViewModel: TradeViewModel,
     snapshot: OrderBookSnapshot?,
-    modifier: Modifier = Modifier
+    assetBalance: String,
+    userAssetsViewModel: UserAssetsViewModel,
+    modifier: Modifier = Modifier,
 ) {
 
 
     var orderType by remember { mutableStateOf("Market") }
     var isBuy by remember { mutableStateOf(true) }
+    val price = PriceCounter(snapshot, tradeViewModel.amount.value, if (isBuy) "buy" else "sell")
+
+    var showNotification by remember { mutableStateOf(false) }
+    var notificationMessage by remember { mutableStateOf("") }
 
 
     Column(
@@ -30,11 +39,12 @@ fun TradeForm(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-
+        //best bid best ask area
         BestPrices(snapshot = snapshot)
 
-        /* ---------- SIDE ---------- */
-        Spacer(Modifier.height(5.dp))
+        Spacer(Modifier.height(8.dp))
+
+        //buy sell slider
         AnimatedSegmentedButton(
             options = listOf("Buy", "Sell"),
             selectedIndex = if (isBuy) 0 else 1,
@@ -42,16 +52,24 @@ fun TradeForm(
             modifier = Modifier.fillMaxWidth()
         )
 
-        /* ---------- ORDER TYPE ---------- */
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Order Type:")
-            Spacer(Modifier.width(8.dp))
-            DropdownMenuBox(
-                selected = orderType,
-                options = listOf("Market", "Limit"),
-                onSelected = { orderType = it }
-            )
+        Spacer(Modifier.height(8.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("Balance: ")
+            Text(assetBalance)
         }
+
+        Spacer(Modifier.height(8.dp))
+
+        DropdownMenuBox(
+            selected = orderType,
+            options = listOf("Market", "Limit"),
+            onSelected = { orderType = it }
+        )
+
+        Spacer(Modifier.height(8.dp))
 
 
         /* ---------- PRICE (only for Limit) ---------- */
@@ -59,85 +77,61 @@ fun TradeForm(
             OutlinedTextField(
                 value = tradeViewModel.price.value,
                 onValueChange = { tradeViewModel.price.value = it },
-                label = { Text("Price") },
+                placeholder  = { Text("Price") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                singleLine = true,
             )
             Spacer(Modifier.height(8.dp))
         }
-
+//        Spacer(Modifier.height(8.dp))
         /* ---------- AMOUNT ---------- */
         OutlinedTextField(
             value = tradeViewModel.amount.value,
             onValueChange = { tradeViewModel.amount.value = it },
-            label = { Text("Amount") },
+            placeholder = { Text("Amount") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp),
+            singleLine = true,
         )
 
-        Spacer(Modifier.height(16.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(
+                checked = false,
+                onCheckedChange = {}
+            )
+            Text(
+                "TP/SL"
+            )
+        }
 
         /* ---------- SUBMIT BUTTON ---------- */
         Button(
             onClick = {
                 val execType = if (orderType == "Market") "market" else "limit"
                 tradeViewModel.updateSnapshot(snapshot)
+                userAssetsViewModel.loadUserAssets()
                 tradeViewModel.place(
                     side = if (isBuy) "buy" else "sell",
-                    execType = execType
+                    execType = execType,
+                    userAssetsViewModel = userAssetsViewModel
                 )
+                notificationMessage = "${tradeViewModel.assetName.value} has been bought!"
+                showNotification = true
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(if (isBuy) "Buy" else "Sell")
         }
-    }
-}
 
-@Composable
-fun DropdownMenuBox(
-    selected: String,
-    options: List<String>,
-    onSelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
+        Text(
+            text = price.takeIf { it != 0.0 }?.toString() ?: "",
+            fontSize = 16.sp
+        )
 
-    Box {
-        TextButton(onClick = { expanded = true }) {
-            Text(selected)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option) },
-                    onClick = {
-                        expanded = false
-                        onSelected(option)
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SegmentedButton(
-    options: List<String>,
-    selectedIndex: Int,
-    onSelectedIndex: (Int) -> Unit
-) {
-    Row {
-        options.forEachIndexed { index, label ->
-            Button(
-                onClick = { onSelectedIndex(index) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (selectedIndex == index) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.surfaceVariant
-                ),
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(label)
-            }
-        }
     }
 }

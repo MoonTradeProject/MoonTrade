@@ -145,7 +145,8 @@ fun AppNavigation() {
                 MarketDetailScreen(
                     navController = navController,
                     symbol = symbol ?: "null",
-                    marketDetailViewModel
+                    marketDetailViewModel,
+                    userAssetsViewModel
                 )
             }
 
