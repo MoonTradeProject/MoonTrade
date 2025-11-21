@@ -1,23 +1,20 @@
 package com.example.moontrade.di
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.moontrade.auth.AuthPreferences
 import com.example.moontrade.auth.AuthRepository
 import com.example.moontrade.data.api.AuthApi
+import com.example.moontrade.data.api.FetchOrdersApi
 import com.example.moontrade.data.api.LeaderboardApi
 import com.example.moontrade.data.api.MarketApi
-import com.example.moontrade.data.api.OrdersApi
+import com.example.moontrade.data.api.PlaceOrdersApi
 import com.example.moontrade.data.api.TournamentApi
 import com.example.moontrade.data.repository.AuthRepositoryImpl
 import com.example.moontrade.data.repository.LeaderboardRepository
+import com.example.moontrade.data.repository.OrdersRepository
 import com.example.moontrade.data.repository.TournamentRepository
 import com.example.moontrade.data.repository.TradeRepository
 import com.example.moontrade.session.SessionManager
-import com.example.moontrade.utils.LocalDateTimeAdapter
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -25,8 +22,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.time.LocalDateTime
 import javax.inject.Singleton
 
 
@@ -75,12 +70,12 @@ object AppModule {
 
 
     @Provides @Singleton
-    fun provideOrdersApi(retrofit: Retrofit): OrdersApi =
-        retrofit.create(OrdersApi::class.java)
+    fun provideOrdersApi(retrofit: Retrofit): PlaceOrdersApi =
+        retrofit.create(PlaceOrdersApi::class.java)
 
     @Provides @Singleton
     fun provideTradeRepository(
-        api: OrdersApi
+        api: PlaceOrdersApi
     ): TradeRepository = TradeRepository(api)
 
 
@@ -95,6 +90,17 @@ object AppModule {
     ): LeaderboardRepository = LeaderboardRepository(api, session)
 
 
+    @Provides
+    @Singleton
+    fun provideUserOrdersApi(retrofit: Retrofit): FetchOrdersApi =
+        retrofit.create(FetchOrdersApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideOrdersRepository(
+        api: FetchOrdersApi,
+        session: SessionManager
+    ): OrdersRepository = OrdersRepository(api, session)
 
 }
 

@@ -37,7 +37,7 @@ fun AppNavigation() {
     val selectedPlayerViewModel: SelectedPlayerViewModel = hiltViewModel()
     val leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
     val userAssetsViewModel: UserAssetsViewModel = hiltViewModel()
-
+    val ordersViewModel: OrdersViewModel = hiltViewModel()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
     val bottomBarRoutes = listOf(
@@ -158,6 +158,12 @@ fun AppNavigation() {
             // ✏ EDIT PROFILE
             composable(NavRoutes.PROFILE_EDIT) {
                 EditProfileScreen(navController, profileViewModel)
+            }
+
+            // USER ORDERS
+            composable(NavRoutes.USER_ORDERS) {
+
+                OrdersScreen(navController, ordersViewModel)
             }
         }
     }

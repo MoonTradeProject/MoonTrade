@@ -72,9 +72,9 @@ fun formatUsdFull(amount: BigDecimal): String = "$" + formatFiat(amount)
 fun formatUsdCompact(amount: BigDecimal): String {
     val abs = amount.abs()
     val (div, suffix) = when {
-        abs >= BigDecimal("1_000_000_000") -> BigDecimal("1_000_000_000") to "B"
-        abs >= BigDecimal("1_000_000")     -> BigDecimal("1_000_000")     to "M"
-        abs >= BigDecimal("1_000")         -> BigDecimal("1_000")         to "K"
+        abs >= BigDecimal("1000000000") -> BigDecimal("1000000000") to "B"
+        abs >= BigDecimal("1000000")    -> BigDecimal("1000000")    to "M"
+        abs >= BigDecimal("1000")       -> BigDecimal("1000")       to "K"
         else -> BigDecimal.ONE to ""
     }
     val scaled = amount.divide(div, 2, RoundingMode.HALF_UP)
