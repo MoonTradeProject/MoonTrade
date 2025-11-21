@@ -30,6 +30,9 @@ fun TradeForm(
     var isBuy by remember { mutableStateOf(true) }
     val price = PriceCounter(snapshot, tradeViewModel.amount.value, if (isBuy) "buy" else "sell")
 
+    var showNotification by remember { mutableStateOf(false) }
+    var notificationMessage by remember { mutableStateOf("") }
+
 
     Column(
         modifier = modifier
@@ -117,6 +120,8 @@ fun TradeForm(
                     execType = execType,
                     userAssetsViewModel = userAssetsViewModel
                 )
+                notificationMessage = "${tradeViewModel.assetName.value} has been bought!"
+                showNotification = true
             },
             modifier = Modifier.fillMaxWidth()
         ) {
