@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.moontrade.R
+import com.example.moontrade.ui.theme.Bluer
+import com.example.moontrade.ui.theme.Violet50
+import com.example.moontrade.ui.theme.Violet600
 
 data class BottomNavItem(
     val route: String,
@@ -40,13 +43,10 @@ private val bottomNavItems = listOf(
 @Composable
 fun BottomBar(navController: NavController) {
     val cs = MaterialTheme.colorScheme
-
     val isDarkTheme = cs.background.luminance() < 0.5f
-    val selectedColor = if (isDarkTheme) com.example.moontrade.ui.theme.Violet50 else com.example.moontrade.ui.theme.Bluer
-
+    val selectedColor = if (isDarkTheme) Violet50 else Bluer
     val labelSelectedColor = selectedColor
-    val labelUnselectedColor = labelSelectedColor.copy(alpha = 0.6f)
-
+    val labelUnselectedColor = Violet600
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val currentRoot = currentRoute?.substringBefore('/')
