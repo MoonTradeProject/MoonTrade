@@ -41,11 +41,11 @@ val TextSecondaryLight = Color(0x991A112E)
 // -----------------------------------------------------------------------------
 
 val GreenUp       = Color(0xFF8FF7AE)
-val GreenUpLight  = Color(0xFF8FF7AE)
+
+val Bluer  = Color(0xFF0288D1)
 
 // Negative (Down)
 val RedDown       = Color(0xFFFF9A84)
-val RedDownLight  = Color(0xFFFF9A84)
 
 // Warning
 val AmberWarn     = Color(0xFFFFC285)

@@ -1,15 +1,15 @@
 package com.example.moontrade.ui.screens.main_screens
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.moontrade.R
@@ -19,14 +19,6 @@ import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.main_screens.home_sub_screens.*
 import com.example.moontrade.viewmodels.*
 import java.util.Locale
-
-/**
- * displays:
- *  - user profile summary (nickname, avatar, tags)
- *  - current balance and ROI
- *  - portfolio preview (user assets)
- *  - top players carousel
- */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,27 +56,18 @@ fun HomeScreen(
                 tournaments.filter { it.isJoined }
                     .map { SelectableMode(Mode.Tournament(it.id.toString()), it.name) }
     }
-
     // --- Currently selected mode
     var selected by remember(currentMode, selectableModes) {
         mutableStateOf(selectableModes.find { it.mode == currentMode } ?: selectableModes.first())
     }
-
     // --- Connect to the balance WebSocket on screen start
     LaunchedEffect(Unit) { balanceViewModel.connect() }
-
-    // --- First load of user assets when entering screen
     LaunchedEffect(Unit) { userAssetsViewModel.loadUserAssets() }
-
-    // --- Load leaderboard once для карусели
     LaunchedEffect(Unit) { leaderboardViewModel.loadLeaderboard() }
-
-    // --- Reload data when mode changes
     LaunchedEffect(selected.mode) {
         balanceViewModel.changeMode(selected.mode)
         userAssetsViewModel.loadUserAssets()
     }
-
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // --- Main screen layout
@@ -105,9 +88,10 @@ fun HomeScreen(
                 },
                 actions = {
                     IconButton(onClick = { navController.navigate(NavRoutes.SETTINGS) }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                        Image(
+                            painter = painterResource(R.drawable.ic_settings),
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 }
@@ -170,7 +154,6 @@ fun HomeScreen(
                     }
                 )
             }
-
             // --- Bottom spacing for safe scrolling
             item { Spacer(Modifier.height(60.dp)) }
 
@@ -185,13 +168,10 @@ fun HomeScreen(
                     Text("My Orders")
                 }
             }
-
         }
     }
 }
-
 /* ---------------- Helper ---------------- */
-
 /**
  * Maps the avatar ID from the user profile to the corresponding drawable resource.
  * Returns [R.drawable.img] if no match is found.
