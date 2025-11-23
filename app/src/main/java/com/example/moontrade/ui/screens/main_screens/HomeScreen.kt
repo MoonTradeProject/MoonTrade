@@ -16,6 +16,7 @@ import com.example.moontrade.R
 import com.example.moontrade.model.Mode
 import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.bars.TopBar
+import com.example.moontrade.ui.screens.components.bars.SectionHeader
 import com.example.moontrade.ui.screens.main_screens.home_sub_screens.*
 import com.example.moontrade.viewmodels.*
 import java.util.Locale
@@ -31,7 +32,6 @@ fun HomeScreen(
     leaderboardViewModel: LeaderboardViewModel,
     selectedPlayerViewModel: SelectedPlayerViewModel
 ) {
-    // --- Reactive state from ViewModels
     val nickname by profileViewModel.nickname.collectAsState()
     val selectedTags by profileViewModel.selectedTags.collectAsState()
     val avatarId by profileViewModel.avatarId.collectAsState()
@@ -43,34 +43,32 @@ fun HomeScreen(
 
     val tournaments by tournamentsViewModel.tournaments.collectAsState()
     val userAssets by userAssetsViewModel.assets.collectAsState()
-
     val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
 
-    // --- New states for loading and error
     val isLoading by userAssetsViewModel.loading.collectAsState()
     val assetsError by userAssetsViewModel.error.collectAsState()
 
-    // --- Available modes (Main + joined tournaments)
     val selectableModes = remember(tournaments) {
         listOf(SelectableMode(Mode.Main, "Main")) +
                 tournaments.filter { it.isJoined }
                     .map { SelectableMode(Mode.Tournament(it.id.toString()), it.name) }
     }
-    // --- Currently selected mode
+
     var selected by remember(currentMode, selectableModes) {
         mutableStateOf(selectableModes.find { it.mode == currentMode } ?: selectableModes.first())
     }
-    // --- Connect to the balance WebSocket on screen start
+
     LaunchedEffect(Unit) { balanceViewModel.connect() }
     LaunchedEffect(Unit) { userAssetsViewModel.loadUserAssets() }
     LaunchedEffect(Unit) { leaderboardViewModel.loadLeaderboard() }
+
     LaunchedEffect(selected.mode) {
         balanceViewModel.changeMode(selected.mode)
         userAssetsViewModel.loadUserAssets()
     }
+
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    // --- Main screen layout
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -104,10 +102,10 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 0.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // --- User profile + balance + ROI
+
             item {
                 val roiValue = roi
                     .replace("%", "")
@@ -128,8 +126,9 @@ fun HomeScreen(
                     avatarResIdFrom = ::resolveAvatarRes
                 )
             }
-            // --- Portfolio / assets preview
+
             item {
+                SectionHeader("Your assets")
                 AssetsSection(
                     assets = userAssets.map { a ->
                         UserAssetUi(
@@ -144,8 +143,8 @@ fun HomeScreen(
                 )
             }
 
-            // --- Top Players carousel
             item {
+                SectionHeader("Top players")
                 TopPlayersCarousel(
                     entries = leaderboardEntries,
                     onClickPlayer = { entry ->
@@ -154,7 +153,7 @@ fun HomeScreen(
                     }
                 )
             }
-            // --- Bottom spacing for safe scrolling
+
             item { Spacer(Modifier.height(60.dp)) }
 
             item {
@@ -171,11 +170,7 @@ fun HomeScreen(
         }
     }
 }
-/* ---------------- Helper ---------------- */
-/**
- * Maps the avatar ID from the user profile to the corresponding drawable resource.
- * Returns [R.drawable.img] if no match is found.
- */
+
 @DrawableRes
 private fun resolveAvatarRes(id: Int): Int = when (id) {
     0 -> R.drawable.avatar_0

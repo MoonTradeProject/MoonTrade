@@ -100,15 +100,14 @@ fun ActiveStatusPill(
     modifier: Modifier = Modifier,
     label: String = "ACTIVE"
 ) {
-    val ex = MaterialTheme.extended
     val cs = MaterialTheme.colorScheme
     val dark = isDarkTheme()
-    val shape = RoundedCornerShape(999.dp)
+    val shape = RoundedCornerShape(40.dp)
 
     val backgroundBrush = if (dark) {
-        Brush.horizontalGradient(listOf(Violet600, Violet300))
+        Brush.horizontalGradient(listOf(Violet600,Violet300.copy(alpha = 1.8f),Violet600.copy(alpha = 1.6f)))
     } else {
-        ex.gradientPrimary
+        Brush.horizontalGradient(listOf(Violet600,Violet600.copy(alpha = 0.5f),Violet600.copy(alpha = 1.6f)))
     }
 
     val borderColor = if (dark) {
