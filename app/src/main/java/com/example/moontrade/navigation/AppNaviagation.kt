@@ -146,7 +146,8 @@ fun AppNavigation() {
                     navController = navController,
                     symbol = symbol ?: "null",
                     marketDetailViewModel,
-                    userAssetsViewModel
+                    userAssetsViewModel,
+                    balanceViewModel
                 )
             }
 

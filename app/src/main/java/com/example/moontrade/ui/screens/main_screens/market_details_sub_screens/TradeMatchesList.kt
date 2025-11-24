@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.moontrade.model.TradeMatch
+import com.example.moontrade.ui.screens.main_screens.OrdersScreen
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.filter
@@ -58,7 +59,7 @@ fun TradeMatchesList(
     when (selectedTab) {
         0 -> LazyColumn(
             modifier = modifier.fillMaxWidth(),
-            reverseLayout = true
+            reverseLayout = false
         ) {
             items(matches) { match ->
                 TradeMatchRow(match)
