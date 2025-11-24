@@ -1,14 +1,24 @@
 package com.example.moontrade.ui.screens.components.bars
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.moontrade.R
+import com.example.moontrade.ui.theme.Violet50
 import com.example.moontrade.ui.theme.Violet600
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,6 +32,8 @@ fun TopBar(
     actions: @Composable (() -> Unit)? = null
 ) {
     val cs = MaterialTheme.colorScheme
+    val isDarkTheme = cs.background.luminance() < 0.5f
+    val titleColor = if (isDarkTheme) Violet50 else Violet600
 
     CenterAlignedTopAppBar(
         modifier = Modifier
@@ -34,11 +46,12 @@ fun TopBar(
                 showBack && onBack != null -> {
                     IconButton(
                         onClick = onBack,
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        modifier = Modifier.padding(horizontal = 0.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = "Back"
+                        Image(
+                            painter = painterResource(R.drawable.ic_back),
+                            contentDescription = "Back",
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 }
@@ -50,7 +63,8 @@ fun TopBar(
                 !title.isNullOrEmpty() -> Text(
                     text = title,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = titleColor
                 )
             }
         },
@@ -58,9 +72,9 @@ fun TopBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = cs.background,
             scrolledContainerColor = cs.background,
-            navigationIconContentColor = Violet600,
-            titleContentColor = Violet600,
-            actionIconContentColor = Violet600
+            navigationIconContentColor = Color.Unspecified,
+            actionIconContentColor = Color.Unspecified,
+            titleContentColor = titleColor
         )
     )
 }

@@ -36,12 +36,6 @@ fun AssetsSection(
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
-        Text(
-            text = "YOUR ASSETS",
-            color = cs.onSurface.copy(alpha = .65f),
-            style = MaterialTheme.typography.labelLarge
-        )
-
         when {
             isLoading -> {
                 Text(

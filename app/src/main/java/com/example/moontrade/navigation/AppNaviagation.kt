@@ -44,7 +44,9 @@ fun AppNavigation() {
         NavRoutes.HOME,
         NavRoutes.MARKETS,
         NavRoutes.RATINGS,
-        NavRoutes.TOURNAMENTS
+        NavRoutes.TOURNAMENTS,
+        NavRoutes.PROFILE,
+        NavRoutes.USER_ORDERS
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -118,7 +120,12 @@ fun AppNavigation() {
 
             // RATINGS
             composable(NavRoutes.RATINGS) {
-                RatingsScreen(navController, leaderboardViewModel, selectedPlayerViewModel)
+                RatingsScreen(
+                    navController = navController,
+                    leaderboardViewModel = leaderboardViewModel,
+                    selectedPlayerViewModel = selectedPlayerViewModel,
+                    profileViewModel = profileViewModel
+                )
             }
 
             // TOURNAMENTS
@@ -169,13 +176,13 @@ fun AppNavigation() {
         }
     }
 
-    if (currentRoute in bottomBarRoutes) {
-        Scaffold(
-            bottomBar = { BottomBar(navController) }
-        ) { padding ->
-            content(padding)
+    Scaffold(
+        bottomBar = {
+            if (currentRoute in bottomBarRoutes) {
+                BottomBar(navController)
+            }
         }
-    } else {
-        content(PaddingValues(0.dp))
+    ) { padding ->
+        content(padding)
     }
 }

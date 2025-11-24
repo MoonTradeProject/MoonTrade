@@ -1,32 +1,26 @@
 package com.example.moontrade.ui.screens.main_screens
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.moontrade.R
 import com.example.moontrade.model.Mode
 import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.bars.TopBar
+import com.example.moontrade.ui.screens.components.bars.SectionHeader
 import com.example.moontrade.ui.screens.main_screens.home_sub_screens.*
+import com.example.moontrade.ui.screens.main_screens.order_sub_screen.MyOrdersCard
 import com.example.moontrade.viewmodels.*
 import java.util.Locale
-
-/**
- * displays:
- *  - user profile summary (nickname, avatar, tags)
- *  - current balance and ROI
- *  - portfolio preview (user assets)
- *  - top players carousel
- */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +33,6 @@ fun HomeScreen(
     leaderboardViewModel: LeaderboardViewModel,
     selectedPlayerViewModel: SelectedPlayerViewModel
 ) {
-    // --- Reactive state from ViewModels
     val nickname by profileViewModel.nickname.collectAsState()
     val selectedTags by profileViewModel.selectedTags.collectAsState()
     val avatarId by profileViewModel.avatarId.collectAsState()
@@ -51,35 +44,25 @@ fun HomeScreen(
 
     val tournaments by tournamentsViewModel.tournaments.collectAsState()
     val userAssets by userAssetsViewModel.assets.collectAsState()
-
     val leaderboardEntries by leaderboardViewModel.entries.collectAsState()
 
-    // --- New states for loading and error
     val isLoading by userAssetsViewModel.loading.collectAsState()
     val assetsError by userAssetsViewModel.error.collectAsState()
 
-    // --- Available modes (Main + joined tournaments)
     val selectableModes = remember(tournaments) {
         listOf(SelectableMode(Mode.Main, "Main")) +
                 tournaments.filter { it.isJoined }
                     .map { SelectableMode(Mode.Tournament(it.id.toString()), it.name) }
     }
 
-    // --- Currently selected mode
     var selected by remember(currentMode, selectableModes) {
         mutableStateOf(selectableModes.find { it.mode == currentMode } ?: selectableModes.first())
     }
 
-    // --- Connect to the balance WebSocket on screen start
     LaunchedEffect(Unit) { balanceViewModel.connect() }
-
-    // --- First load of user assets when entering screen
     LaunchedEffect(Unit) { userAssetsViewModel.loadUserAssets() }
-
-    // --- Load leaderboard once для карусели
     LaunchedEffect(Unit) { leaderboardViewModel.loadLeaderboard() }
 
-    // --- Reload data when mode changes
     LaunchedEffect(selected.mode) {
         balanceViewModel.changeMode(selected.mode)
         userAssetsViewModel.loadUserAssets()
@@ -87,7 +70,6 @@ fun HomeScreen(
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    // --- Main screen layout
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -105,9 +87,10 @@ fun HomeScreen(
                 },
                 actions = {
                     IconButton(onClick = { navController.navigate(NavRoutes.SETTINGS) }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                        Image(
+                            painter = painterResource(R.drawable.ic_settings),
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 }
@@ -120,10 +103,10 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 0.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // --- User profile + balance + ROI
+
             item {
                 val roiValue = roi
                     .replace("%", "")
@@ -144,8 +127,9 @@ fun HomeScreen(
                     avatarResIdFrom = ::resolveAvatarRes
                 )
             }
-            // --- Portfolio / assets preview
+
             item {
+                SectionHeader("Your assets")
                 AssetsSection(
                     assets = userAssets.map { a ->
                         UserAssetUi(
@@ -160,8 +144,14 @@ fun HomeScreen(
                 )
             }
 
-            // --- Top Players carousel
             item {
+                MyOrdersCard(
+                    onClick = { navController.navigate(NavRoutes.USER_ORDERS) }
+                )
+            }
+
+            item {
+                SectionHeader("Top players")
                 TopPlayersCarousel(
                     entries = leaderboardEntries,
                     onClickPlayer = { entry ->
@@ -170,32 +160,10 @@ fun HomeScreen(
                     }
                 )
             }
-
-            // --- Bottom spacing for safe scrolling
-            item { Spacer(Modifier.height(60.dp)) }
-
-            item {
-                Button(
-                    onClick = { navController.navigate(NavRoutes.USER_ORDERS) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Text("My Orders")
-                }
-            }
-
         }
     }
 }
 
-/* ---------------- Helper ---------------- */
-
-/**
- * Maps the avatar ID from the user profile to the corresponding drawable resource.
- * Returns [R.drawable.img] if no match is found.
- */
 @DrawableRes
 private fun resolveAvatarRes(id: Int): Int = when (id) {
     0 -> R.drawable.avatar_0

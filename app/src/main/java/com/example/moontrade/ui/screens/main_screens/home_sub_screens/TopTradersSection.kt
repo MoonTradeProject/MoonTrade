@@ -2,11 +2,12 @@ package com.example.moontrade.ui.screens.main_screens.home_sub_screens
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.LazyListScope
+import com.example.moontrade.R
 import com.example.moontrade.model.LeaderboardEntry
 import com.example.moontrade.ui.screens.components.PlayerCard
 
@@ -26,16 +27,23 @@ fun LazyListScope.TopTradersSection(
 
     items(top.size) { index ->
         val entry = top[index]
-        val medal = when (index) {
-            0 -> "🥇"
-            1 -> "🥈"
-            2 -> "🥉"
+
+        // те же иконки, что и в карусели
+        val medalIconRes = when (index) {
+            0 -> R.drawable.ic_place_1
+            1 -> R.drawable.ic_place_2
+            2 -> R.drawable.ic_place_3
+            3 -> R.drawable.ic_place_4
+            4 -> R.drawable.ic_place_5
             else -> null
         }
+
         PlayerCard(
             entry = entry,
-            medal = medal
-        ) { onClickPlayer(entry) }
+            medalIconRes = medalIconRes,
+            modifier = Modifier,
+            onClick = { onClickPlayer(entry) }
+        )
     }
 
     item { Spacer(Modifier.height(8.dp)) }

@@ -1,105 +1,137 @@
 package com.example.moontrade.ui.screens.main_screens.order_sub_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.moontrade.data.response.OrderEntry
+import com.example.moontrade.ui.screens.components.glasskit.GlassCard
+import com.example.moontrade.ui.theme.GreenUp
+import com.example.moontrade.ui.theme.RedDown
+import com.example.moontrade.ui.theme.Violet300
+import com.example.moontrade.ui.theme.Violet600
 
 @Composable
 fun OrderRow(
     order: OrderEntry,
-    onCancel: (String) -> Unit = {} // optional cancel callback
+    modifier: Modifier = Modifier,
+    onCancel: (String) -> Unit = {}
 ) {
-    val sideColor =
-        if (order.order_type.lowercase() == "buy") Color(0xFF4CAF50)
-        else Color(0xFFF44336)
+    val cs = MaterialTheme.colorScheme
 
-    Card(
-        modifier = Modifier
+    val isBuy = order.order_type.equals("buy", ignoreCase = true)
+    val sideColor = if (isBuy) GreenUp else RedDown
+
+    GlassCard(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(6.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            .padding(horizontal = 4.dp, vertical = 6.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
 
-            // FIRST ROW: SIDE + STATUS
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = order.order_type.uppercase(),
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = sideColor
                 )
 
-                Text(
-                    text = order.status,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-            }
-
-            Spacer(Modifier.height(4.dp))
-
-            // SECOND ROW: pair + mode
-            Text(
-                text = order.asset_name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Text(
-                text = "Mode: ${order.mode}",
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodySmall
-            )
-
-            if (order.tournament_id != "00000000-0000-0000-0000-000000000000") {
-                Text(
-                    text = "Tournament: ${order.tournament_id}",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Box(
+                    modifier = Modifier
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                listOf(
+                                    Violet600.copy(alpha = 0.9f),
+                                    Violet300.copy(alpha = 0.9f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(40.dp)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = order.status.uppercase(),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
             }
 
             Spacer(Modifier.height(6.dp))
 
-            // PRICE / AMOUNT
+            Text(
+                text = order.asset_name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = cs.onSurface
+            )
+            Text(
+                text = "Mode: ${order.mode}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = cs.onSurfaceVariant
+            )
+            if (order.tournament_id != "00000000-0000-0000-0000-000000000000") {
+                Text(
+                    text = "Tournament: ${order.tournament_id}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = cs.onSurfaceVariant
+                )
+            }
+
+            Spacer(Modifier.height(10.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text("Price", color = Color.Gray)
-                    Text(order.price)
+                    Text(
+                        text = "Price",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = cs.onSurfaceVariant
+                    )
+                    Text(
+                        text = order.price,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = cs.onSurface
+                    )
                 }
-                Column {
-                    Text("Amount", color = Color.Gray)
-                    Text(order.amount)
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "Amount",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = cs.onSurfaceVariant
+                    )
+                    Text(
+                        text = order.amount,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = cs.onSurface
+                    )
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
-
-            // CANCEL BUTTON IF PENDING
-            if (order.status.lowercase() == "pending") {
-                Button(
+            if (order.status.equals("pending", ignoreCase = true)) {
+                Spacer(Modifier.height(10.dp))
+                TextButton(
                     onClick = { onCancel(order.id) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF5252)
-                    )
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Cancel Order")
+                    Text("Cancel order")
                 }
             }
         }
