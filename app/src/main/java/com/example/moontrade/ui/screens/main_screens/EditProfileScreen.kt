@@ -1,3 +1,4 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
 package com.example.moontrade.ui.screens.main_screens
 
 import android.annotation.SuppressLint
@@ -11,7 +12,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -29,7 +29,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.moontrade.R
 import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.viewmodels.ProfileViewModel
-import com.google.accompanist.flowlayout.FlowRow
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable

@@ -32,10 +32,9 @@ import com.example.moontrade.utils.formatUsdFull
 import com.example.moontrade.utils.formatUsdCompact
 import com.example.moontrade.utils.formatPercent
 import java.math.BigDecimal
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import com.example.moontrade.ui.theme.Violet200
 import com.example.moontrade.ui.theme.Violet300
+import com.example.moontrade.ui.theme.Violet600
 
 @Composable
 private fun isDarkThemeFromColors(): Boolean {
@@ -43,7 +42,6 @@ private fun isDarkThemeFromColors(): Boolean {
     return cs.background.luminance() < 0.5f
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProfileSummaryCard(
     nickname: String,
@@ -100,7 +98,6 @@ fun ProfileSummaryCard(
                         )
                     }
                 }
-
                 Spacer(Modifier.width(30.dp))
 
                 Column(
@@ -133,25 +130,41 @@ fun ProfileSummaryCard(
 
                     Spacer(Modifier.height(8.dp))
 
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        selectedTags.forEach {
-                            AssistChip(
-                                onClick = {},
-                                label = {
+                    // ----- TAGS -----
+                    if (selectedTags.isNotEmpty()) {
+                        val shape = RoundedCornerShape(30)
+
+                        val backgroundBrush = Brush.horizontalGradient(
+                            listOf(
+                                Violet600.copy(alpha = 0.6f),
+                                Violet600.copy(alpha = 0.9f),
+                                Violet600.copy(alpha = 1.2f)
+                            )
+                        )
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            selectedTags.forEach { tag ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(shape)
+                                        .background(backgroundBrush)
+                                        .padding(
+                                            horizontal = 12.dp,
+                                            vertical = 4.dp
+                                        )
+                                ) {
                                     Text(
-                                        it,
+                                        text = tag,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = Color.White,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = ex.glassSurface,
-                                    labelColor = cs.onSurface
-                                )
-                            )
+                                }
+                            }
                         }
                     }
                 }
