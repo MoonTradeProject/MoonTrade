@@ -120,7 +120,12 @@ fun AppNavigation() {
 
             // RATINGS
             composable(NavRoutes.RATINGS) {
-                RatingsScreen(navController, leaderboardViewModel, selectedPlayerViewModel)
+                RatingsScreen(
+                    navController = navController,
+                    leaderboardViewModel = leaderboardViewModel,
+                    selectedPlayerViewModel = selectedPlayerViewModel,
+                    profileViewModel = profileViewModel
+                )
             }
 
             // TOURNAMENTS
