@@ -51,7 +51,7 @@ fun TopBar(
                         Image(
                             painter = painterResource(R.drawable.ic_back),
                             contentDescription = "Back",
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(36.dp)
                         )
                     }
                 }

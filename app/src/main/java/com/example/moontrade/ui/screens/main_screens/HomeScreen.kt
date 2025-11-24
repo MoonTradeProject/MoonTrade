@@ -18,6 +18,7 @@ import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.components.bars.SectionHeader
 import com.example.moontrade.ui.screens.main_screens.home_sub_screens.*
+import com.example.moontrade.ui.screens.main_screens.order_sub_screen.MyOrdersCard
 import com.example.moontrade.viewmodels.*
 import java.util.Locale
 
@@ -144,6 +145,12 @@ fun HomeScreen(
             }
 
             item {
+                MyOrdersCard(
+                    onClick = { navController.navigate(NavRoutes.USER_ORDERS) }
+                )
+            }
+
+            item {
                 SectionHeader("Top players")
                 TopPlayersCarousel(
                     entries = leaderboardEntries,
@@ -152,20 +159,6 @@ fun HomeScreen(
                         navController.navigate(NavRoutes.PLAYER_PROFILE)
                     }
                 )
-            }
-
-            item { Spacer(Modifier.height(60.dp)) }
-
-            item {
-                Button(
-                    onClick = { navController.navigate(NavRoutes.USER_ORDERS) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Text("My Orders")
-                }
             }
         }
     }

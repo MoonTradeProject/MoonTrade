@@ -40,7 +40,7 @@ val TextSecondaryLight = Color(0x991A112E)
 // Semantic colors
 // -----------------------------------------------------------------------------
 
-val GreenUp       = Color(0xFF8FF7AE)
+val GreenUp       = Color(0xFF009688)
 
 val Bluer  = Color(0xFF0288D1)
 

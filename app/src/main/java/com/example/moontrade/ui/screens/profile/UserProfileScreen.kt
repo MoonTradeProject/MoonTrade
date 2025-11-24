@@ -3,9 +3,8 @@ package com.example.moontrade.ui.screens.profile
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -14,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -22,8 +22,9 @@ import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.components.glasskit.GlassCard
 import com.example.moontrade.viewmodels.ProfileViewModel
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -48,80 +49,84 @@ fun UserProfileScreen(
                     IconButton(onClick = {
                         navController.navigate(NavRoutes.PROFILE_EDIT)
                     }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_edit),
+                            contentDescription = "Edit",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(42.dp)
+                        )
                     }
                 }
             )
         }
     ) { padding ->
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(cs.background)
                 .padding(padding)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                corner = 28.dp
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+            item {
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    corner = 28.dp
                 ) {
-
-                    // Avatar
-                    Box(
+                    Column(
                         modifier = Modifier
-                            .size(96.dp)
-                            .clip(CircleShape)
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (!avatarUrl.isNullOrEmpty()) {
-                            AsyncImage(
-                                model = avatarUrl,
-                                contentDescription = "avatar",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            Image(
-                                painter = androidx.compose.ui.res.painterResource(
-                                    id = resolveDefaultAvatar(avatarId)
-                                ),
-                                contentDescription = "avatar",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
+
+                        // Avatar
+                        Box(
+                            modifier = Modifier
+                                .size(96.dp)
+                                .clip(CircleShape)
+                        ) {
+                            if (!avatarUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = avatarUrl,
+                                    contentDescription = "avatar",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = resolveDefaultAvatar(avatarId)),
+                                    contentDescription = "avatar",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
                         }
-                    }
 
-                    Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(16.dp))
 
-                    // Nickname
-                    Text(
-                        text = nickname,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = cs.onSurface
-                    )
+                        // Nickname
+                        Text(
+                            text = nickname,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = cs.onSurface
+                        )
 
-                    Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(12.dp))
 
-                    // Tags
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        selectedTags.forEach { tag ->
-                            AssistChip(
-                                onClick = {},
-                                label = { Text(tag) }
-                            )
+                        // Tags
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            selectedTags.forEach { tag ->
+                                AssistChip(
+                                    onClick = {},
+                                    label = { Text(tag) }
+                                )
+                            }
                         }
                     }
                 }

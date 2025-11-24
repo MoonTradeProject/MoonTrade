@@ -105,7 +105,7 @@ fun ActiveStatusPill(
     val shape = RoundedCornerShape(40.dp)
 
     val backgroundBrush = if (dark) {
-        Brush.horizontalGradient(listOf(Violet600,Violet300.copy(alpha = 1.8f),Violet600.copy(alpha = 1.6f)))
+        Brush.horizontalGradient(listOf(Violet600,Violet300.copy(alpha = 0.8f),Violet600.copy(alpha = 1.6f)))
     } else {
         Brush.horizontalGradient(listOf(Violet600,Violet600.copy(alpha = 0.5f),Violet600.copy(alpha = 1.6f)))
     }
