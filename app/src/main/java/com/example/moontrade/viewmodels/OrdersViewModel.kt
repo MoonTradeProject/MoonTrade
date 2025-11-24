@@ -26,7 +26,6 @@ class OrdersViewModel @Inject constructor(
     val error: StateFlow<String?> = _error.asStateFlow()
 
     init {
-
         viewModelScope.launch {
             sessionManager.mode.collect {
                 loadOrders()
