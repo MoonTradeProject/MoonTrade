@@ -1,6 +1,5 @@
 package com.example.moontrade.ui.screens.components.tournament
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -32,34 +32,78 @@ fun TournamentCard(
             .border(2.dp, borderColor, shape)
             .alpha(cardAlpha),
         shape = shape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     ) {
         Row(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(title, style = MaterialTheme.typography.titleMedium)
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Spacer(Modifier.height(4.dp))
-                Text(subtitle, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
 
+            Spacer(Modifier.width(12.dp))
+
             if (isJoined) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                Row(
+                    modifier = Modifier
+                        .defaultMinSize(minHeight = 40.dp)
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
-                        Icons.Default.Check,
+                        imageVector = Icons.Default.Check,
                         contentDescription = "Joined",
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(Modifier.width(4.dp))
-                    Text("Joined", color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        text = "Joined",
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             } else {
-                Button(onClick = onAction) {
-                    Text(actionText)
+
+                Button(
+                    onClick = onAction,
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .heightIn(min = 40.dp),
+                    contentPadding = PaddingValues(
+                        horizontal = 20.dp,
+                        vertical = 8.dp
+                    )
+                ) {
+                    Text(
+                        text = actionText,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         }

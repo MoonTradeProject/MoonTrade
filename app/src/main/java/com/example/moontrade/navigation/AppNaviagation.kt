@@ -4,18 +4,23 @@ import MarketDetailScreen
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.moontrade.auth.AuthViewModel
 import com.example.moontrade.ui.screens.authentication.*
 import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.ui.screens.main_screens.*
-import com.example.moontrade.ui.screens.onboarding.*
+import com.example.moontrade.ui.screens.onboarding.OnboardingPagerScreen
 import com.example.moontrade.ui.screens.profile.PlayerProfileScreen
 import com.example.moontrade.ui.screens.profile.UserProfileScreen
 import com.example.moontrade.ui.theme.ThemeViewModel
@@ -33,13 +38,11 @@ fun AppNavigation() {
     val themeViewModel: ThemeViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
     val marketDetailViewModel: MarketDetailViewModel = hiltViewModel()
-    // val tradeViewModel: TradeViewModel = hiltViewModel()
     val selectedPlayerViewModel: SelectedPlayerViewModel = hiltViewModel()
     val leaderboardViewModel: LeaderboardViewModel = hiltViewModel()
     val userAssetsViewModel: UserAssetsViewModel = hiltViewModel()
     val ordersViewModel: OrdersViewModel = hiltViewModel()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
-
     val bottomBarRoutes = listOf(
         NavRoutes.HOME,
         NavRoutes.MARKETS,
@@ -48,7 +51,6 @@ fun AppNavigation() {
         NavRoutes.PROFILE,
         NavRoutes.USER_ORDERS
     )
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -63,18 +65,25 @@ fun AppNavigation() {
     val content: @Composable (PaddingValues) -> Unit = { padding ->
         NavHost(
             navController = navController,
-            startDestination = NavRoutes.ONBOARDING_1,
+            startDestination = NavRoutes.ONBOARDING,
             modifier = Modifier.padding(padding)
         ) {
-            composable(NavRoutes.ONBOARDING_1) {
-                OnboardingOne(onNext = { navController.navigate(NavRoutes.ONBOARDING_2) })
+            // ---------- ONBOARDING (pager: swipe + button) ----------
+            composable(NavRoutes.ONBOARDING) {
+                OnboardingPagerScreen(
+                    onFinished = {
+                        navController.navigate(NavRoutes.WELCOME) {
+                            popUpTo(NavRoutes.ONBOARDING) { inclusive = true }
+                        }
+                    },
+                    onSkip = {
+                        navController.navigate(NavRoutes.WELCOME) {
+                            popUpTo(NavRoutes.ONBOARDING) { inclusive = true }
+                        }
+                    }
+                )
             }
-            composable(NavRoutes.ONBOARDING_2) {
-                OnboardingTwo(onNext = { navController.navigate(NavRoutes.ONBOARDING_3) })
-            }
-            composable(NavRoutes.ONBOARDING_3) {
-                OnboardingThree(onNext = { navController.navigate(NavRoutes.WELCOME) })
-            }
+            // ---------- AUTH / WELCOME ----------
             composable(NavRoutes.WELCOME) {
                 WelcomeScreen(navController, authViewModel)
             }
@@ -99,8 +108,7 @@ fun AppNavigation() {
             composable(NavRoutes.LOGIN) {
                 LoginScreen(navController, authViewModel)
             }
-
-            // HOME
+            // ---------- HOME ----------
             composable(NavRoutes.HOME) {
                 HomeScreen(
                     navController,
@@ -112,13 +120,11 @@ fun AppNavigation() {
                     selectedPlayerViewModel
                 )
             }
-
-            // MARKETS
+            // ---------- MARKETS ----------
             composable(NavRoutes.MARKETS) {
                 MarketsScreen(navController, marketViewModel, themeViewModel)
             }
-
-            // RATINGS
+            // ---------- RATINGS ----------
             composable(NavRoutes.RATINGS) {
                 RatingsScreen(
                     navController = navController,
@@ -127,23 +133,19 @@ fun AppNavigation() {
                     profileViewModel = profileViewModel
                 )
             }
-
-            // TOURNAMENTS
+            // ---------- TOURNAMENTS ----------
             composable(NavRoutes.TOURNAMENTS) {
                 TournamentsScreen(navController, tournamentsViewModel)
             }
-
-            // USER PROFILE
+            // ---------- USER PROFILE ----------
             composable(NavRoutes.PROFILE) {
                 UserProfileScreen(navController, profileViewModel)
             }
-
-            // OTHER PLAYER PROFILE
+            // ---------- OTHER PLAYER PROFILE ----------
             composable(NavRoutes.PLAYER_PROFILE) {
                 PlayerProfileScreen(navController, selectedPlayerViewModel)
             }
-
-            // MARKET DETAIL
+            // ---------- MARKET DETAIL ----------
             composable(
                 route = "${NavRoutes.MARKET_DETAIL}/{symbol}",
                 arguments = listOf(navArgument("symbol") { type = NavType.StringType })
@@ -157,25 +159,20 @@ fun AppNavigation() {
                     balanceViewModel
                 )
             }
-
-            // ⚙ SETTINGS
+            // ---------- SETTINGS ----------
             composable(NavRoutes.SETTINGS) {
                 SettingsScreen(navController, authViewModel, themeViewModel)
             }
-
-            // ✏ EDIT PROFILE
+            // ---------- EDIT PROFILE ----------
             composable(NavRoutes.PROFILE_EDIT) {
                 EditProfileScreen(navController, profileViewModel)
             }
-
-            // USER ORDERS
+            // ---------- USER ORDERS ----------
             composable(NavRoutes.USER_ORDERS) {
-
                 OrdersScreen(navController, ordersViewModel)
             }
         }
     }
-
     Scaffold(
         bottomBar = {
             if (currentRoute in bottomBarRoutes) {

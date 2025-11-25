@@ -2,9 +2,7 @@ package com.example.moontrade.navigation
 
 
 object NavRoutes {
-    const val ONBOARDING_1 = "onboarding1"
-    const val ONBOARDING_2 = "onboarding2"
-    const val ONBOARDING_3 = "onboarding3"
+    const val ONBOARDING = "onboarding"
     const val WELCOME = "welcome"
     const val ACCOUNT_CREATION = "account_creation"
     const val ADD_MAIL = "add_mail"
