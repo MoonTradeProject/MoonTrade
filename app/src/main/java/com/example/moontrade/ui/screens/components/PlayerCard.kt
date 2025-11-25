@@ -37,7 +37,7 @@ fun PlayerCard(
     } else entry.avatar_url
 
     val roi = entry.roi
-    val roiText = formatPercent(roi, keepPlus = true, decimals = 2)
+    val roiText = formatPercent(roi, keepPlus = true, decimals = 1)
     val displayRoiText = when {
         roi > 10_000.0 -> "> 10,000%"
         roi < -10_000.0 -> "< -10,000%"
@@ -52,39 +52,56 @@ fun PlayerCard(
 
     GlassCard(
         modifier = modifier
+            .width(180.dp)
+            .heightIn(min = 210.dp)
             .clickable(onClick = onClick)
             .padding(vertical = 8.dp)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (medalIconRes != null) {
-                Box(
-                    modifier = Modifier.size(50.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(medalIconRes),
-                        contentDescription = null,
-                        modifier = Modifier.size(50.dp)
-                    )
-                }
-            }
-            Text(
-                text = "TOP ${entry.rank}",
-                style = MaterialTheme.typography.titleSmall,
-                color = cs.onSurface
-            )
-            Text(
-                text = displayRoiText,
-                style = MaterialTheme.typography.titleMedium,
-                color = roiColor
-            )
 
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (medalIconRes != null) {
+                    Box(
+                        modifier = Modifier.size(40.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(medalIconRes),
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
+
+                Text(
+                    text = "TOP ${entry.rank}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = cs.onSurface,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Clip
+                )
+
+                Text(
+                    text = displayRoiText,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = roiColor,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Clip
+                )
+            }
+
+            // аватар
             AvatarWithRing(size = 48.dp) {
                 AsyncImage(
                     model = avatarUrl ?: R.drawable.avatar_0,
@@ -93,9 +110,11 @@ fun PlayerCard(
                     contentScale = ContentScale.Crop
                 )
             }
+
+            // ник
             Text(
                 text = entry.username,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.bodyMedium,
                 color = cs.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

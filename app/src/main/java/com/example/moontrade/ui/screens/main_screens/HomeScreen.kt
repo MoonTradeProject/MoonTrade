@@ -10,16 +10,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.moontrade.R
 import com.example.moontrade.model.Mode
+import com.example.moontrade.model.LeaderboardEntry
 import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.components.bars.SectionHeader
 import com.example.moontrade.ui.screens.main_screens.home_sub_screens.*
 import com.example.moontrade.ui.screens.main_screens.order_sub_screen.MyOrdersCard
 import com.example.moontrade.viewmodels.*
+import java.math.BigDecimal
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,6 +71,67 @@ fun HomeScreen(
         userAssetsViewModel.loadUserAssets()
     }
 
+    val roiValue = roi
+        .replace("%", "")
+        .replace(",", ".")
+        .toDoubleOrNull() ?: 0.0
+
+    val roiLabel = (if (roiValue >= 0) "+" else "") +
+            String.format(Locale.US, "%.1f%%", roiValue)
+
+    val assetsUi = userAssets.map { a ->
+        UserAssetUi(
+            name = a.asset_name,
+            amount = a.amount,
+            assetValue = a.asset_value,
+            change = listOf(-2.5, 1.2, 0.8, -0.6).random()
+        )
+    }
+
+    HomeScreenContent(
+        nickname = nickname,
+        selectedTags = selectedTags,
+        avatarId = avatarId,
+        avatarUrl = avatarUrl,
+        balanceText = balance,
+        roiValue = roiValue,
+        roiLabel = roiLabel,
+        selectableModes = selectableModes,
+        selectedMode = selected,
+        onSelectMode = { selected = it },
+        assets = assetsUi,
+        isAssetsLoading = isLoading,
+        assetsError = assetsError,
+        leaderboardEntries = leaderboardEntries,
+        onOpenSettings = { navController.navigate(NavRoutes.SETTINGS) },
+        onOpenOrders = { navController.navigate(NavRoutes.USER_ORDERS) },
+        onOpenPlayer = { entry ->
+            selectedPlayerViewModel.set(entry)
+            navController.navigate(NavRoutes.PLAYER_PROFILE)
+        }
+    )
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeScreenContent(
+    nickname: String,
+    selectedTags: List<String>,
+    avatarId: Int,
+    avatarUrl: String?,
+    balanceText: String,
+    roiValue: Double,
+    roiLabel: String,
+    selectableModes: List<SelectableMode>,
+    selectedMode: SelectableMode,
+    onSelectMode: (SelectableMode) -> Unit,
+    assets: List<UserAssetUi>,
+    isAssetsLoading: Boolean,
+    assetsError: String?,
+    leaderboardEntries: List<LeaderboardEntry>,
+    onOpenSettings: () -> Unit,
+    onOpenOrders: () -> Unit,
+    onOpenPlayer: (LeaderboardEntry) -> Unit
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
@@ -80,13 +144,13 @@ fun HomeScreen(
                 showBack = false,
                 navigationContent = {
                     ModeSelector(
-                        selected = selected,
+                        selected = selectedMode,
                         items = selectableModes,
-                        onSelect = { selected = it }
+                        onSelect = onSelectMode
                     )
                 },
                 actions = {
-                    IconButton(onClick = { navController.navigate(NavRoutes.SETTINGS) }) {
+                    IconButton(onClick = onOpenSettings) {
                         Image(
                             painter = painterResource(R.drawable.ic_settings),
                             contentDescription = "Settings",
@@ -108,20 +172,12 @@ fun HomeScreen(
         ) {
 
             item {
-                val roiValue = roi
-                    .replace("%", "")
-                    .replace(",", ".")
-                    .toDoubleOrNull() ?: 0.0
-
-                val roiLabel = (if (roiValue >= 0) "+" else "") +
-                        String.format(Locale.US, "%.1f%%", roiValue)
-
                 ProfileSummaryCard(
                     nickname = nickname,
                     selectedTags = selectedTags,
                     avatarId = avatarId,
                     avatarUrl = avatarUrl,
-                    balanceText = balance,
+                    balanceText = balanceText,
                     roiValue = roiValue,
                     roiLabel = roiLabel,
                     avatarResIdFrom = ::resolveAvatarRes
@@ -131,22 +187,15 @@ fun HomeScreen(
             item {
                 SectionHeader("Your assets")
                 AssetsSection(
-                    assets = userAssets.map { a ->
-                        UserAssetUi(
-                            name = a.asset_name,
-                            amount = a.amount,
-                            assetValue = a.asset_value,
-                            change = listOf(-2.5, 1.2, 0.8, -0.6).random()
-                        )
-                    },
-                    isLoading = isLoading,
+                    assets = assets,
+                    isLoading = isAssetsLoading,
                     error = assetsError
                 )
             }
 
             item {
                 MyOrdersCard(
-                    onClick = { navController.navigate(NavRoutes.USER_ORDERS) }
+                    onClick = onOpenOrders
                 )
             }
 
@@ -154,14 +203,116 @@ fun HomeScreen(
                 SectionHeader("Top players")
                 TopPlayersCarousel(
                     entries = leaderboardEntries,
-                    onClickPlayer = { entry ->
-                        selectedPlayerViewModel.set(entry)
-                        navController.navigate(NavRoutes.PLAYER_PROFILE)
-                    }
+                    onClickPlayer = onOpenPlayer
                 )
             }
         }
     }
+}
+
+private fun fakeLeaderboardEntries(): List<LeaderboardEntry> {
+    val names = listOf("market-bot", "GODDAMN", "TraderX", "MoonShot", "SlowBro")
+    val rois = listOf(10000.0, 4444.33, 120.5, 75.2, 12.3)
+    val descriptions = listOf(
+        "AI-based trader",
+        "Consistent growth",
+        "Steady performer",
+        "Swing trader",
+        "Low-risk strategy"
+    )
+    val achievements = listOf("10k% ROI", "4400% ROI", "120% ROI", "75% ROI", "12% ROI")
+
+    return names.indices.map { i ->
+        LeaderboardEntry(
+            uid = (i + 1).toString(),
+            username = names[i],
+            roi = rois[i],
+            rank = i + 1,
+            avatar_url = null,
+            description = descriptions[i],
+            tags = listOf("Top ${i + 1}"),
+            achievements = listOf(achievements[i])
+        )
+    }
+}
+// ПРЕВЬЮ
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HomeScreenPreviewContent() {
+    val modes = listOf(
+        SelectableMode(Mode.Main, "Main"),
+        SelectableMode(Mode.Tournament("1"), "BTC Cup")
+    )
+    var selected by remember { mutableStateOf(modes.first()) }
+
+    val assets = listOf(
+        UserAssetUi(
+            name = "ADAUSDT",
+            amount = BigDecimal("19.0"),
+            assetValue = BigDecimal("7.81"),
+            change = -2.5
+        ),
+        UserAssetUi(
+            name = "SOLUSDT",
+            amount = BigDecimal("2.0"),
+            assetValue = BigDecimal("269.18"),
+            change = -2.5
+        ),
+    )
+
+    val leaders = fakeLeaderboardEntries()
+
+    MaterialTheme {
+        HomeScreenContent(
+            nickname = "TraderX",
+            selectedTags = listOf("Sniper", "Top 10"),
+            avatarId = 0,
+            avatarUrl = null,
+            balanceText = "$1,940.85",
+            roiValue = -3.0,
+            roiLabel = "-3.0%",
+            selectableModes = modes,
+            selectedMode = selected,
+            onSelectMode = { selected = it },
+            assets = assets,
+            isAssetsLoading = false,
+            assetsError = null,
+            leaderboardEntries = leaders,
+            onOpenSettings = {},
+            onOpenOrders = {},
+            onOpenPlayer = {}
+        )
+    }
+}
+
+// обычное превью
+@Preview(showBackground = true, widthDp = 380, heightDp = 800)
+@Composable
+fun HomeScreen_Preview_Normal() {
+    HomeScreenPreviewContent()
+}
+
+// превью с большим шрифтом
+@Preview(
+    showBackground = true,
+    widthDp = 380,
+    heightDp = 800,
+    fontScale = 1.4f
+)
+@Composable
+fun HomeScreen_Preview_BigFont() {
+    HomeScreenPreviewContent()
+}
+
+// превью на узком устройстве
+@Preview(
+    showBackground = true,
+    device = "spec:width=320dp,height=700dp,dpi=320"
+)
+@Composable
+fun HomeScreen_Preview_SmallDevice() {
+    HomeScreenPreviewContent()
 }
 
 @DrawableRes
