@@ -17,6 +17,8 @@ fun TopPlayersCarousel(
 ) {
     if (entries.isEmpty()) return
 
+    val top5 = entries.take(5)
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(20.dp)
@@ -26,8 +28,6 @@ fun TopPlayersCarousel(
             contentPadding = PaddingValues(horizontal = 0.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            val top5 = entries.take(5)
-
             itemsIndexed(top5) { index, entry ->
                 val medalIconRes = when (index) {
                     0 -> R.drawable.ic_place_1
@@ -37,10 +37,11 @@ fun TopPlayersCarousel(
                     4 -> R.drawable.ic_place_5
                     else -> null
                 }
+
                 PlayerCard(
                     entry = entry,
                     medalIconRes = medalIconRes,
-                    modifier = Modifier.width(160.dp),
+                    modifier = Modifier,
                     onClick = { onClickPlayer(entry) }
                 )
             }

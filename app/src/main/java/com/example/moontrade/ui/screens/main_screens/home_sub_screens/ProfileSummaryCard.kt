@@ -6,7 +6,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -21,20 +23,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.BoxWithConstraints
 import coil.compose.rememberAsyncImagePainter
 import com.example.moontrade.ui.screens.components.glasskit.ActiveStatusPill
 import com.example.moontrade.ui.screens.components.glasskit.AvatarWithRing
 import com.example.moontrade.ui.screens.components.glasskit.GlassCard
 import com.example.moontrade.ui.theme.TextPrimaryLight
-import com.example.moontrade.ui.theme.extended
-import com.example.moontrade.utils.parseBigDecimalLoose
-import com.example.moontrade.utils.formatUsdFull
-import com.example.moontrade.utils.formatUsdCompact
-import com.example.moontrade.utils.formatPercent
-import java.math.BigDecimal
 import com.example.moontrade.ui.theme.Violet200
 import com.example.moontrade.ui.theme.Violet300
 import com.example.moontrade.ui.theme.Violet600
+import com.example.moontrade.ui.theme.extended
+import com.example.moontrade.utils.formatPercent
+import com.example.moontrade.utils.formatUsdCompact
+import com.example.moontrade.utils.formatUsdFull
+import com.example.moontrade.utils.parseBigDecimalLoose
+import java.math.BigDecimal
 
 @Composable
 private fun isDarkThemeFromColors(): Boolean {
@@ -67,16 +70,17 @@ fun ProfileSummaryCard(
         modifier = Modifier.fillMaxWidth(),
         corner = 22.dp
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // ----- TOP PART -----
+        Column(Modifier.fillMaxWidth()) {
+
             Row(
-                Modifier.fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(end = 4.dp),
                 verticalAlignment = Alignment.Top
             ) {
+
                 AvatarWithRing(
-                    size = 100.dp,
+                    size = 88.dp,
                     innerColor = Color.Transparent,
                     borderPadding = 0.dp
                 ) {
@@ -98,7 +102,8 @@ fun ProfileSummaryCard(
                         )
                     }
                 }
-                Spacer(Modifier.width(30.dp))
+
+                Spacer(Modifier.width(16.dp))
 
                 Column(
                     Modifier.weight(1f),
@@ -124,40 +129,30 @@ fun ProfileSummaryCard(
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    Spacer(Modifier.height(8.dp))
-
                     ActiveStatusPill()
 
-                    Spacer(Modifier.height(8.dp))
-
-                    // ----- TAGS -----
                     if (selectedTags.isNotEmpty()) {
-                        val shape = RoundedCornerShape(30)
-
-                        val backgroundBrush = Brush.horizontalGradient(
+                        val bg = Brush.horizontalGradient(
                             listOf(
                                 Violet600.copy(alpha = 0.6f),
                                 Violet600.copy(alpha = 0.9f),
                                 Violet600.copy(alpha = 1.2f)
                             )
                         )
-
                         Row(
+                            Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             selectedTags.forEach { tag ->
                                 Box(
                                     modifier = Modifier
-                                        .clip(shape)
-                                        .background(backgroundBrush)
-                                        .padding(
-                                            horizontal = 12.dp,
-                                            vertical = 4.dp
-                                        )
+                                        .clip(RoundedCornerShape(30))
+                                        .background(bg)
+                                        .padding(horizontal = 12.dp, vertical = 4.dp)
                                 ) {
                                     Text(
-                                        text = tag,
+                                        tag,
                                         style = MaterialTheme.typography.labelMedium,
                                         color = Color.White,
                                         maxLines = 1,
@@ -190,40 +185,75 @@ fun ProfileSummaryCard(
 
             Spacer(Modifier.height(16.dp))
 
-            // ----- BOTTOM: TOTAL VALUE + ROI -----
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            // ====================== BOTTOM ======================
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
                 Column(
                     Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
+
                     Text(
                         "TOTAL VALUE",
                         color = cs.onSurface.copy(alpha = .65f),
                         style = MaterialTheme.typography.labelLarge
                     )
-                    val amountStyle = MaterialTheme.typography.headlineMedium.copy(
+
+                    val amountStyle = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                         fontFeatureSettings = "tnum"
                     )
                     val currencyStyle = MaterialTheme.typography.labelLarge
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = amountUi,
-                            style = amountStyle,
-                            color = ex.positiveText,
-                            maxLines = 1,
-                            modifier = Modifier.alignByBaseline()
-                        )
+                    // АДАПТИВ!
+                    BoxWithConstraints {
+                        val isNarrow = maxWidth < 240.dp
 
-                        Spacer(Modifier.width(10.dp))
-
-                        Text(
-                            text = "USDT",
-                            style = currencyStyle,
-                            color = cs.onSurface.copy(alpha = 0.75f),
-                            modifier = Modifier.alignByBaseline()
-                        )
+                        if (isNarrow) {
+                            // на маленьких устройствах — показываем сумму полностью
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = amountUi,
+                                    style = amountStyle,
+                                    color = ex.positiveText,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = "USDT",
+                                    style = currencyStyle,
+                                    color = cs.onSurface.copy(alpha = 0.75f),
+                                    maxLines = 1
+                                )
+                            }
+                        } else {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = amountUi,
+                                    style = amountStyle,
+                                    color = ex.positiveText,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .alignByBaseline()
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = "USDT",
+                                    style = currencyStyle,
+                                    color = cs.onSurface.copy(alpha = 0.75f),
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Clip,
+                                    modifier = Modifier.alignByBaseline()
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -250,24 +280,13 @@ private fun RoiCard(roi: String, isPositive: Boolean) {
         fontFeatureSettings = "tnum"
     )
 
-    val bgColor = if (dark) {
-        cs.surface.copy(alpha = 0.25f)
-    } else {
-        Color.White
-    }
-
-    val borderColor = if (dark) {
-        Violet300.copy(alpha = 1.2f)
-    } else {
-        Violet200.copy(alpha = 0.6f)
-    }
+    val bgColor = if (dark) cs.surface.copy(alpha = 0.25f) else Color.White
+    val borderColor = if (dark) Violet300.copy(alpha = 1.2f) else Violet200.copy(alpha = 0.6f)
 
     Surface(
-        modifier = Modifier.widthIn(min = 120.dp),
+        modifier = Modifier.widthIn(min = 120.dp, max = 160.dp),
         color = bgColor,
-        shape = shape,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp
+        shape = shape
     ) {
         Column(
             Modifier
@@ -277,15 +296,17 @@ private fun RoiCard(roi: String, isPositive: Boolean) {
         ) {
             Text(
                 "ROI",
-                color = cs.onSurface.copy(1.7f),
-                style = MaterialTheme.typography.labelMedium
+                color = cs.onSurface.copy(1.0f),
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 roi,
                 style = digitsStyle,
                 color = if (isPositive) ex.success else ex.danger,
-                maxLines = 1
+                maxLines = 1,
+                softWrap = false
             )
         }
     }
