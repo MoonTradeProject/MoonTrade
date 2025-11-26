@@ -29,16 +29,25 @@ fun OrderRow(
     val isBuy = order.order_type.equals("buy", ignoreCase = true)
     val sideColor = if (isBuy) GreenUp else RedDown
 
+    // parse amounts safely
+    val original = order.original_amount.toBigDecimalOrNull() ?: java.math.BigDecimal.ZERO
+    val executed = order.executed_amount.toBigDecimalOrNull() ?: java.math.BigDecimal.ZERO
+    val remaining = order.amount.toBigDecimalOrNull() ?: java.math.BigDecimal.ZERO
+    val progress =
+        if (original > java.math.BigDecimal.ZERO) executed.divide(original, 4, java.math.RoundingMode.HALF_UP)
+            .toFloat()
+        else 0f
+
     GlassCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 6.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
 
+            // --- HEADER ROW: BUY/SELL + STATUS ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -74,6 +83,7 @@ fun OrderRow(
 
             Spacer(Modifier.height(6.dp))
 
+            // --- ASSET & MODE ---
             Text(
                 text = order.asset_name,
                 style = MaterialTheme.typography.titleMedium,
@@ -95,6 +105,8 @@ fun OrderRow(
 
             Spacer(Modifier.height(10.dp))
 
+
+            // --- PRICE & FILLS ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -111,20 +123,40 @@ fun OrderRow(
                         color = cs.onSurface
                     )
                 }
+
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "Amount",
+                        text = "Executed / Total",
                         style = MaterialTheme.typography.labelMedium,
                         color = cs.onSurfaceVariant
                     )
                     Text(
-                        text = order.amount,
+                        text = "${order.executed_amount} / ${order.original_amount}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = cs.onSurface
+                    )
+
+                    Text(
+                        text = "Remaining: ${order.amount}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = cs.onSurfaceVariant
                     )
                 }
             }
 
+            // --- PROGRESS BAR ---
+            Spacer(Modifier.height(10.dp))
+
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp),
+                color = sideColor,
+                trackColor = cs.surfaceVariant
+            )
+
+            // --- CANCEL BUTTON ---
             if (order.status.equals("pending", ignoreCase = true)) {
                 Spacer(Modifier.height(10.dp))
                 TextButton(
