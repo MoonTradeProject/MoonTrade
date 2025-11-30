@@ -2,12 +2,10 @@ package com.example.moontrade.ui.screens.onboarding
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -16,13 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.moontrade.ui.theme.Violet300
+import com.example.moontrade.ui.screens.components.buttons.PrimaryGradientButton
 import com.example.moontrade.ui.theme.Violet600
 import kotlinx.coroutines.launch
 
@@ -49,38 +44,6 @@ private fun OnboardingDots(
         }
     }
 }
-@Composable
-private fun OnboardingPrimaryButton(
-    text: String,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val cs = MaterialTheme.colorScheme
-    val dark = cs.background.luminance() < 0.5f
-
-    val gradient = Brush.horizontalGradient(
-        if (dark)
-            listOf(Violet600, Violet300.copy(alpha = 0.9f), Violet600)
-        else
-            listOf(Violet600, Violet600.copy(alpha = 0.7f), Violet600)
-    )
-
-    Box(
-        modifier = modifier
-            .height(56.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(gradient)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-            color = cs.onPrimary
-        )
-    }
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingPagerScreen(
@@ -106,7 +69,6 @@ fun OnboardingPagerScreen(
         ) {
 
             Spacer(Modifier.height(16.dp))
-
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.weight(1f)
@@ -115,7 +77,6 @@ fun OnboardingPagerScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Text(
                         text = "MoonTrade",
                         style = MaterialTheme.typography.headlineLarge.copy(
@@ -124,7 +85,6 @@ fun OnboardingPagerScreen(
                         color = Violet600,
                         textAlign = TextAlign.Center
                     )
-
                     Spacer(Modifier.height(24.dp))
 
                     when (page) {
@@ -144,7 +104,6 @@ fun OnboardingPagerScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
-
                         1 -> {
                             Text(
                                 "Compete & Improve",
@@ -162,7 +121,6 @@ fun OnboardingPagerScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
-
                         2 -> {
                             Text(
                                 "Learn & Start",
@@ -182,14 +140,12 @@ fun OnboardingPagerScreen(
                     }
                 }
             }
-
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
                 OnboardingDots(total = pageCount, selected = pagerState.currentPage)
-
                 Spacer(Modifier.height(24.dp))
 
-                OnboardingPrimaryButton(
+                PrimaryGradientButton(
                     text = if (pagerState.currentPage == pageCount - 1) "Get Started" else "Next",
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
@@ -202,9 +158,7 @@ fun OnboardingPagerScreen(
                         }
                     }
                 )
-
                 Spacer(Modifier.height(8.dp))
-
                 TextButton(onClick = onSkip) {
                     Text("Skip for now", color = cs.onSurface)
                 }

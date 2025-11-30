@@ -85,7 +85,7 @@ fun AppNavigation() {
             }
             // ---------- AUTH / WELCOME ----------
             composable(NavRoutes.WELCOME) {
-                WelcomeScreen(navController, authViewModel)
+                WelcomeScreen(navController)
             }
             composable(NavRoutes.ACCOUNT_CREATION) {
                 AccountCreationScreen(navController)
