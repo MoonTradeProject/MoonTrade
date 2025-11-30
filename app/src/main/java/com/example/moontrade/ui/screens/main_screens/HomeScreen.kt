@@ -53,7 +53,7 @@ fun HomeScreen(
     val assetsError by userAssetsViewModel.error.collectAsState()
 
     val selectableModes = remember(tournaments) {
-        listOf(SelectableMode(Mode.Main, "Main")) +
+        listOf(SelectableMode(Mode.Main, "Regular trading")) +
                 tournaments.filter { it.isJoined }
                     .map { SelectableMode(Mode.Tournament(it.id.toString()), it.name) }
     }
@@ -142,13 +142,7 @@ private fun HomeScreenContent(
             TopBar(
                 title = null,
                 showBack = false,
-                navigationContent = {
-                    ModeSelector(
-                        selected = selectedMode,
-                        items = selectableModes,
-                        onSelect = onSelectMode
-                    )
-                },
+                navigationContent = {},
                 actions = {
                     IconButton(onClick = onOpenSettings) {
                         Image(
@@ -172,6 +166,29 @@ private fun HomeScreenContent(
         ) {
 
             item {
+                SectionHeader("Trading mode")
+                Spacer(Modifier.height(8.dp))
+
+                ModeSelector(
+                    selected = selectedMode,
+                    items = selectableModes,
+                    onSelect = onSelectMode,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(6.dp))
+
+                val modeDescription = when (selectedMode.mode) {
+                    is Mode.Main -> "Regular trading without a tournament"
+                    is Mode.Tournament -> "You are trading inside: ${selectedMode.label} mode"
+                }
+
+                Text(
+                    text = modeDescription,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            item {
                 ProfileSummaryCard(
                     nickname = nickname,
                     selectedTags = selectedTags,
@@ -183,7 +200,6 @@ private fun HomeScreenContent(
                     avatarResIdFrom = ::resolveAvatarRes
                 )
             }
-
             item {
                 SectionHeader("Your assets")
                 AssetsSection(
@@ -192,13 +208,11 @@ private fun HomeScreenContent(
                     error = assetsError
                 )
             }
-
             item {
                 MyOrdersCard(
                     onClick = onOpenOrders
                 )
             }
-
             item {
                 SectionHeader("Top players")
                 TopPlayersCarousel(
@@ -274,7 +288,7 @@ private fun HomeScreenPreviewContent() {
             roiLabel = "-3.0%",
             selectableModes = modes,
             selectedMode = selected,
-            onSelectMode = { selected = it },
+            onSelectMode = { },
             assets = assets,
             isAssetsLoading = false,
             assetsError = null,
@@ -313,6 +327,45 @@ fun HomeScreen_Preview_BigFont() {
 @Composable
 fun HomeScreen_Preview_SmallDevice() {
     HomeScreenPreviewContent()
+}
+@Preview(showBackground = true, widthDp = 380, heightDp = 200)
+@Composable
+fun TradingModeSection_Preview() {
+    val modes = listOf(
+        SelectableMode(Mode.Main, "Regular trading"),
+        SelectableMode(Mode.Tournament("1"), "Weekly Challenge"),
+        SelectableMode(Mode.Tournament("2"), "Two Weeks Challenge")
+    )
+    var selected by remember { mutableStateOf(modes.first()) }
+
+    MaterialTheme {
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SectionHeader("Trading mode")
+
+            ModeSelector(
+                selected = selected,
+                items = modes,
+                onSelect = { selected = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            val modeDescription = when (selected.mode) {
+                is Mode.Main -> "Regular trading without a tournament"
+                is Mode.Tournament -> "You are trading inside: ${selected.label}"
+            }
+
+            Text(
+                text = modeDescription,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
 }
 
 @DrawableRes
