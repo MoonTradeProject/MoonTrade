@@ -1,18 +1,30 @@
 package com.example.moontrade.ui.screens.components.tournament
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
+import com.example.moontrade.ui.screens.components.buttons.PrimaryGradientButton
+import com.example.moontrade.ui.screens.components.glasskit.GlassCard
+import com.example.moontrade.ui.theme.Violet300
+import com.example.moontrade.ui.theme.Violet600
 
 @Composable
 fun TournamentCard(
@@ -22,90 +34,125 @@ fun TournamentCard(
     actionText: String,
     onAction: () -> Unit
 ) {
-    val shape = RoundedCornerShape(12.dp)
-    val borderColor = if (isJoined) MaterialTheme.colorScheme.primary else Color.Transparent
-    val cardAlpha = if (isJoined) 0.85f else 1f
+    val cs = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(20.dp)
 
-    Card(
+    // анимированный бордер — только если not joined
+    val borderModifier = if (!isJoined) {
+        val transition = rememberInfiniteTransition()
+        val offset by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1000f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 4000,
+                    easing = FastOutSlowInEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+
+        val borderBrush = Brush.horizontalGradient(
+            colors = listOf(
+                Color.Transparent,
+                Violet300.copy(alpha = 0.8f),
+                Violet600.copy(alpha = 0.2f),
+                Color.Transparent
+            ),
+            startX = -600f + offset,
+            endX = offset + 400f
+        )
+
+        Modifier.border(1.4.dp, borderBrush, shape)
+    } else {
+        Modifier.border(
+            1.dp,
+            cs.outline.copy(alpha = 0.35f),
+            shape
+        )
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .border(2.dp, borderColor, shape)
-            .alpha(cardAlpha),
-        shape = shape,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            .then(borderModifier)
+            .clip(shape)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        GlassCard(
+            modifier = Modifier.fillMaxWidth(),
+            corner = 20.dp
         ) {
-
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = cs.onSurface
                 )
-                Spacer(Modifier.height(4.dp))
+
+                Spacer(Modifier.height(2.dp))
+
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.bodySmall,
+                    color = cs.onSurface.copy(alpha = 0.7f)
                 )
-            }
 
-            Spacer(Modifier.width(12.dp))
-
-            if (isJoined) {
+                Spacer(Modifier.height(8.dp))
 
                 Row(
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = 40.dp)
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Joined",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = "Joined",
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            } else {
-
-                Button(
-                    onClick = onAction,
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .heightIn(min = 40.dp),
-                    contentPadding = PaddingValues(
-                        horizontal = 20.dp,
-                        vertical = 8.dp
-                    )
-                ) {
-                    Text(
-                        text = actionText,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.labelLarge
-                    )
+                    if (isJoined) {
+                        JoinedChip()
+                    } else {
+                        PrimaryGradientButton(
+                            text = actionText,
+                            modifier = Modifier
+                                .height(40.dp)
+                                .widthIn(min = 90.dp),
+                            onClick = onAction
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun JoinedChip() {
+    val cs = MaterialTheme.colorScheme
+    val dark = cs.background.luminance() < 0.5f
+
+    // такой же стиль градиента, но слабее — secondary
+    val baseColors = if (dark) {
+        listOf(Violet600, Violet300.copy(alpha = 0.9f), Violet600)
+    } else {
+        listOf(Violet600, Violet600.copy(alpha = 0.7f), Violet600)
+    }
+
+    val gradient = Brush.horizontalGradient(
+        baseColors.map { it.copy(alpha = 0.40f) }
+    )
+
+    Box(
+        modifier = Modifier
+            .height(40.dp)
+            .widthIn(min = 90.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(gradient),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Joined",
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White.copy(alpha = 0.95f)
+        )
     }
 }
