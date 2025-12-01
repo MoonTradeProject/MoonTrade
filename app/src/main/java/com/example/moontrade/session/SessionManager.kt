@@ -11,6 +11,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.tasks.await
 import org.json.JSONObject
 import java.util.UUID
@@ -27,36 +28,62 @@ class SessionManager @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val _mode = MutableStateFlow<Mode>(Mode.Main)
-
     val mode: StateFlow<Mode> = _mode
 
     private val _idToken = MutableStateFlow<String?>(null)
     val idToken: StateFlow<String?> = _idToken
 
+    // Derived "connected" flag from WebSocket status
     private val _isConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> = _isConnected
 
+    // Expose balance / roi / status directly from WebSocketManager
     val balance: StateFlow<String> = ws.balance
     val status: StateFlow<WebSocketStatus> = ws.status
     val roi: StateFlow<String> = ws.roi
 
+    private val _joinedTournamentIds = MutableStateFlow<Set<UUID>>(emptySet())
+    val joinedTournamentIds: StateFlow<Set<UUID>> = _joinedTournamentIds.asStateFlow()
+
     init {
         // Preload saved token if available
         prefs.getIdToken()?.let { _idToken.value = it }
+
+        // Track WebSocketStatus and update _isConnected
+        scope.launch {
+            ws.status.collectLatest { st ->
+                _isConnected.value = st is WebSocketStatus.Connected
+                Log.d(TAG, "WS status changed: $st, isConnected=${_isConnected.value}")
+            }
+        }
     }
-    private val _joinedTournamentIds = MutableStateFlow<Set<UUID>>(emptySet())
-    val joinedTournamentIds: StateFlow<Set<UUID>> = _joinedTournamentIds.asStateFlow()
 
     fun setJoinedTournaments(ids: Set<UUID>) {
         _joinedTournamentIds.value = ids
     }
 
+    // -----------------------------
+    // TOKEN MANAGEMENT
+    // -----------------------------
+
     suspend fun refreshToken(): String? {
         val user = FirebaseAuth.getInstance().currentUser ?: return null
-        val freshToken = user.getIdToken(true).await().token
-        _idToken.value = freshToken
-        prefs.saveIdToken(freshToken!!)
-        return freshToken
+
+        return try {
+            val result = user.getIdToken(true).await()
+            val freshToken = result.token
+
+            if (freshToken != null) {
+                _idToken.value = freshToken
+                prefs.saveIdToken(freshToken)
+                Log.d(TAG, "🔑 Token refreshed successfully")
+            }
+
+            freshToken
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Failed to refresh token: ${e.message}")
+            null
+        }
     }
 
     // Check if token is present and not expired
@@ -76,7 +103,12 @@ class SessionManager @Inject constructor(
             val parts = token.split(".")
             if (parts.size != 3) return true
 
-            val payload = String(Base64.decode(parts[1], Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
+            val payload = String(
+                Base64.decode(
+                    parts[1],
+                    Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                )
+            )
             val json = JSONObject(payload)
             val exp = json.optLong("exp", 0)
             val now = System.currentTimeMillis() / 1000
@@ -88,47 +120,89 @@ class SessionManager @Inject constructor(
         }
     }
 
+    // -----------------------------
+    // CONNECTION MANAGEMENT
+    // -----------------------------
+
+
     fun connectIfNeeded() {
         scope.launch {
-            if (_isConnected.value) return@launch
             val token = getValidToken() ?: return@launch
-            ws.connect(token, _mode.value) {
-                _isConnected.value = true
+            val st = ws.status.value
+
+
+            if (st is WebSocketStatus.Connected ||
+                st is WebSocketStatus.Connecting
+            ) {
+                Log.d(TAG, "connectIfNeeded(): already ok, skipping")
+                return@launch
             }
+
+
+            Log.d(TAG, "connectIfNeeded(): opening WS…")
+            ws.connect(token, _mode.value)
         }
     }
 
+    /**
+     * Explicit hook you can call when app goes to foreground.
+     * For example from Activity.onResume().
+     */
+    fun onAppForeground() {
+        scope.launch {
+            // 1. Refresh token always on foreground
+            val token = getValidToken()
+
+            if (token != null) {
+                Log.d(TAG, "📱 Foreground: token OK")
+            } else {
+                Log.e(TAG, "📱 Foreground: FAILED TO REFRESH TOKEN")
+            }
+
+            // 2. Ensure WS connection
+            connectIfNeeded()
+        }
+    }
+
+    /**
+     * Change trading mode (Main or Tournament).
+     * If WS is already connected, just send changeMode.
+     * If not connected, connect with new mode.
+     */
     fun changeMode(mode: Mode) {
-        println("🌐 [SessionManager] Received changeMode: $mode")
+        Log.d(TAG, "🌐 [SessionManager] changeMode: $mode")
         _mode.value = mode
 
         scope.launch {
             val token = getValidToken() ?: return@launch
 
-            if (_isConnected.value) {
-                ws.sendChangeMode(mode)
-            } else {
-                ws.connect(token, mode) {
-                    _isConnected.value = true
+            when (ws.status.value) {
+                is WebSocketStatus.Connected -> {
+                    ws.sendChangeMode(mode)
+                }
+                else -> {
+                    Log.d(TAG, "changeMode(): WS dead → reconnect")
+                    ws.connect(token, mode)
                 }
             }
         }
     }
 
 
-
-
-
-
+    /**
+     * User / app requested an explicit disconnect.
+     */
     fun disconnect() {
+        Log.d(TAG, "🔌 SessionManager.disconnect()")
         ws.disconnect()
-        _isConnected.value = false
     }
 
     fun logout() {
+        Log.d(TAG, "🚪 SessionManager.logout()")
         disconnect()
         prefs.clear()
         FirebaseAuth.getInstance().signOut()
         _idToken.value = null
+        _joinedTournamentIds.value = emptySet()
     }
 }

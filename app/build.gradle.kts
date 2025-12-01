@@ -9,19 +9,30 @@ plugins {
 
 android {
     namespace = "com.example.moontrade"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.moontrade"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    // 🔐 SIGNING CONFIG
+    signingConfigs {
+        create("release") {
+            storeFile = file("moontrade-release.jks")
+            storePassword = "Vrotebal123"
+            keyAlias = "moontrade"
+            keyPassword = "Vrotebal123"
+        }
+    }
+
     buildTypes {
+
         getByName("debug") {
-            // 🔧 Used when running locally (Android emulator → host machine)
             buildConfigField("String", "BASE_URL", "\"http://insectivora.eu:1010\"")
         }
 
@@ -32,7 +43,9 @@ android {
                 "proguard-rules.pro"
             )
 
-            // 🌍 Used in production (actual deployed backend)
+
+            signingConfig = signingConfigs.getByName("release")
+
             buildConfigField("String", "BASE_URL", "\"http://insectivora.eu:1010\"")
         }
     }
@@ -53,6 +66,7 @@ android {
     }
 }
 
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -67,16 +81,25 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(libs.firebase.functions.ktx)
-    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.functions)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database)
+    kapt(libs.hilt.compiler)
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.geometry)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.foundation)
+
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(platform(libs.firebase.bom))
+
+    // Add the dependencies for the Firebase products you want to use
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.functions)
 
     // Debug & Test
     debugImplementation(libs.androidx.ui.tooling)
@@ -87,22 +110,22 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     //Moshi for json
-    implementation("com.squareup.moshi:moshi:1.15.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.0")
+    implementation("com.squareup.moshi:moshi:1.15.2")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.2")
     //google
     implementation(libs.play.services.auth)
 
     //retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation("androidx.compose.material:material-icons-extended:<version>")
 
 
-    implementation("io.coil-kt:coil-compose:2.5.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.google.accompanist:accompanist-flowlayout:0.31.3-beta")
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.36.0")
 }

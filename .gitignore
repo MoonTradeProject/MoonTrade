@@ -20,6 +20,7 @@ local.properties
 "gradlew.bat"
 # Firebase config (секретный файл, не должен быть в гите)
 google-services.json
+moontrade-release.jks
 
 
 /build/

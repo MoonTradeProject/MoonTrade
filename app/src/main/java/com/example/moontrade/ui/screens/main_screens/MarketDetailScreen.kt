@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.CenterNotification
 import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.OrderBookLive
 import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.TopBarWithBackButton
@@ -116,7 +117,8 @@ fun MarketDetailScreen(
 
         Scaffold(
             topBar = {
-                TopBarWithBackButton(symbol = symbol, navController = navController, viewModel = viewModel)
+//                TopBarWithBackButton(symbol = symbol, navController = navController, viewModel = viewModel)
+                TopBar(title = symbol, showBack = true, onBack = { navController.popBackStack() })
             }
         ) { innerPadding ->
             Box(

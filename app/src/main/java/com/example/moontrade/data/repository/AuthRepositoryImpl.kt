@@ -9,11 +9,11 @@ import com.example.moontrade.data.api.AuthApi
 import com.example.moontrade.model.RegisterRequest
 import com.example.moontrade.session.SessionManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.auth.auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

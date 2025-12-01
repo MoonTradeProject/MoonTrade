@@ -4,5 +4,6 @@ sealed class WebSocketStatus {
     data object Idle : WebSocketStatus()
     data object Connecting : WebSocketStatus()
     data object Connected : WebSocketStatus()
+    data class Disconnected(val reason: String) : WebSocketStatus()
     data class Error(val reason: String) : WebSocketStatus()
 }
