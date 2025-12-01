@@ -15,6 +15,7 @@ import com.example.moontrade.data.dto.TournamentDto
 import com.example.moontrade.data.enums.TournamentKind
 import com.example.moontrade.data.enums.TournamentPaymentMethod
 import com.example.moontrade.data.enums.TournamentStatus
+import com.example.moontrade.ui.screens.components.bars.SectionHeader
 import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.components.tournament.JoinTournamentDialog
 import com.example.moontrade.ui.screens.components.tournament.TournamentCard
@@ -32,17 +33,14 @@ fun TournamentsScreen(
     val tournaments by viewModel.tournaments.collectAsState()
     var selectedTournamentId by remember { mutableStateOf<String?>(null) }
     var selectedTournamentName by remember { mutableStateOf<String?>(null) }
-
     val scrollState = rememberScrollState()
 
-    // подгрузка турниров
     LaunchedEffect(Unit) {
         while (true) {
             viewModel.loadTournaments()
             delay(30_000)
         }
     }
-
     TournamentsScreenContent(
         tournaments = tournaments,
         scrollState = scrollState,
@@ -68,7 +66,6 @@ fun TournamentsScreen(
     )
 }
 
-
 @Composable
 private fun TournamentsScreenContent(
     tournaments: List<TournamentDto>,
@@ -86,13 +83,13 @@ private fun TournamentsScreenContent(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .padding(padding)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            Text(
-                "Available Tournaments",
-                style = MaterialTheme.typography.titleLarge
+            SectionHeader(
+                title = "Available Tournaments"
             )
-            Spacer(Modifier.height(8.dp))
+
+            Spacer(Modifier.height(4.dp))
 
             tournaments.forEach { tournament ->
                 val formattedDate = remember(tournament.startTime) {
@@ -122,9 +119,6 @@ private fun TournamentsScreenContent(
         )
     }
 }
-
-
-
 // обычное превью
 @Preview(showBackground = true, widthDp = 380, heightDp = 800)
 @Composable
@@ -149,7 +143,6 @@ fun TournamentsScreen_Preview_Normal() {
             isJoined = true
         )
     )
-
     MaterialTheme {
         TournamentsScreenContent(
             tournaments = fakeTournaments,
@@ -161,7 +154,6 @@ fun TournamentsScreen_Preview_Normal() {
         )
     }
 }
-
 // превью с увеличенным текстом
 @Preview(
     showBackground = true,
@@ -173,7 +165,6 @@ fun TournamentsScreen_Preview_Normal() {
 fun TournamentsScreen_Preview_BigFont() {
     TournamentsScreen_Preview_Normal()
 }
-
 // превью на узком устройстве
 @Preview(
     showBackground = true,
