@@ -37,7 +37,6 @@ fun TournamentCard(
     val cs = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(20.dp)
 
-    // анимированный бордер — только если not joined
     val borderModifier = if (!isJoined) {
         val transition = rememberInfiniteTransition()
         val offset by transition.animateFloat(
@@ -62,7 +61,6 @@ fun TournamentCard(
             startX = -600f + offset,
             endX = offset + 400f
         )
-
         Modifier.border(1.4.dp, borderBrush, shape)
     } else {
         Modifier.border(
@@ -71,7 +69,6 @@ fun TournamentCard(
             shape
         )
     }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -92,7 +89,6 @@ fun TournamentCard(
                     style = MaterialTheme.typography.titleMedium,
                     color = cs.onSurface
                 )
-
                 Spacer(Modifier.height(2.dp))
 
                 Text(
@@ -100,7 +96,6 @@ fun TournamentCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = cs.onSurface.copy(alpha = 0.7f)
                 )
-
                 Spacer(Modifier.height(8.dp))
 
                 Row(
@@ -129,8 +124,6 @@ fun TournamentCard(
 private fun JoinedChip() {
     val cs = MaterialTheme.colorScheme
     val dark = cs.background.luminance() < 0.5f
-
-    // такой же стиль градиента, но слабее — secondary
     val baseColors = if (dark) {
         listOf(Violet600, Violet300.copy(alpha = 0.9f), Violet600)
     } else {
@@ -140,7 +133,6 @@ private fun JoinedChip() {
     val gradient = Brush.horizontalGradient(
         baseColors.map { it.copy(alpha = 0.40f) }
     )
-
     Box(
         modifier = Modifier
             .height(40.dp)

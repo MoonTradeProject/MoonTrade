@@ -33,17 +33,14 @@ fun TournamentsScreen(
     val tournaments by viewModel.tournaments.collectAsState()
     var selectedTournamentId by remember { mutableStateOf<String?>(null) }
     var selectedTournamentName by remember { mutableStateOf<String?>(null) }
-
     val scrollState = rememberScrollState()
 
-    // подгрузка турниров
     LaunchedEffect(Unit) {
         while (true) {
             viewModel.loadTournaments()
             delay(30_000)
         }
     }
-
     TournamentsScreenContent(
         tournaments = tournaments,
         scrollState = scrollState,
@@ -68,7 +65,6 @@ fun TournamentsScreen(
         }
     )
 }
-
 
 @Composable
 private fun TournamentsScreenContent(
@@ -110,7 +106,6 @@ private fun TournamentsScreenContent(
                     actionText = "Join",
                     onAction = { onTournamentClick(tournament) }
                 )
-
                 Spacer(Modifier.height(12.dp))
             }
         }
@@ -124,8 +119,6 @@ private fun TournamentsScreenContent(
         )
     }
 }
-
-
 // обычное превью
 @Preview(showBackground = true, widthDp = 380, heightDp = 800)
 @Composable
@@ -150,7 +143,6 @@ fun TournamentsScreen_Preview_Normal() {
             isJoined = true
         )
     )
-
     MaterialTheme {
         TournamentsScreenContent(
             tournaments = fakeTournaments,
@@ -162,7 +154,6 @@ fun TournamentsScreen_Preview_Normal() {
         )
     }
 }
-
 // превью с увеличенным текстом
 @Preview(
     showBackground = true,
@@ -174,7 +165,6 @@ fun TournamentsScreen_Preview_Normal() {
 fun TournamentsScreen_Preview_BigFont() {
     TournamentsScreen_Preview_Normal()
 }
-
 // превью на узком устройстве
 @Preview(
     showBackground = true,

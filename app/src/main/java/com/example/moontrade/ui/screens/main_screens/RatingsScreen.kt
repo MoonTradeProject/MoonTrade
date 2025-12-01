@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,8 +20,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import com.example.moontrade.BuildConfig
 import com.example.moontrade.R
 import com.example.moontrade.model.LeaderboardEntry
@@ -32,6 +30,7 @@ import com.example.moontrade.ui.screens.components.glasskit.AvatarWithRing
 import com.example.moontrade.ui.screens.components.glasskit.GlassCard
 import com.example.moontrade.ui.theme.GreenUp
 import com.example.moontrade.ui.theme.RedDown
+import com.example.moontrade.ui.theme.Violet600
 import com.example.moontrade.utils.formatPercent
 import com.example.moontrade.viewmodels.LeaderboardViewModel
 import com.example.moontrade.viewmodels.ProfileViewModel
@@ -59,9 +58,6 @@ fun RatingsScreen(
         }
     )
 }
-
-// ===================== CONTENT =====================
-
 @Composable
 private fun RatingsScreenContent(
     entries: List<LeaderboardEntry>,
@@ -69,7 +65,11 @@ private fun RatingsScreenContent(
     onBack: () -> Unit,
     onClickPlayer: (LeaderboardEntry) -> Unit
 ) {
-    val sorted = remember(entries) { entries.sortedBy { it.rank } }
+    val players = remember(entries) {
+        entries
+            .filterNot { it.username == "market-bot" }
+            .sortedBy { it.rank }
+    }
 
     Scaffold(
         topBar = {
@@ -81,7 +81,7 @@ private fun RatingsScreenContent(
         }
     ) { padding ->
 
-        if (sorted.isEmpty()) {
+        if (players.isEmpty()) {
             Box(
                 Modifier
                     .fillMaxSize()
@@ -107,15 +107,16 @@ private fun RatingsScreenContent(
                         .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
                 )
             }
+            itemsIndexed(players) { index, entry ->
+                val displayRank = index + 1
 
-            items(sorted) { entry ->
                 LeaderboardRow(
                     entry = entry,
+                    rank = displayRank,
                     isMe = entry.username == myNickname,
                     onClick = { onClickPlayer(entry) }
                 )
             }
-
             item { Spacer(Modifier.height(16.dp)) }
         }
     }
@@ -125,6 +126,7 @@ private fun RatingsScreenContent(
 @Composable
 private fun LeaderboardRow(
     entry: LeaderboardEntry,
+    rank: Int,
     isMe: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
@@ -166,24 +168,13 @@ private fun LeaderboardRow(
         else -> MaterialTheme.typography.titleMedium
     }
 
-    val isTop3 = entry.rank in 1..3
-    val overlay: Brush? = when {
-        isMe -> Brush.verticalGradient(
-            listOf(cs.primary.copy(alpha = 0.22f), Color.Transparent)
-        )
-        isTop3 -> Brush.verticalGradient(
-            listOf(cs.primary.copy(alpha = 0.14f), Color.Transparent)
-        )
-        else -> null
-    }
-
     GlassCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .clickable(onClick = onClick),
         corner = 18.dp,
-        overlay = overlay
+        overlay = null
     ) {
         if (!useStackedLayout) {
             Row(
@@ -193,7 +184,7 @@ private fun LeaderboardRow(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = entry.rank.toString(),
+                    text = rank.toString(),
                     style = MaterialTheme.typography.titleMedium,
                     color = cs.onSurface,
                     modifier = Modifier.width(20.dp),
@@ -218,7 +209,7 @@ private fun LeaderboardRow(
                         Text(
                             text = "You",
                             style = MaterialTheme.typography.bodySmall,
-                            color = cs.primary
+                            color = Violet600
                         )
                     }
                     Text(
@@ -254,7 +245,7 @@ private fun LeaderboardRow(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = entry.rank.toString(),
+                        text = rank.toString(),
                         style = MaterialTheme.typography.titleMedium,
                         color = cs.onSurface,
                         modifier = Modifier.width(20.dp),
@@ -309,7 +300,8 @@ private fun LeaderboardRow(
         }
     }
 }
-// ===================== PREVIEW DATA =====================
+
+// Preview
 
 private fun fakeLeaderboardEntries(): List<LeaderboardEntry> {
     val names = listOf("market-bot", "GODDAMN", "TraderX", "MoonShot", "SlowBro")
@@ -335,7 +327,6 @@ private fun fakeLeaderboardEntries(): List<LeaderboardEntry> {
         )
     }
 }
-// ===================== PREVIEWS =====================
 @Preview(showBackground = true, widthDp = 380, heightDp = 800)
 @Composable
 fun RatingsScreen_Preview_Normal() {
@@ -346,6 +337,7 @@ fun RatingsScreen_Preview_Normal() {
         onClickPlayer = {}
     )
 }
+
 @Preview(
     showBackground = true,
     widthDp = 380,

@@ -17,7 +17,9 @@ fun TopPlayersCarousel(
 ) {
     if (entries.isEmpty()) return
 
-    val top5 = entries.take(5)
+    val top5 = entries
+        .filterNot { it.username == "market-bot" }
+        .take(5)
 
     Column(
         modifier = Modifier.fillMaxWidth(),
