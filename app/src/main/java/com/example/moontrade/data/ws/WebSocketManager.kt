@@ -10,24 +10,22 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.*
-import java.net.SocketException
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val TAG = "BalanceWS"
 private const val WS_URL = "ws://insectivora.eu:1010/ws/balance"
 
-
 @Singleton
 class WebSocketManager @Inject constructor() {
 
     private val gson = Gson()
     private val client = OkHttpClient()
-    private var socket: WebSocket? = null
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
+    private var socket: WebSocket? = null
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    // UI streams
     private val _balance = MutableStateFlow("Loading…")
     val balance: StateFlow<String> = _balance
 
@@ -37,109 +35,99 @@ class WebSocketManager @Inject constructor() {
     private val _status = MutableStateFlow<WebSocketStatus>(WebSocketStatus.Idle)
     val status: StateFlow<WebSocketStatus> = _status
 
-    private val currentMode = AtomicReference<Mode>(Mode.Main)
-    private val idTokenRef = AtomicReference<String>()
-    private var userClosed = false
+    private var savedToken: String? = null
+    private var savedMode: Mode = Mode.Main
 
-    private var onConnected: (() -> Unit)? = null
+    /**
+     * Connect: simple, no reconnect logic.
+     * Always cancels the old socket and opens a new one.
+     */
+    fun connect(token: String, mode: Mode) {
+        Log.d(TAG, "⚙️ connect(token, mode=$mode)")
 
-    fun connect(token: String, mode: Mode, onConnectedCallback: () -> Unit) {
-        if (socket != null) {
-            Log.w(TAG, "⚠️ Already connected — skipping connect()")
-            return
-        }
+        savedToken = token
+        savedMode = mode
 
-        Log.d(TAG, "⚙️ Opening new WebSocket with mode=$mode")
+        // Always close previous WS
+        socket?.cancel()
+        socket = null
+
         _status.value = WebSocketStatus.Connecting
 
-        userClosed = false
-        idTokenRef.set(token)
-        currentMode.set(mode)
-        onConnected = onConnectedCallback
-
-        socket = client.newWebSocket(Request.Builder().url(WS_URL).build(), Listener())
-    }
-
-    fun sendChangeMode(mode: Mode) {
-        currentMode.set(mode)
-        val json = JsonObject().apply {
-            addProperty("type", "changeMode")
-            add("mode", mode.toJson())
-        }
-        send(json.toString())
+        val request = Request.Builder().url(WS_URL).build()
+        socket = client.newWebSocket(request, Listener())
     }
 
     fun disconnect() {
-        userClosed = true
+        Log.d(TAG, "🔌 disconnect() called")
         socket?.cancel()
         socket = null
         _status.value = WebSocketStatus.Idle
     }
 
+    fun sendChangeMode(mode: Mode) {
+        savedMode = mode
+        send(
+            JsonObject().apply {
+                addProperty("type", "changeMode")
+                add("mode", mode.toJson())
+            }.toString()
+        )
+    }
+
     private fun send(json: String) {
-        Log.d(TAG, "→ $json")
-        socket?.send(json) ?: Log.w(TAG, "⚠️ Tried to send but socket is null")
+        val ok = socket?.send(json) ?: false
+        if (!ok) Log.w(TAG, "⚠️ Socket is not open for send()")
+    }
+
+    private fun sendSubscribe() {
+        val token = savedToken ?: return
+
+        val msg = JsonObject().apply {
+            addProperty("type", "subscribe")
+            addProperty("id_token", token)
+            add("mode", savedMode.toJson())
+        }
+
+        send(msg.toString())
     }
 
     private inner class Listener : WebSocketListener() {
+
         override fun onOpen(ws: WebSocket, response: Response) {
             Log.d(TAG, "✅ WebSocket opened")
             _status.value = WebSocketStatus.Connected
-            onConnected?.invoke()
 
             scope.launch {
                 delay(50)
-                val subscribe = JsonObject().apply {
-                    addProperty("type", "subscribe")
-                    addProperty("id_token", idTokenRef.get())
-                    add("mode", currentMode.get().toJson())
-                }
-                send(subscribe.toString())
+                sendSubscribe()
             }
         }
 
         override fun onMessage(ws: WebSocket, text: String) {
-            Log.d(TAG, "← $text")
+            Log.d(TAG, "← WS message: $text")
+
             runCatching {
                 val res = gson.fromJson(text, BalanceResponse::class.java)
-                scope.launch {
+
+                scope.launch(Dispatchers.Main) {
                     _balance.value = "${res.balance} USDT"
-                    _roi.value = res.roi?.let { "${"%.2f".format(it)}%" } ?: "–"
+                    _roi.value = res.roi?.let { "%.2f%%".format(it) } ?: "–"
                 }
             }.onFailure {
-                Log.e(TAG, "❌ Failed to parse balance", it)
-                _status.value = WebSocketStatus.Error("Invalid response")
+                Log.e(TAG, "❌ invalid WS message", it)
             }
         }
 
         override fun onClosed(ws: WebSocket, code: Int, reason: String) {
-            Log.d(TAG, "🛑 Closed: $code — $reason")
+            Log.d(TAG, "🛑 Closed: $reason")
+            _status.value = WebSocketStatus.Disconnected(reason)
+        }
+
+        override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
+            Log.e(TAG, "💥 WS failure: ${t.message}", t)
             socket = null
-            _status.value = WebSocketStatus.Idle
+            _status.value = WebSocketStatus.Error(t.message ?: "WS failure")
         }
-
-        override fun onFailure(ws: WebSocket, t: Throwable, r: Response?) {
-            if (userClosed || t is SocketException && t.message?.contains("Socket closed") == true) {
-                Log.w(TAG, "⛔ Ignoring socket closed by user")
-                return
-            }
-
-            Log.e(TAG, "💥 WS failure", t)
-            _status.value = WebSocketStatus.Error(t.message ?: "Unknown error")
-
-            scope.launch {
-                delay(3000)
-                Log.d(TAG, "🔄 Reconnect scheduled")
-
-
-                socket?.cancel()
-                socket = null
-
-                val token = idTokenRef.get()
-                val mode = currentMode.get()
-                connect(token, mode) { onConnected?.invoke() }
-            }
-        }
-
     }
 }

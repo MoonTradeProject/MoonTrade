@@ -249,6 +249,8 @@ private fun fakeLeaderboardEntries(): List<LeaderboardEntry> {
         )
     }
 }
+
+// надо убрать великий и могучий из комментов
 // ПРЕВЬЮ
 
 @OptIn(ExperimentalMaterial3Api::class)

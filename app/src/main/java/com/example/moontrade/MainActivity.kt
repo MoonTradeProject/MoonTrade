@@ -8,12 +8,23 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.moontrade.navigation.AppNavigation
+import com.example.moontrade.session.SessionManager
 import com.example.moontrade.ui.theme.MoonTradeTheme
 import com.example.moontrade.ui.theme.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var session: SessionManager
+
+    override fun onResume() {
+        super.onResume()
+        session.onAppForeground()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -21,13 +32,10 @@ class MainActivity : ComponentActivity() {
             val isDarkTheme = themeViewModel.isDarkTheme.collectAsState().value
 
             MoonTradeTheme(darkTheme = isDarkTheme) {
-                Surface(
-                    color = MaterialTheme.colorScheme.background
-                ) {
+                Surface(color = MaterialTheme.colorScheme.background) {
                     AppNavigation()
                 }
             }
         }
     }
 }
-
