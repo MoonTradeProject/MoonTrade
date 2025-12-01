@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.moontrade.R
+import com.example.moontrade.navigation.NavRoutes
 import com.example.moontrade.ui.screens.components.bars.SectionHeader
 import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.components.buttons.PrimaryGradientButton
@@ -57,6 +58,14 @@ fun EditProfileScreen(
     val selectedTags  by viewModel.selectedTags.collectAsState()
     val avatarId      by viewModel.avatarId.collectAsState()
     val avatarUrl     by viewModel.avatarUrl.collectAsState()
+
+    LaunchedEffect(Unit) {
+        android.util.Log.d(
+            "EditProfileScreen",
+            "ON ENTER -> avatarId=$avatarId, avatarUrl=$avatarUrl"
+        )
+    }
+
     val descriptionVm by viewModel.description.collectAsState()
 
     val availableTags = viewModel.availableTags
@@ -67,10 +76,22 @@ fun EditProfileScreen(
     var tempAvatarId by remember { mutableIntStateOf(avatarId) }
     var description  by remember(descriptionVm) { mutableStateOf(descriptionVm) }
 
+    // держим локальный URI, чтобы показать превью сразу после выбора
+    var pickedAvatarUri by remember { mutableStateOf<Uri?>(null) }
+
+    // если avatarId в VM поменялся (например после uploadAvatarFromUri),
+    // синхронизируем с временным состоянием экрана
+    LaunchedEffect(avatarId) {
+        tempAvatarId = avatarId
+    }
+
     val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
+            pickedAvatarUri = it
+
+            // грузим на сервер, VM сама обновит avatarUrl и avatarId = -1
             viewModel.uploadAvatarFromUri(context, it) {
                 tempAvatarId = -1
             }
@@ -113,23 +134,23 @@ fun EditProfileScreen(
                     innerColor = Color.Transparent,
                     borderPadding = 0.dp
                 ) {
-                    if (tempAvatarId == -1 && !avatarUrl.isNullOrEmpty()) {
-                        Image(
-                            painter = rememberAsyncImagePainter(avatarUrl),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                        )
-                    } else {
-                        Image(
-                            painter = painterResource(id = avatarResIdFromLocal(tempAvatarId)),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                        )
+                    // приоритет: локальный uri → кастомный url → встроенный аватар
+                    val painter = when {
+                        pickedAvatarUri != null ->
+                            rememberAsyncImagePainter(pickedAvatarUri)
+                        tempAvatarId == -1 && !avatarUrl.isNullOrEmpty() ->
+                            rememberAsyncImagePainter(avatarUrl)
+                        else ->
+                            painterResource(id = avatarResIdFromLocal(tempAvatarId))
                     }
+
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
                 }
 
                 Spacer(Modifier.width(16.dp))
@@ -248,12 +269,12 @@ fun EditProfileScreen(
                     PrimaryGradientButton(
                         text = "Upload from gallery",
                         modifier = Modifier.weight(1f),
-                        onClick = { launcher.launch("image/*") }
+                        onClick = { launcher.launch(arrayOf("image/*")) }
                     )
 
-                    if (avatarUrl != null) {
+                    if (pickedAvatarUri != null || avatarUrl != null) {
                         Image(
-                            painter = rememberAsyncImagePainter(avatarUrl),
+                            painter = rememberAsyncImagePainter(pickedAvatarUri ?: avatarUrl),
                             contentDescription = "Uploaded avatar",
                             modifier = Modifier
                                 .size(52.dp)
@@ -277,7 +298,7 @@ fun EditProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    if (avatarUrl != null) {
+                    if (pickedAvatarUri != null || avatarUrl != null) {
                         item(key = "custom_avatar") {
                             val selected = tempAvatarId == -1
                             Box(
@@ -289,11 +310,13 @@ fun EditProfileScreen(
                                             Violet600.copy(alpha = 0.25f)
                                         else Color.Transparent
                                     )
-                                    .clickable { tempAvatarId = -1 }
+                                    .clickable {
+                                        tempAvatarId = -1
+                                    }
                                     .padding(4.dp)
                             ) {
                                 Image(
-                                    painter = rememberAsyncImagePainter(avatarUrl),
+                                    painter = rememberAsyncImagePainter(pickedAvatarUri ?: avatarUrl),
                                     contentDescription = "Custom Avatar",
                                     modifier = Modifier.size(64.dp)
                                 )
@@ -313,6 +336,7 @@ fun EditProfileScreen(
                                     else Color.Transparent
                                 )
                                 .clickable {
+                                    pickedAvatarUri = null   // переключились на встроенный аватар
                                     tempAvatarId = id
                                     viewModel.updateAvatarId(id)
                                 }
@@ -339,12 +363,14 @@ fun EditProfileScreen(
                     viewModel.updateSelectedTags(tempTags)
                     viewModel.updateDescription(description)
 
-                    if (tempAvatarId != avatarId) {
+                    // если выбрали встроенный аватар и он отличается — обновляем id
+                    if (tempAvatarId != avatarId && tempAvatarId != -1) {
                         viewModel.updateAvatarId(tempAvatarId)
                     }
 
                     viewModel.saveProfile()
-                    navController.popBackStack()
+
+
                 }
             )
 
