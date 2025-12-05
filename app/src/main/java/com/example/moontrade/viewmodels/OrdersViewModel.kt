@@ -25,13 +25,22 @@ class OrdersViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+//    init {
+//        viewModelScope.launch {
+//            sessionManager.mode.collect {
+//                loadOrders()
+//            }
+//        }
+//    }
     init {
         viewModelScope.launch {
+            loadOrders()
             sessionManager.mode.collect {
                 loadOrders()
             }
         }
     }
+
 
     fun loadOrders() {
         viewModelScope.launch {

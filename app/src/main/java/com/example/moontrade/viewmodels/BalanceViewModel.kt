@@ -8,6 +8,7 @@ package com.example.moontrade.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.moontrade.data.ws.UnifiedWebSocketManager
 import com.example.moontrade.model.Mode
 import com.example.moontrade.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,30 +19,32 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BalanceViewModel @Inject constructor(
-    private val session: SessionManager
+    private val session: SessionManager,
+    private val ws: UnifiedWebSocketManager
 ) : ViewModel() {
 
-    // Flows directly proxied from SessionManager / WebSocketManager
-    val balance: StateFlow<String>           = session.balance
-    val status                               = session.status
-    val mode: StateFlow<Mode>                = session.mode
-    val joinedTournamentIds: StateFlow<Set<UUID>> = session.joinedTournamentIds
-    val roi: StateFlow<String>               = session.roi
+    // ----- FLOWS -----
+    val balance = ws.balance
+    val roi = ws.roi
+    val status = ws.balanceStatus
 
-    /** Kick-off initial connection from UI layer */
+    val mode = session.mode
+    val joinedTournamentIds = session.joinedTournamentIds
+
+    /** Start WebSocket connection */
     fun connect() = viewModelScope.launch {
-        session.connectIfNeeded()
+        val token = session.getValidToken() ?: return@launch
+        ws.connectBalance(token, session.mode.value)
     }
 
-    /** Switch trading / UI mode (Main or Tournament) */
+    /** Switch UI trading mode */
     fun changeMode(mode: Mode) {
-        println("🌐 [BalanceViewModel] changeMode: $mode")
-        session.changeMode(mode)          // one call is enough
-        // session.connectIfNeeded()      // <- removed as redundant
+        session.changeMode(mode)
+        ws.changeMode(mode)
     }
 
     override fun onCleared() {
-        session.disconnect()
+        ws.disconnectBalance()
         super.onCleared()
     }
 }
