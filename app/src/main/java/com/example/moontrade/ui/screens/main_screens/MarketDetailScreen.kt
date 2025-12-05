@@ -156,7 +156,7 @@ fun MarketDetailScreen(
                     // LEFT: Trade form
                     Column(
                         modifier = Modifier
-                            .weight(3f)
+                            .weight(3.5f)
 //                            .verticalScroll(rememberScrollState())
                             .padding(end = 8.dp)
                     ) {
@@ -179,7 +179,7 @@ fun MarketDetailScreen(
                     // RIGHT: OrderBook
                     Column(
                         modifier = Modifier
-                            .weight(2f)
+                            .weight(2.5f)
                             .wrapContentHeight()
                     ) {
                         OrderBookLive(snapshot = snapshot)
@@ -188,17 +188,18 @@ fun MarketDetailScreen(
 
                 // Bottom: matches / active orders
                 TradeMatchesList(
-                    matches = snapshot?.matches?.takeLast(10) ?: emptyList(),
+                    matches = snapshot?.matches?.take(10) ?: emptyList(),
                     selectedTab = selectedTab,
                     tabs = listOf("Last Orders", "Active Orders"),
                     onTabSelected = { selectedTab = it },
                     navController = navController,
                     ordersViewModel = ordersViewModel,
+                    userAssetsViewModel = userAssetsViewModel,
                     symbol = symbol,
                     modifier = Modifier
                         .fillMaxWidth()
 //                        .weight(1f)
-                        .height(600.dp)
+                        .height(400.dp)
                 )
             }
 
