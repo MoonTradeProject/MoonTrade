@@ -1,5 +1,6 @@
-package com.example.moontrade.ui.screens.components
+package com.example.moontrade.ui.screens.components.glasskit
 
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -17,8 +18,6 @@ import coil.compose.AsyncImage
 import com.example.moontrade.BuildConfig
 import com.example.moontrade.R
 import com.example.moontrade.model.LeaderboardEntry
-import com.example.moontrade.ui.screens.components.glasskit.AvatarWithRing
-import com.example.moontrade.ui.screens.components.glasskit.GlassCard
 import com.example.moontrade.ui.theme.extended
 import com.example.moontrade.utils.formatPercent
 
@@ -26,7 +25,7 @@ import com.example.moontrade.utils.formatPercent
 fun PlayerCard(
     entry: LeaderboardEntry,
     @DrawableRes medalIconRes: Int? = null,
-    modifier: Modifier = Modifier,
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val cs = MaterialTheme.colorScheme
@@ -101,7 +100,6 @@ fun PlayerCard(
                 )
             }
 
-            // аватар
             AvatarWithRing(size = 48.dp) {
                 AsyncImage(
                     model = avatarUrl ?: R.drawable.avatar_0,

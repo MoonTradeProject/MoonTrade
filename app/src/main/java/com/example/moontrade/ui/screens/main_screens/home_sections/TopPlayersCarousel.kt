@@ -1,4 +1,4 @@
-package com.example.moontrade.ui.screens.main_screens.home_sub_screens
+package com.example.moontrade.ui.screens.main_screens.home_sections
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.moontrade.R
 import com.example.moontrade.model.LeaderboardEntry
-import com.example.moontrade.ui.screens.components.PlayerCard
+import com.example.moontrade.ui.screens.components.glasskit.PlayerCard
 
 @Composable
 fun TopPlayersCarousel(

@@ -1,4 +1,4 @@
-package com.example.moontrade.ui.screens.main_screens.home_sub_screens
+package com.example.moontrade.ui.screens.main_screens.home_sections
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

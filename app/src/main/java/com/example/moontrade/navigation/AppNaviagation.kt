@@ -20,9 +20,9 @@ import com.example.moontrade.auth.AuthViewModel
 import com.example.moontrade.ui.screens.authentication.*
 import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.ui.screens.main_screens.*
-import com.example.moontrade.ui.screens.onboarding.OnboardingPagerScreen
-import com.example.moontrade.ui.screens.profile.PlayerProfileScreen
-import com.example.moontrade.ui.screens.profile.UserProfileScreen
+import com.example.moontrade.ui.screens.main_screens.onboarding.OnboardingPagerScreen
+import com.example.moontrade.ui.screens.main_screens.profile.PlayerProfileScreen
+import com.example.moontrade.ui.screens.main_screens.profile.UserProfileScreen
 import com.example.moontrade.ui.theme.ThemeViewModel
 import com.example.moontrade.viewmodels.*
 
@@ -140,8 +140,12 @@ fun AppNavigation() {
                 TournamentsScreen(navController, tournamentsViewModel)
             }
             // ---------- USER PROFILE ----------
-            composable(NavRoutes.PROFILE) {
-                UserProfileScreen(navController, profileViewModel)
+            composable(route = NavRoutes.PROFILE) {
+                UserProfileScreen(
+                    navController = navController,
+                    profileViewModel = profileViewModel,
+                    balanceViewModel = balanceViewModel
+                )
             }
             // ---------- OTHER PLAYER PROFILE ----------
             composable(NavRoutes.PLAYER_PROFILE) {
