@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.firebase.functions)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.ui.graphics)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.compose.ui)

@@ -26,7 +26,7 @@ fun BestPrices(snapshot: OrderBookSnapshot?) {
         Text(
             buildAnnotatedString {
                 withStyle(SpanStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)) {
-                    append("Best Ask: ")
+                    append("Best ask: ")
                 }
                 withStyle(SpanStyle(color = Color.Red, fontWeight = FontWeight.Normal)) {
                     append(bestAsk?.toString() ?: "-")
@@ -38,7 +38,7 @@ fun BestPrices(snapshot: OrderBookSnapshot?) {
         Text(
             buildAnnotatedString {
                 withStyle(SpanStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)) {
-                    append("Best Bid: ")
+                    append("Best bid: ")
                 }
                 withStyle(SpanStyle(color = Color.Green, fontWeight = FontWeight.Normal)) {
                     append(bestBid?.toString() ?: "-")
