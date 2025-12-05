@@ -51,6 +51,8 @@ fun AppNavigation() {
         NavRoutes.PROFILE,
         NavRoutes.USER_ORDERS
     )
+    val tradeViewModel: TradeViewModel = hiltViewModel()
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -160,7 +162,9 @@ fun AppNavigation() {
                     symbol = symbol ?: "null",
                     marketDetailViewModel,
                     userAssetsViewModel,
-                    balanceViewModel
+                    balanceViewModel,
+                    tradeViewModel,
+                    ordersViewModel
                 )
             }
             // ---------- SETTINGS ----------

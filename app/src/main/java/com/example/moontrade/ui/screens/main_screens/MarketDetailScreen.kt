@@ -10,12 +10,12 @@ import androidx.navigation.NavController
 import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.CenterNotification
 import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.OrderBookLive
-import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.TopBarWithBackButton
 import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.TradeForm
 import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.TradeMatchesList
 import com.example.moontrade.utils.PriceCounter
 import com.example.moontrade.viewmodels.BalanceViewModel
 import com.example.moontrade.viewmodels.MarketDetailViewModel
+import com.example.moontrade.viewmodels.OrdersViewModel
 import com.example.moontrade.viewmodels.TradeViewModel
 import com.example.moontrade.viewmodels.UserAssetsViewModel
 import java.math.BigDecimal
@@ -26,59 +26,86 @@ fun MarketDetailScreen(
     symbol: String,
     viewModel: MarketDetailViewModel,
     userAssetsViewModel: UserAssetsViewModel,
-    balanceViewModel: BalanceViewModel
+    balanceViewModel: BalanceViewModel,
+    tradeViewModel: TradeViewModel,
+    ordersViewModel: OrdersViewModel
 ) {
-    val tradeViewModel: TradeViewModel = hiltViewModel()
+    val mainScrollState = rememberScrollState()
+
     val snapshot by viewModel.snapshot.collectAsState()
-    val userAssets by userAssetsViewModel.assets.collectAsState()
     val balance by balanceViewModel.balance.collectAsState()
+    val userAssets by userAssetsViewModel.assets.collectAsState()
+
+    // ---------- Local UI state ----------
+    var orderType by remember { mutableStateOf("Market") }
+    var isBuy by remember { mutableStateOf(true) }
+    var selectedTab by remember { mutableStateOf(0) }
+
+    // ---------- LIFECYCLE: connect / disconnect orderbook ----------
+    LaunchedEffect(symbol) {
+        viewModel.connect(symbol)
+        tradeViewModel.assetName.value = symbol
+        userAssetsViewModel.loadUserAssets()
+    }
+
+    DisposableEffect(symbol) {
+        onDispose {
+            viewModel.disconnect()
+        }
+    }
+
+    // ---------- Balance / assets formatting ----------
     val formattedBalanceString = balance.removeSuffix("USDT").trim()
-    ///////related to asset balance item (REFACTOR)///////
+
     val assetBalance = userAssets
         .firstOrNull { it.asset_name.equals(symbol, ignoreCase = true) }
-        ?.amount ?: 0.0
-    val decimals: Int = 3
-    val assetBalanceDecimal: BigDecimal = assetBalance.toString()
-        .toBigDecimalOrNull()
-        ?: BigDecimal.ZERO
+        ?.available ?: 0.0
+
+    val decimals = 3
+    val assetBalanceDecimal: BigDecimal =
+        assetBalance.toString().toBigDecimalOrNull() ?: BigDecimal.ZERO
+
     val integerPartLength = assetBalance.toInt().toString().length
     val adjustedDecimals = if (integerPartLength >= 3) 1 else decimals
     val safeDecimals = adjustedDecimals.coerceIn(0, 8)
-    val formattedAssetBalance = "%.${safeDecimals}f ${symbol.removeSuffix("USDT")}".format(assetBalance)
-    ///////related to asset balance item (REFACTOR)///////
 
-    /////////lower item with tabs//////////
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Last Orders", "My Orders")
+    val formattedAssetBalance =
+        "%.${safeDecimals}f ${symbol.removeSuffix("USDT")}".format(assetBalance)
 
-    /////////////////////////////
+    // ---------- Price Counter ----------
+    val price = PriceCounter(
+        snapshot,
+        tradeViewModel.amount.value,
+        if (isBuy) "buy" else "sell"
+    )
 
-    ////////notif//////
+    // ---------- Notifications ----------
     var showNotification by remember { mutableStateOf(false) }
-    var isErrorNotification by remember { mutableStateOf(false) }
     var notificationMessage by remember { mutableStateOf("") }
-    ////////notif//////
+    var isErrorNotification by remember { mutableStateOf(false) }
+    var isLoadingNotification by remember { mutableStateOf(false) }
 
-    //////state from trade from//////////
-    var orderType by remember { mutableStateOf("Market") }
-    var isBuy by remember { mutableStateOf(true) }
-    var price = PriceCounter(snapshot, tradeViewModel.amount.value, if (isBuy) "buy" else "sell")
-    /////////////////////////////////////
+    fun notifyLoading() {
+        notificationMessage = "Loading..."
+        isErrorNotification = false
+        isLoadingNotification = true
+        showNotification = true
+    }
 
-    val onTradeSuccess: (action: String) -> Unit = { action ->
+    fun notifySuccess(action: String) {
         notificationMessage = "$action of $symbol successful!"
         isErrorNotification = false
         showNotification = true
     }
 
-    val onTradeError: (errorMessage: String) -> Unit = { errorMessage ->
-        notificationMessage = errorMessage
+    fun notifyError(msg: String) {
+        notificationMessage = msg
         isErrorNotification = true
         showNotification = true
     }
 
-    val executeTradeBlock: (execType: String, side: String) -> Unit = { execType, side ->
-
+    // ---------- Trade execution ----------
+    val executeTradeBlock: (String, String) -> Unit = { execType, side ->
         tradeViewModel.updateSnapshot(snapshot)
         userAssetsViewModel.loadUserAssets()
 
@@ -87,110 +114,107 @@ fun MarketDetailScreen(
             execType = execType,
             userAssetsViewModel = userAssetsViewModel,
             onSuccess = {
-                val action = if (side == "buy") "Buy" else "Sell"
-                onTradeSuccess(action)
+                notifySuccess(if (side == "buy") "Buy" else "Sell")
             },
-            onError = onTradeError,
+            onError = ::notifyError,
             balance = formattedBalanceString,
             assetBalance = assetBalanceDecimal,
+            ordersViewModel = ordersViewModel,
             symbol = symbol
         )
     }
 
-    LaunchedEffect(symbol) {
-        viewModel.disconnect()
-        viewModel.connect(symbol)
-        userAssetsViewModel.loadUserAssets()
-        tradeViewModel.assetName.value = symbol
-        println(
-            userAssets.joinToString("\n") { asset ->
-                "asset_name = ${asset.asset_name}, balance = ${asset.amount}"
-            }
-        )
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.disconnect()
+    // ---------- UI ----------
+    Scaffold(
+        topBar = {
+            TopBar(
+                title = symbol,
+                showBack = true,
+                onBack = {
+                    viewModel.disconnect()
+                    navController.popBackStack()
+                }
+            )
         }
-    }
+    ) { innerPadding ->
 
-        Scaffold(
-            topBar = {
-//                TopBarWithBackButton(symbol = symbol, navController = navController, viewModel = viewModel)
-                TopBar(title = symbol, showBack = true, onBack = { navController.popBackStack() })
-            }
-        ) { innerPadding ->
-            Box(
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(mainScrollState)
+                    .padding(16.dp)
             ) {
-                Column(
+
+                Row(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
                 ) {
-
-
-                    Row(
+                    // LEFT: Trade form
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            //.weight(1f)
-                            .wrapContentHeight()
+                            .weight(3f)
+//                            .verticalScroll(rememberScrollState())
+                            .padding(end = 8.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .weight(3f)
-                                .wrapContentHeight()
-                                .verticalScroll(rememberScrollState())
-                                .padding(end = 8.dp)
-                        ) {
-                            TradeForm(
-                                tradeViewModel = tradeViewModel,
-                                snapshot = snapshot,
-                                assetBalance = formattedAssetBalance,
-                                onExecuteTrade = executeTradeBlock,
-                                orderType = orderType,
-                                onOrderTypeChange = { orderType = it },
-                                isBuy = isBuy,
-                                onBuySellChange = { isBuy = it },
-                                price = price,
-                                onPriceChange = { price = it },
-                                userAssetsViewModel = userAssetsViewModel
-                            )
-                        }
-
-                        Column(
-                            modifier = Modifier
-                                .weight(2f)
-                                .wrapContentHeight()
-                        ) {
-                            OrderBookLive(snapshot = snapshot)
-                        }
+                        TradeForm(
+                            tradeViewModel = tradeViewModel,
+                            snapshot = snapshot,
+                            assetBalance = formattedAssetBalance,
+                            onExecuteTrade = executeTradeBlock,
+                            orderType = orderType,
+                            onOrderTypeChange = { orderType = it },
+                            isBuy = isBuy,
+                            onBuySellChange = { isBuy = it },
+                            price = price,
+                            onPriceChange = { },
+                            navController = navController,
+                            userAssetsViewModel = userAssetsViewModel
+                        )
                     }
 
-                    TradeMatchesList(
-                        matches = snapshot?.matches?.takeLast(5) ?: emptyList(),
-                        selectedTab = selectedTab,
-                        tabs = tabs,
-                        onTabSelected = { selectedTab = it },
+                    // RIGHT: OrderBook
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    )
+                            .weight(2f)
+                            .wrapContentHeight()
+                    ) {
+                        OrderBookLive(snapshot = snapshot)
+                    }
                 }
 
+                // Bottom: matches / active orders
+                TradeMatchesList(
+                    matches = snapshot?.matches?.takeLast(10) ?: emptyList(),
+                    selectedTab = selectedTab,
+                    tabs = listOf("Last Orders", "Active Orders"),
+                    onTabSelected = { selectedTab = it },
+                    navController = navController,
+                    ordersViewModel = ordersViewModel,
+                    symbol = symbol,
+                    modifier = Modifier
+                        .fillMaxWidth()
+//                        .weight(1f)
+                        .height(600.dp)
+                )
             }
 
+            // Notification
             if (showNotification) {
-
                 LaunchedEffect(showNotification) {
                     kotlinx.coroutines.delay(2000)
                     showNotification = false
                 }
 
-                CenterNotification(notificationMessage, isError = isErrorNotification)
+                CenterNotification(
+                    notificationMessage,
+                    isErrorNotification
+                )
             }
         }
+    }
 }
+

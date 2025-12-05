@@ -62,7 +62,7 @@ class AuthRepositoryImpl @Inject constructor(
             return RegisterResult.Error("Server unavailable — registration cancelled")
         }
 
-        session.connectIfNeeded()
+
         _isAuth.value = true
         RegisterResult.Success
     }.getOrElse { e ->
@@ -76,7 +76,6 @@ class AuthRepositoryImpl @Inject constructor(
         val token = auth.currentUser?.getIdToken(true)?.await()?.token ?: return false
         prefs.saveIdToken(token)
 
-        session.connectIfNeeded()
         _isAuth.value = true
         true
     }.getOrElse { e ->
@@ -90,7 +89,7 @@ class AuthRepositoryImpl @Inject constructor(
         val token = auth.currentUser?.getIdToken(true)?.await()?.token ?: return false
         prefs.saveIdToken(token)
 
-        session.connectIfNeeded()
+
         _isAuth.value = true
         true
     }.getOrElse { e ->

@@ -1,5 +1,9 @@
 package com.example.moontrade.data.response
-
+//Pending,
+//Active,
+//PartiallyFilled,
+//Filled,
+//Cancelled,
 data class OrderEntry(
     val id: String,
     val timestamp: String,

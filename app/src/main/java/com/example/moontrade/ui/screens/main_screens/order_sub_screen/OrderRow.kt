@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.sp
 import com.example.moontrade.data.response.OrderEntry
 import com.example.moontrade.ui.screens.components.glasskit.GlassCard
 import com.example.moontrade.ui.theme.GreenUp
@@ -37,6 +38,24 @@ fun OrderRow(
         if (original > java.math.BigDecimal.ZERO) executed.divide(original, 4, java.math.RoundingMode.HALF_UP)
             .toFloat()
         else 0f
+
+    val executedAmountDouble = order.executed_amount.toDoubleOrNull() ?: 0.0
+
+// 2. Safely get the integer part of the amount (e.g., 12.345 -> 12)
+    val integerPart = executedAmountDouble.toLong()
+
+// 3. Get the length of the integer part string representation
+    val integerPartLength = integerPart.toString().length
+
+// The rest of your logic is now safe
+    val adjustedDecimals = if (integerPartLength >= 3) 1 else 4
+    val safeDecimals = adjustedDecimals.coerceIn(0, 8)
+    val formattedPrice = "%.${safeDecimals}f".format(executedAmountDouble)
+    val fontSize = when {
+        formattedPrice.length > 12 -> 12.sp
+        formattedPrice.length > 8 -> 14.sp
+        else -> 16.sp
+    }
 
     GlassCard(
         modifier = modifier
@@ -131,7 +150,7 @@ fun OrderRow(
                         color = cs.onSurfaceVariant
                     )
                     Text(
-                        text = "${order.executed_amount} / ${order.original_amount}",
+                        text = "$formattedPrice / ${order.original_amount}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = cs.onSurface
                     )

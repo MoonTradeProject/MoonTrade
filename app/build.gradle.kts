@@ -125,6 +125,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:<version>")
 
 
+
+    implementation("com.squareup.moshi:moshi-adapters:1.15.0")
+
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("com.google.accompanist:accompanist-flowlayout:0.36.0")

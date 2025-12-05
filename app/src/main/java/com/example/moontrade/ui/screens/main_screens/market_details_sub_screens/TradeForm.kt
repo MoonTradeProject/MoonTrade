@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.moontrade.model.OrderBookSnapshot
 import com.example.moontrade.utils.PriceCounter
 import com.example.moontrade.viewmodels.OrdersViewModel
@@ -33,6 +34,7 @@ fun TradeForm(
     onOrderTypeChange: (String) -> Unit,
     onBuySellChange: (Boolean) -> Unit,
     onPriceChange: (String) -> Unit,
+    navController: NavController,
     modifier: Modifier = Modifier,
 ) {
 
@@ -99,11 +101,7 @@ fun TradeForm(
                 shape = RoundedCornerShape(10.dp),
                 singleLine = true,
             )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = false, onCheckedChange = {})
-                Text("TP/SL")
-            }
+            Spacer(Modifier.height(8.dp))
 
             Button(
                 onClick = {
