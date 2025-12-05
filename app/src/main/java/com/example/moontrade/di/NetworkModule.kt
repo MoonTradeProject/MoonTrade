@@ -14,6 +14,8 @@ import javax.inject.Singleton
 import com.example.moontrade.data.api.ProfileApi
 import com.example.moontrade.data.api.UserApi
 import com.example.moontrade.data.repository.AssetsRepository
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 
 /**
  * Holds the single global Gson + Retrofit instances for the whole app.
@@ -24,6 +26,23 @@ import com.example.moontrade.data.repository.AssetsRepository
 object NetworkModule {
 
 
+//    fun provideOkHttpClient(): OkHttpClient {
+//        return OkHttpClient.Builder()
+//            .addInterceptor { chain ->
+//                val request = chain.request().newBuilder()
+//                    .build()
+//                chain.proceed(request)
+//            }
+//            .addInterceptor(NetworkLoggingInterceptor())
+//            .build()
+//    }
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(NetworkLoggingInterceptor())
+            .build()
+    }
     @Provides
     @Singleton
     fun provideUserApi(retrofit: Retrofit): UserApi =
@@ -41,13 +60,26 @@ object NetworkModule {
             .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
             .create()
 
+//    @Provides
+//    @Singleton
+//    fun provideRetrofit(gson: Gson): Retrofit =
+//        Retrofit.Builder()
+//            .baseUrl("http://insectivora.eu:1010/")          // ← change if backend host differs
+//            .addConverterFactory(GsonConverterFactory.create(gson))
+//            .build()
+
     @Provides
     @Singleton
-    fun provideRetrofit(gson: Gson): Retrofit =
+    fun provideRetrofit(
+        gson: Gson,
+        client: OkHttpClient
+    ): Retrofit =
         Retrofit.Builder()
-            .baseUrl("http://insectivora.eu:1010/")          // ← change if backend host differs
+            .baseUrl("http://insectivora.eu:1010/")
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
+
 
     @Suppress("unused")
     @Provides @Singleton

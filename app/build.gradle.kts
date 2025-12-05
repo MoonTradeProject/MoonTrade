@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.firebase.functions)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.ui.graphics)
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.compose.ui)
@@ -124,6 +125,9 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation("androidx.compose.material:material-icons-extended:<version>")
 
+
+
+    implementation("com.squareup.moshi:moshi-adapters:1.15.0")
 
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")

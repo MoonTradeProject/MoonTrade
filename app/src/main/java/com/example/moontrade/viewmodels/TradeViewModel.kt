@@ -13,6 +13,7 @@ import com.example.moontrade.model.PlaceOrderRequest
 import com.example.moontrade.model.toWire
 import com.example.moontrade.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -52,6 +53,7 @@ class TradeViewModel @Inject constructor(
         onError: (String) -> Unit,
         balance: String,
         assetBalance: BigDecimal,
+        ordersViewModel: OrdersViewModel? = null,
         symbol: String
     ) = viewModelScope.launch {
         Log.d(
@@ -141,6 +143,8 @@ class TradeViewModel @Inject constructor(
                 amount.value = ""
                 if (execType.equals("limit", true)) price.value = "" // clear limit price
                 userAssetsViewModel?.loadUserAssets()
+                delay(50)
+                ordersViewModel?.loadOrders()
                 onSuccess()
             }
             .onFailure { e ->

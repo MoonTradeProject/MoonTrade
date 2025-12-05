@@ -17,33 +17,85 @@ class OrdersRepository @Inject constructor(
     private val sessionManager: SessionManager
 ) {
 
-    suspend fun getOrders(): OrdersResponse {
+//    suspend fun getOrders(): OrdersResponse {
+//
+//        val rawToken = sessionManager.getValidToken()
+//            ?: throw IllegalStateException("Token missing")
+//
+//        val token = "Bearer $rawToken"
+//        val mode = sessionManager.mode.value
+//
+//        val response = when (mode) {
+//            Mode.Main -> api.getUserOrders(
+//                token = token,
+//                mode = "main",
+//                tournamentId = null
+//            )
+//
+//            is Mode.Tournament -> api.getUserOrders(
+//                token = token,
+//                mode = "tournament",
+//                tournamentId = mode.tournamentId.toString()
+//            )
+//        }
+//
+//        // 🔥 Pretty printed JSON
+//        Log.d("OrdersRepository", response.prettyJson())
+//        Log.d("ORDERS", "TOKEN = $rawToken")
+//        Log.d("ORDERS", "MODE = $mode")
+//        return response
+//    }
+suspend fun getOrders(): OrdersResponse {
 
-        val rawToken = sessionManager.getValidToken()
-            ?: throw IllegalStateException("Token missing")
+    val rawToken = sessionManager.getValidToken()
+        ?: throw IllegalStateException("Token missing")
 
-        val token = "Bearer $rawToken"
-        val mode = sessionManager.mode.value
+    val token = "Bearer $rawToken"
+    val mode = sessionManager.mode.value
 
-        val response = when (mode) {
-            Mode.Main -> api.getUserOrders(
-                token = token,
-                mode = "main",
-                tournamentId = null
-            )
+    // ---------- BEFORE REQUEST: FULL DIAGNOSTIC LOG ----------
+    Log.d("ORDERS_REQ", "📤 Sending GET /orders request")
+    Log.d("ORDERS_REQ", "  TOKEN: ${rawToken.take(12)}... (hidden)")
+    Log.d("ORDERS_REQ", "  Mode object: $mode")
 
-            is Mode.Tournament -> api.getUserOrders(
-                token = token,
-                mode = "tournament",
-                tournamentId = mode.tournamentId.toString()
-            )
+    when (mode) {
+        Mode.Main -> {
+            Log.d("ORDERS_REQ", "  → mode = \"main\"")
+            Log.d("ORDERS_REQ", "  → tournamentId = null")
         }
 
-        // 🔥 Pretty printed JSON
-        Log.d("OrdersRepository", response.prettyJson())
-
-        return response
+        is Mode.Tournament -> {
+            Log.d("ORDERS_REQ", "  → mode = \"tournament\"")
+            Log.d("ORDERS_REQ", "  → tournamentId = ${mode.tournamentId}")
+        }
     }
+
+    // ---------- ACTUAL REQUEST ----------
+    val response = when (mode) {
+        Mode.Main -> api.getUserOrders(
+            token = token,
+            mode = "main",
+            tournamentId = null
+        )
+
+        is Mode.Tournament -> api.getUserOrders(
+            token = token,
+            mode = "tournament",
+            tournamentId = mode.tournamentId.toString()
+        )
+    }
+
+    val json = response.prettyJson()
+    val sizeBytes = json.toByteArray().size
+    val sizeKb = sizeBytes / 1024.0
+
+    Log.d("ORDERS_RES", "📥 Received response from /orders:")
+    Log.d("ORDERS_RES", "  📦 Size: $sizeBytes bytes (${String.format("%.2f", sizeKb)} KB)")
+    Log.d("ORDERS_RES", json)
+
+    return response
+}
+
 
     suspend fun cancelOrder(id: String) {
         val rawToken = sessionManager.getValidToken()
