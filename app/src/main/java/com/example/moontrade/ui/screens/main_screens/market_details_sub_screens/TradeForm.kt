@@ -1,6 +1,8 @@
 package com.example.moontrade.ui.screens.main_screens.market_details_sub_screens
 
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +23,7 @@ import com.example.moontrade.viewmodels.OrdersViewModel
 import com.example.moontrade.viewmodels.TradeViewModel
 import com.example.moontrade.viewmodels.UserAssetsViewModel
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun TradeForm(
     tradeViewModel: TradeViewModel,
@@ -103,22 +106,31 @@ fun TradeForm(
             )
             Spacer(Modifier.height(8.dp))
 
-            Button(
-                onClick = {
-                    val execType = if (orderType == "Market") "market" else "limit"
-                    val side = if (isBuy) "buy" else "sell"
-
-                    onExecuteTrade(execType, side)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(if (isBuy) "Buy" else "Sell")
-            }
-
-            Text(
-                text = price.takeIf { it != 0.0 }?.toString() ?: "",
-                fontSize = 16.sp
+            TradeActionButton(
+                isBuy = isBuy,
+                orderType = orderType,
+                price = price as Double,
+                modifier = Modifier.fillMaxWidth(),
+                onExecuteTrade = onExecuteTrade
             )
+
+
+//            Button(
+//                onClick = {
+//                    val execType = if (orderType == "Market") "market" else "limit"
+//                    val side = if (isBuy) "buy" else "sell"
+//
+//                    onExecuteTrade(execType, side)
+//                },
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                Text(if (isBuy) "Buy" else "Sell")
+//            }
+//
+//            Text(
+//                text = price.takeIf { it != 0.0 }?.toString() ?: "",
+//                fontSize = 16.sp
+//            )
         }
     }
 

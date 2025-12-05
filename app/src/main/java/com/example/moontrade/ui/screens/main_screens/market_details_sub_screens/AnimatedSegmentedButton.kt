@@ -202,8 +202,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.moontrade.ui.shaders.ShaderFillBox
-import com.example.moontrade.ui.shaders.createBuyShader
-import com.example.moontrade.ui.shaders.createSellShader
+import com.example.moontrade.ui.shaders.createBuyMetallicShader
+import com.example.moontrade.ui.shaders.createSellMetallicShader
 import com.example.moontrade.ui.shaders.rememberShaderTime
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -236,17 +236,18 @@ fun AnimatedSegmentedButton(
             label = "indicatorOffset"
         )
 
+        // ТЕПЕРЬ ИНДИКАТОР ТОЖЕ METALLIC, КАК TRADE КНОПКА
         val shader = remember(isBuySelected) {
             if (isBuySelected) {
-                createBuyShader()
+                createBuyMetallicShader()
             } else {
-                createSellShader()
+                createSellMetallicShader()
             }
         }
 
         val shaderTime = rememberShaderTime()
 
-        // Ползунок с шейдером
+        // Металлический ползунок
         Box(
             modifier = Modifier
                 .offset(x = indicatorOffset)
@@ -261,7 +262,7 @@ fun AnimatedSegmentedButton(
             )
         }
 
-        // Текстовые сегменты
+        // Текстовые сегменты сверху
         Row(modifier = Modifier.fillMaxSize()) {
             options.forEachIndexed { index, option ->
                 val isSelected = index == selectedIndex
@@ -278,7 +279,7 @@ fun AnimatedSegmentedButton(
                         .fillMaxHeight()
                         .clickable(
                             interactionSource = interactionSource,
-                            indication = null // отключаем белую обводку/рипл
+                            indication = null // без белой ряби/рипла
                         ) {
                             onSelectedIndex(index)
                         },
@@ -295,5 +296,6 @@ fun AnimatedSegmentedButton(
         }
     }
 }
+
 
 
