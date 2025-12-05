@@ -287,7 +287,7 @@ private fun ProfileAvatar(
             .background(
                 Brush.radialGradient(
                     listOf(
-                        cs.primary.copy(alpha = 0.45f),
+                        cs.primary.copy(alpha = 1.0f),
                         Color.Transparent
                     )
                 ),

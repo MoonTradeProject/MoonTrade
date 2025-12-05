@@ -46,7 +46,7 @@ class ProfileViewModel @Inject constructor(
     private val _avatarUrl    = MutableStateFlow(storage.loadAvatarUrl()) // nullable
     val avatarUrl: StateFlow<String?> = _avatarUrl
 
-    val availableTags = listOf("Sniper", "Top 10", "Bullish", "Risky", "Calm")
+    val availableTags = listOf("New Trader", "Flow Learner", "Trend Explorer", "Market Wanderer" )
 
     /** Base URL from build config (can be host:port or full http://host:port) */
     private val baseUrl = BuildConfig.BASE_URL
