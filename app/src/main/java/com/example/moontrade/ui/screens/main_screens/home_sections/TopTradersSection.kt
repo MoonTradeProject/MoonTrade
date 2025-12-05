@@ -1,4 +1,4 @@
-package com.example.moontrade.ui.screens.main_screens.home_sub_screens
+package com.example.moontrade.ui.screens.main_screens.home_sections
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.moontrade.R
 import com.example.moontrade.model.LeaderboardEntry
-import com.example.moontrade.ui.screens.components.PlayerCard
+import com.example.moontrade.ui.screens.components.glasskit.PlayerCard
 
 fun LazyListScope.TopTradersSection(
     top: List<LeaderboardEntry>,
@@ -28,7 +28,6 @@ fun LazyListScope.TopTradersSection(
     items(top.size) { index ->
         val entry = top[index]
 
-        // те же иконки, что и в карусели
         val medalIconRes = when (index) {
             0 -> R.drawable.ic_place_1
             1 -> R.drawable.ic_place_2
@@ -37,7 +36,6 @@ fun LazyListScope.TopTradersSection(
             4 -> R.drawable.ic_place_5
             else -> null
         }
-
         PlayerCard(
             entry = entry,
             medalIconRes = medalIconRes,
@@ -45,6 +43,5 @@ fun LazyListScope.TopTradersSection(
             onClick = { onClickPlayer(entry) }
         )
     }
-
     item { Spacer(Modifier.height(8.dp)) }
 }

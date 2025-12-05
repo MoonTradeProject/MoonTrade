@@ -6,24 +6,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.example.moontrade.ui.screens.main_screens.home_sub_screens.UserAssetUi
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.foundation.layout.BoxScope
 import com.example.moontrade.ui.theme.*
 import com.example.moontrade.ui.theme.extended
-import com.example.moontrade.utils.formatCryptoAmount
-import com.example.moontrade.utils.formatFiat
-import com.example.moontrade.utils.formatPercent
 
 @Composable
 private fun isDarkTheme(): Boolean {
@@ -39,7 +35,7 @@ fun GlassCard(
 ) {
     val ex = MaterialTheme.extended
     val dark = isDarkTheme()
-    val shape = RoundedCornerShape(corner)
+    val shape: Shape = RoundedCornerShape(corner)
 
     val backgroundBrush: Brush
     val borderBrush: Brush
@@ -95,59 +91,6 @@ fun GlassCard(
         Column(content = content)
     }
 }
-
-@Composable
-fun ActiveStatusPill(
-    modifier: Modifier = Modifier,
-    label: String = "ACTIVE"
-) {
-    val cs = MaterialTheme.colorScheme
-    val dark = isDarkTheme()
-    val shape = RoundedCornerShape(40.dp)
-
-    val backgroundBrush = if (dark) {
-        Brush.horizontalGradient(listOf(Violet600,Violet300.copy(alpha = 0.8f),Violet600.copy(alpha = 1.6f)))
-    } else {
-        Brush.horizontalGradient(listOf(Violet600,Violet600.copy(alpha = 0.5f),Violet600.copy(alpha = 1.6f)))
-    }
-
-    val borderColor = if (dark) {
-        Color.White.copy(alpha = 0.22f)
-    } else {
-        Color.Transparent
-    }
-
-    val textColor = if (dark) {
-        cs.onPrimary
-    } else {
-        Color.White
-    }
-
-    Box(
-        modifier = modifier
-            .height(28.dp)
-            .border(1.dp, borderColor, shape)
-            .background(backgroundBrush, shape)
-            .padding(horizontal = 14.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                Modifier
-                    .size(8.dp)
-                    .clip(CircleShape)
-                    .background(textColor)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = label,
-                color = textColor,
-                style = MaterialTheme.typography.labelMedium
-            )
-        }
-    }
-}
-
 @Composable
 fun AvatarWithRing(
     modifier: Modifier = Modifier,
@@ -167,85 +110,5 @@ fun AvatarWithRing(
         contentAlignment = Alignment.Center
     ) {
         content()
-    }
-}
-
-@Composable
-fun UserAssetCard(
-    asset: UserAssetUi,
-    modifier: Modifier = Modifier
-) {
-    val ex = MaterialTheme.extended
-    val cs = MaterialTheme.colorScheme
-
-    val change = asset.change
-    val changeText = change?.let { formatPercent(it, keepPlus = true, decimals = 2) } ?: ""
-
-    val changeColor = when {
-        change == null -> cs.onSurfaceVariant
-        change > 0.0   -> ex.assetChangePositive
-        change < 0.0   -> ex.assetChangeNegative
-        else           -> cs.onSurfaceVariant
-    }
-
-    GlassCard(modifier = modifier) {
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            // ICON
-            AvatarWithRing {
-                Text(
-                    text = asset.name.first().uppercaseChar().toString(),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = cs.onSurface
-                )
-            }
-
-            Spacer(Modifier.width(12.dp))
-
-            // TEXT BLOCK — FLEXIBLE
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = asset.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = "Amount: ${formatCryptoAmount(asset.amount)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = "≈ ${formatFiat(asset.assetValue)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Spacer(Modifier.width(8.dp))
-
-            // CHANGE %
-            if (change != null) {
-                Text(
-                    text = changeText,
-                    color = changeColor,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1,
-                    softWrap = false,
-                    overflow = TextOverflow.Clip
-                )
-            }
-        }
     }
 }

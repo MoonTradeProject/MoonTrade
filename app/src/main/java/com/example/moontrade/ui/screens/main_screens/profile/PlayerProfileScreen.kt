@@ -1,4 +1,4 @@
-package com.example.moontrade.ui.screens.profile
+package com.example.moontrade.ui.screens.main_screens.profile
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState

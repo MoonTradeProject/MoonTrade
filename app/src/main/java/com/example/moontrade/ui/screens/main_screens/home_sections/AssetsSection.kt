@@ -1,4 +1,4 @@
-package com.example.moontrade.ui.screens.main_screens.home_sub_screens
+package com.example.moontrade.ui.screens.main_screens.home_sections
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.unit.dp
-import com.example.moontrade.ui.screens.components.glasskit.UserAssetCard
 import com.example.moontrade.ui.theme.Violet200
 import com.example.moontrade.ui.theme.extended
 import com.example.moontrade.utils.formatFiat
@@ -26,6 +25,7 @@ data class UserAssetUi(
     val assetValue: BigDecimal,
     val change: Double? = null
 )
+
 @Composable
 fun AssetsSection(
     assets: List<UserAssetUi>,
@@ -43,6 +43,7 @@ fun AssetsSection(
                     color = cs.onSurface.copy(alpha = .6f)
                 )
             }
+
             error != null -> {
                 Text(
                     text = "Failed to load: $error",
@@ -68,7 +69,7 @@ fun AssetsSection(
 
                 Spacer(Modifier.height(16.dp))
 
-                TotalValueCard(
+                AssetsTotalValueCard(
                     total = total,
                     assetsCount = assets.size
                 )
@@ -76,9 +77,8 @@ fun AssetsSection(
         }
     }
 }
-
 @Composable
-private fun TotalValueCard(
+private fun AssetsTotalValueCard(
     total: BigDecimal,
     assetsCount: Int
 ) {
@@ -103,6 +103,7 @@ private fun TotalValueCard(
             )
         )
     }
+
     val valueTextStyle = if (isDark) {
         MaterialTheme.typography.headlineMedium.copy(
             shadow = Shadow(
@@ -147,13 +148,11 @@ private fun TotalValueCard(
                     )
                 )
             }
-
             Text(
                 text = "$${formatFiat(total)}",
                 style = valueTextStyle,
                 color = ex.success
             )
-
             Text(
                 text = "Across $assetsCount assets",
                 style = MaterialTheme.typography.labelSmall,
