@@ -1,4 +1,4 @@
-package com.example.moontrade.ui.screens.onboarding
+package com.example.moontrade.ui.screens.main_screens.onboarding
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
