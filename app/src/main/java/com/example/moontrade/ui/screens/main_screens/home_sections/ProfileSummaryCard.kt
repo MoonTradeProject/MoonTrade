@@ -70,23 +70,19 @@ fun ProfileSummaryCard(
                     innerColor = Color.Transparent,
                     borderPadding = 0.dp
                 ) {
-                    if (avatarId == -1 && !avatarUrl.isNullOrEmpty()) {
-                        Image(
-                            painter = rememberAsyncImagePainter(avatarUrl),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                        )
+                    val painter = if (!avatarUrl.isNullOrEmpty()) {
+                        rememberAsyncImagePainter(avatarUrl)
                     } else {
-                        Image(
-                            painter = painterResource(id = avatarResIdFrom(avatarId)),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                        )
+                        painterResource(id = avatarResIdFrom(avatarId))
                     }
+
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
                 }
                 Spacer(Modifier.width(16.dp))
 
