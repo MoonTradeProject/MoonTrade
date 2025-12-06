@@ -96,7 +96,7 @@ fun AvatarWithRing(
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
     ringBrush: Brush = MaterialTheme.extended.gradientAvatar,
-    innerColor: Color = Color.Transparent,
+    innerColor: Color = MaterialTheme.colorScheme.surface,
     borderPadding: Dp = 3.dp,
     content: @Composable BoxScope.() -> Unit
 ) {

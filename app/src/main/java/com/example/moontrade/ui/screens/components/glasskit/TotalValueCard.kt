@@ -27,9 +27,13 @@ fun TotalValueCard(
     Box(
         modifier = modifier
             .clip(shape)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(vertical = 12.dp)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
 
             Text(
                 "TOTAL VALUE",
