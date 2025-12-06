@@ -3,6 +3,7 @@ package com.example.moontrade.ui.screens.main_screens.market_details_sub_screens
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,33 +20,52 @@ import com.example.moontrade.model.OrderBookSnapshot
 
 @Composable
 fun BestPrices(snapshot: OrderBookSnapshot?) {
-    val bestAsk = snapshot?.asks?.firstOrNull()?.price
-    val bestBid = snapshot?.bids?.firstOrNull()?.price
 
-    Column {
+    val askColor = Color(0xFFFF4C4C)   // такой же, как в OrderBook asks
+    val bidColor = Color(0xFF2DFF88)   // такой же, как в OrderBook bids
+
+    val bestAsk = snapshot?.asks?.minByOrNull { it.price }?.price
+    val bestBid = snapshot?.bids?.maxByOrNull { it.price }?.price
+
+    Column(
+        modifier = Modifier.padding(bottom = 4.dp)
+    ) {
         Text(
             buildAnnotatedString {
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)) {
-                    append("Best ask: ")
+                withStyle(SpanStyle(color = Color(0xFFB8BBDA), fontSize = 15.sp)) {
+                    append("Best Ask: ")
                 }
-                withStyle(SpanStyle(color = Color.Red, fontWeight = FontWeight.Normal)) {
-                    append(bestAsk?.toString() ?: "-")
+                withStyle(
+                    SpanStyle(
+                        color = askColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                ) {
+                    append(bestAsk?.let { "%.4f".format(it) } ?: "-")
                 }
-            },
-            fontSize = 16.sp
+            }
         )
-        Spacer(Modifier.height(4.dp))
+
+        Spacer(modifier = Modifier.height(2.dp))
+
         Text(
             buildAnnotatedString {
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)) {
-                    append("Best bid: ")
+                withStyle(SpanStyle(color = Color(0xFFB8BBDA), fontSize = 15.sp)) {
+                    append("Best Bid: ")
                 }
-                withStyle(SpanStyle(color = Color.Green, fontWeight = FontWeight.Normal)) {
-                    append(bestBid?.toString() ?: "-")
+                withStyle(
+                    SpanStyle(
+                        color = bidColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                ) {
+                    append(bestBid?.let { "%.4f".format(it) } ?: "-")
                 }
-            },
-            fontSize = 16.sp
+            }
         )
     }
 }
+
 

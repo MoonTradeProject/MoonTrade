@@ -1,11 +1,26 @@
-import androidx.compose.foundation.layout.*
+
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.main_screens.market_details_sub_screens.CenterNotification
@@ -20,6 +35,7 @@ import com.example.moontrade.viewmodels.TradeViewModel
 import com.example.moontrade.viewmodels.UserAssetsViewModel
 import java.math.BigDecimal
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MarketDetailScreen(
     navController: NavController,
@@ -73,11 +89,19 @@ fun MarketDetailScreen(
         "%.${safeDecimals}f ${symbol.removeSuffix("USDT")}".format(assetBalance)
 
     // ---------- Price Counter ----------
-    val price = PriceCounter(
+    val rawPrice = PriceCounter(
         snapshot,
         tradeViewModel.amount.value,
         if (isBuy) "buy" else "sell"
     )
+
+// Нормализуем к Double, без жёсткого каста
+    val price: Double = when (rawPrice) {
+        is Number -> rawPrice.toDouble()
+        is String -> rawPrice.toDoubleOrNull() ?: 0.0
+        else -> 0.0
+    }
+
 
     // ---------- Notifications ----------
     var showNotification by remember { mutableStateOf(false) }
@@ -124,6 +148,9 @@ fun MarketDetailScreen(
         )
     }
 
+    val horizontalPadding = 8.dp
+    val verticalPadding = 8.dp
+
     // ---------- UI ----------
     Scaffold(
         topBar = {
@@ -144,21 +171,22 @@ fun MarketDetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .padding(
+                        start = horizontalPadding,
+                        end = horizontalPadding,
+                        top = verticalPadding,
+                        bottom = verticalPadding
+                    )
                     .verticalScroll(mainScrollState)
-                    .padding(16.dp)
             ) {
 
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    // LEFT: Trade form
                     Column(
                         modifier = Modifier
-                            .weight(3.5f)
-//                            .verticalScroll(rememberScrollState())
-                            .padding(end = 8.dp)
+                            .weight(3f)       // было 3.5
+                            .padding(end = 6.dp)
                     ) {
                         TradeForm(
                             tradeViewModel = tradeViewModel,
@@ -170,23 +198,20 @@ fun MarketDetailScreen(
                             isBuy = isBuy,
                             onBuySellChange = { isBuy = it },
                             price = price,
-                            onPriceChange = { },
                             navController = navController,
                             userAssetsViewModel = userAssetsViewModel
                         )
                     }
 
-                    // RIGHT: OrderBook
                     Column(
                         modifier = Modifier
-                            .weight(2.5f)
-                            .wrapContentHeight()
+                            .weight(2.2f)     // было 2.5
                     ) {
                         OrderBookLive(snapshot = snapshot)
                     }
                 }
 
-                // Bottom: matches / active orders
+
                 TradeMatchesList(
                     matches = snapshot?.matches?.take(10) ?: emptyList(),
                     selectedTab = selectedTab,
@@ -198,12 +223,10 @@ fun MarketDetailScreen(
                     symbol = symbol,
                     modifier = Modifier
                         .fillMaxWidth()
-//                        .weight(1f)
                         .height(400.dp)
                 )
             }
 
-            // Notification
             if (showNotification) {
                 LaunchedEffect(showNotification) {
                     kotlinx.coroutines.delay(2000)
@@ -218,4 +241,3 @@ fun MarketDetailScreen(
         }
     }
 }
-

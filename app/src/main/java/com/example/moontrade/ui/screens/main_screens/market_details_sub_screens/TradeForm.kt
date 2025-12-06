@@ -1,25 +1,32 @@
 package com.example.moontrade.ui.screens.main_screens.market_details_sub_screens
 
-
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.moontrade.model.OrderBookSnapshot
-import com.example.moontrade.utils.PriceCounter
-import com.example.moontrade.viewmodels.OrdersViewModel
 import com.example.moontrade.viewmodels.TradeViewModel
 import com.example.moontrade.viewmodels.UserAssetsViewModel
 
@@ -33,19 +40,16 @@ fun TradeForm(
     userAssetsViewModel: UserAssetsViewModel,
     orderType: String,
     isBuy: Boolean,
-    price: Any,
+    price: Double,
     onOrderTypeChange: (String) -> Unit,
     onBuySellChange: (Boolean) -> Unit,
-    onPriceChange: (String) -> Unit,
     navController: NavController,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
-
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-
         Column(
             modifier = modifier
                 .fillMaxWidth()
@@ -66,8 +70,16 @@ fun TradeForm(
             Spacer(Modifier.height(8.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Balance: ")
-                Text(assetBalance)
+                Text(
+                    text = "Balance: ",
+                    fontSize = 12.sp,
+                    color = Color(0xFFB8BBDA)
+                )
+                Text(
+                    text = assetBalance,
+                    fontSize = 12.sp,
+                    color = Color(0xFFE5E6FA)
+                )
             }
 
             Spacer(Modifier.height(8.dp))
@@ -82,6 +94,7 @@ fun TradeForm(
 
             Spacer(Modifier.height(8.dp))
 
+            // LIMIT price input
             if (orderType == "Limit") {
                 OutlinedTextField(
                     value = tradeViewModel.price.value,
@@ -95,43 +108,28 @@ fun TradeForm(
                 Spacer(Modifier.height(8.dp))
             }
 
+            // AMOUNT input
             OutlinedTextField(
                 value = tradeViewModel.amount.value,
-                onValueChange = { tradeViewModel.amount.value = it },
+                onValueChange = { newValue ->
+                    tradeViewModel.amount.value = newValue
+                },
                 placeholder = { Text("Amount") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(10.dp),
                 singleLine = true,
             )
+
             Spacer(Modifier.height(8.dp))
 
             TradeActionButton(
                 isBuy = isBuy,
                 orderType = orderType,
-                price = price as Double,
+                price = price,
                 modifier = Modifier.fillMaxWidth(),
                 onExecuteTrade = onExecuteTrade
             )
-
-
-//            Button(
-//                onClick = {
-//                    val execType = if (orderType == "Market") "market" else "limit"
-//                    val side = if (isBuy) "buy" else "sell"
-//
-//                    onExecuteTrade(execType, side)
-//                },
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Text(if (isBuy) "Buy" else "Sell")
-//            }
-//
-//            Text(
-//                text = price.takeIf { it != 0.0 }?.toString() ?: "",
-//                fontSize = 16.sp
-//            )
         }
     }
-
 }
