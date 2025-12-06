@@ -21,8 +21,8 @@ import com.example.moontrade.ui.screens.authentication.*
 import com.example.moontrade.ui.screens.components.bars.BottomBar
 import com.example.moontrade.ui.screens.main_screens.*
 import com.example.moontrade.ui.screens.main_screens.onboarding.OnboardingPagerScreen
-import com.example.moontrade.ui.screens.main_screens.profile.PlayerProfileScreen
-import com.example.moontrade.ui.screens.main_screens.profile.UserProfileScreen
+import com.example.moontrade.ui.screens.main_screens.profile_section.PlayerProfileScreen
+import com.example.moontrade.ui.screens.main_screens.profile_section.UserProfileScreen
 import com.example.moontrade.ui.theme.ThemeViewModel
 import com.example.moontrade.viewmodels.*
 
@@ -49,7 +49,8 @@ fun AppNavigation() {
         NavRoutes.RATINGS,
         NavRoutes.TOURNAMENTS,
         NavRoutes.PROFILE,
-        NavRoutes.USER_ORDERS
+        NavRoutes.USER_ORDERS,
+        NavRoutes.PLAYER_PROFILE
     )
     val tradeViewModel: TradeViewModel = hiltViewModel()
 

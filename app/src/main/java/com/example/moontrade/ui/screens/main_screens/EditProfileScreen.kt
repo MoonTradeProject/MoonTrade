@@ -6,7 +6,6 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,7 +49,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.moontrade.R
 import com.example.moontrade.ui.screens.components.bars.SectionHeader
 import com.example.moontrade.ui.screens.components.bars.TopBar
 import com.example.moontrade.ui.screens.components.buttons.PrimaryGradientButton
@@ -148,7 +146,6 @@ fun EditProfileScreen(
                                 viewModel.updateAvatarId(tempAvatarId)
                             }
                             viewModel.saveProfile()
-
                             isEditingAbout = false
                             hasChanges     = false
                         },
@@ -175,7 +172,6 @@ fun EditProfileScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-
                 // ---------- PROFILE ----------
                 SectionHeader("Profile")
 
